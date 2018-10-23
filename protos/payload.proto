@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+message TransactionPayload {
+
+    enum PayloadType {
+        TYPE_UNSET = 0;
+        CREATE_CLINIC = 1;
+        CREATE_DOCTOR = 2;
+        CREATE_PATIENT = 3;
+        CREATE_CLAIM = 4;
+        ASSIGN_DOCTOR = 5;
+        FIRST_VISIT = 6;
+        PASS_TESTS = 7;
+        ATTEND_PROCEDURES = 8;
+        EAT_PILLS = 9;
+        NEXT_VISIT = 10;
+    }
+
+    PayloadType payload_type = 1;
+
+    CreateClinic create_clinic = 2;
+    CreateDoctor create_doctor = 3;
+    CreatePatient create_patient = 4;
+    CreateClaim create_claim = 5;
+    ActionOnClaim assign_doctor = 6;
+    ActionOnClaim first_visit = 7;
+    ActionOnClaim pass_tests = 8;
+    ActionOnClaim attend_procedures = 9;
+    ActionOnClaim eat_pills = 10;
+    ActionOnClaim next_visit = 11;
+}
+
+message CreateClinic {
+    string public_key = 1;
+    string name = 2;
+}
+
+message CreateDoctor {
+    string public_key = 1;
+    string name = 2;
+    string surname = 3;
+}
+
+message CreatePatient {
+    string public_key = 1;
+    string name = 2;
+    string surname = 3;
+}
+
+message CreateClaim {
+    string claim_id = 1;
+    string clinic_pkey = 2;
+    string patient_pkey = 3;
+}
+
+message ActionOnClaim {
+    enum Event {
+        ASSIGN = 0;
+        FIRST_VISIT = 1;
+        PASS_TEST = 2;
+        PASS_PROCEDURE = 3;
+        EAT_PILLS = 4;
+        NEXT_VISIT = 5;
+    }
+
+    string claim_id = 1;
+    string clinic_pkey = 2;
+    string description = 3;
+    Event event = 4;
+    string event_time = 5;
+}
