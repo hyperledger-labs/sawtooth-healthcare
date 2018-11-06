@@ -8,9 +8,9 @@ import traceback
 import pkg_resources
 from colorlog import ColoredFormatter
 
-from sawtooth_healthcare.common.helper import DISTRIBUTION_NAME, DEFAULT_URL
-from sawtooth_healthcare.healthcare_client import HealthCareClient
-from sawtooth_healthcare.healthcare_exceptions import HealthCareException
+from common.helper import DISTRIBUTION_NAME, DEFAULT_URL
+from cli.workflow.healthcare_client import HealthCareClient
+from cli.workflow.healthcare_exceptions import HealthCareException
 
 
 def create_console_handler(verbose_level):

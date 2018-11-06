@@ -3,9 +3,9 @@ import logging
 from sawtooth_sdk.processor.exceptions import InvalidTransaction
 from sawtooth_sdk.processor.handler import TransactionHandler
 
-from sawtooth_healthcare.common import helper
-from sawtooth_healthcare.healthcare_payload import HealthCarePayload
-from sawtooth_healthcare.healthcare_state import HealthCareState
+import common.helper as helper
+from processor.workflow.payload import HealthCarePayload
+from processor.workflow.state import HealthCareState
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)

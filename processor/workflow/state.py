@@ -1,5 +1,5 @@
-from sawtooth_healthcare.common import helper
-from sawtooth_healthcare.processor.protobuf import payload_pb2
+from common import helper
+from common.protobuf import payload_pb2
 
 
 class HealthCareState(object):

@@ -1,4 +1,4 @@
-from sawtooth_healthcare.processor.protobuf import payload_pb2
+from common.protobuf import payload_pb2
 
 
 class HealthCarePayload(object):

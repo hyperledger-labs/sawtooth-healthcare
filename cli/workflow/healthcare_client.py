@@ -10,9 +10,9 @@ from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import ParseError, CryptoFactory, create_context
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
-from sawtooth_healthcare.common import helper
-from sawtooth_healthcare.processor.protobuf import payload_pb2
-from sawtooth_healthcare.healthcare_exceptions import HealthCareException
+from common import helper
+from common.protobuf import payload_pb2
+from cli.workflow.healthcare_exceptions import HealthCareException
 
 
 class HealthCareClient:
