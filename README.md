@@ -3,6 +3,7 @@
 Sawtooth Healthcare is a blockchain application built on Hyperledger Sawtooth, allowing clinics to keep history regarding petients health and claims on the blockchain. The repo is based on two other repos available on the internet:
 
 https://github.com/hyperledger/sawtooth-marketplace 
+
 https://github.com/hyperledger/sawtooth-core/tree/master/sdk/examples/xo_python
 
 Note, this app is under constant development. All items mentioned in this documentation having "To be defined" will be ready later and updated accordingly. However, recent commits to the repo should functioning properly as described in the doc.
@@ -11,7 +12,7 @@ Note, this app is under constant development. All items mentioned in this docume
 
 This application covers basic workflow when a patient visit clinic with a claim till he fills good:
 - Prerequisites: clinic, doctor and patient entity objects registered in blockchain;
-- Parient comes to clinic with a claim;
+- Patient comes to clinic with a claim;
 - Receptionist creates new claim for patient and assigns the claim to doctor;
 - Patient visits the doctor with the claim and as result gets treatment direction (like pass certain tests, eat pills, attend procedures);
 - Patient pass tests;
@@ -70,7 +71,7 @@ To be defined
 
 # Deploy & Setup
 
-# How it works
+# How It Works (Step By Step)
 
 This example shows how to use CLI client to operate with blockchain:
 
