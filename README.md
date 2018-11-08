@@ -1,6 +1,6 @@
 # Sawtooth Healthcare
 
-Sawtooth Healthcare is a blockchain application built on Hyperledger Sawtooth, allowing clinics to keep history regarding petients health and claims on the blockchain. The repo is based on two other repos available on the internet:
+Sawtooth Healthcare is a blockchain application built on Hyperledger Sawtooth, allowing clinics to keep history regarding patients health and claims on the blockchain. The repo is based on two other repos available on the internet:
 
 https://github.com/hyperledger/sawtooth-marketplace 
 
