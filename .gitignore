@@ -107,3 +107,4 @@ venv.bak/
 
 /web/bin/
 /web/node_modules/
+.idea/
