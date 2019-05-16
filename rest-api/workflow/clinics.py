@@ -25,12 +25,12 @@ from sanic import response
 from sawtooth_signing import CryptoFactory
 
 # from rest_api.workflow.authorization import authorized
-from sawtooth_healthcare.common.protobuf import payload_pb2
-from sawtooth_healthcare.common import helper
-from rest_api.workflow import common
-from rest_api.workflow import messaging
-from rest_api.workflow.errors import ApiBadRequest
-from rest_api.workflow.errors import ApiInternalError
+from common.protobuf import payload_pb2
+from common import helper
+from workflow import common
+from workflow import messaging
+from workflow.errors import ApiBadRequest
+from workflow.errors import ApiInternalError
 
 # from db import accounts_query
 # from db import auth_query

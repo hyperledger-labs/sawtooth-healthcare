@@ -22,12 +22,12 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sawtooth_signing import CryptoFactory, ParseError
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
-from sawtooth_healthcare.common.exceptions import HealthCareException
-from rest_api.workflow.errors import ApiBadRequest
+from common.exceptions import HealthCareException
+from workflow.errors import ApiBadRequest
 
 # from db import auth_query
 
-from sawtooth_healthcare.common.protobuf import payload_pb2 as rule_pb2
+from common.protobuf import payload_pb2 as rule_pb2
 
 # from marketplace_transaction.protobuf import rule_pb2
 

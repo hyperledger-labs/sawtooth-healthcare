@@ -33,12 +33,12 @@ from sawtooth_rest_api.messaging import Connection
 
 from zmq.asyncio import ZMQEventLoop
 
-from rest_api.workflow.claims import CLAIMS_BP
-from rest_api.workflow.clinics import CLINICS_BP
-from rest_api.workflow.common import get_keyfile, get_signer_from_file
-from rest_api.workflow.doctors import DOCTORS_BP
-from rest_api.workflow.patients import PATIENTS_BP
-from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
+from workflow.claims import CLAIMS_BP
+from workflow.clinics import CLINICS_BP
+from workflow.common import get_keyfile, get_signer_from_file
+from workflow.doctors import DOCTORS_BP
+from workflow.patients import PATIENTS_BP
+from workflow.claim_details import CLAIM_DETAILS_BP
 
 # from api.authorization import AUTH_BP
 # from api.errors import ERRORS_BP
