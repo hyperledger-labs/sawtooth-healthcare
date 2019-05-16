@@ -12,7 +12,7 @@ from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from common import helper
 from common.protobuf import payload_pb2
-from cli.workflow.healthcare_exceptions import HealthCareException
+from common.exceptions import HealthCareException
 
 
 class HealthCareClient:
@@ -45,7 +45,7 @@ class HealthCareClient:
     def create_clinic(self, name, wait=None, auth_user=None, auth_password=None):
         batch_key = txn_key = self._signer.get_public_key().as_hex()
 
-        address = helper.make_clinic_address(clinic_pkey=txn_key)
+        inputs = outputs = helper.make_clinic_address(clinic_pkey=txn_key)
 
         clinic = payload_pb2.CreateClinic(
             public_key=txn_key,
@@ -55,10 +55,28 @@ class HealthCareClient:
             payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
             create_clinic=clinic)
 
-        return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
+        return self._send_healthcare_txn(txn_key, batch_key, [inputs], [outputs], payload,
                                          wait=wait,
                                          auth_user=auth_user,
                                          auth_password=auth_password)
+
+    # def create_clinic(self, name, wait=None, auth_user=None, auth_password=None):
+    #     batch_key = txn_key = self._signer.get_public_key().as_hex()
+    #
+    #     address = helper.make_clinic_address(clinic_pkey=txn_key)
+    #
+    #     clinic = payload_pb2.CreateClinic(
+    #         public_key=txn_key,
+    #         name=name)
+    #
+    #     payload = payload_pb2.TransactionPayload(
+    #         payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
+    #         create_clinic=clinic)
+    #
+    #     return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
+    #                                      wait=wait,
+    #                                      auth_user=auth_user,
+    #                                      auth_password=auth_password)
 
     def create_doctor(self, name, surname, wait=None, auth_user=None, auth_password=None):
         batch_key = txn_key = self._signer.get_public_key().as_hex()

@@ -10,7 +10,7 @@ from colorlog import ColoredFormatter
 
 from common.helper import DISTRIBUTION_NAME, DEFAULT_URL
 from cli.workflow.healthcare_client import HealthCareClient
-from cli.workflow.healthcare_exceptions import HealthCareException
+from common.exceptions import HealthCareException
 
 
 def create_console_handler(verbose_level):

@@ -79,7 +79,13 @@ class HealthCareTransactionHandler(TransactionHandler):
                 cl = healthcare_state.get_claim(claim.claim_id, claim.clinic_pkey)
                 if cl is not None:
                     raise InvalidTransaction(
-                        'Invalid action: Claim already exists: ' + claim.clinic_pkey)
+                        'Invalid action: Claim ' + claim.claim_id + ' already exists in clinic having ' +
+                        claim.clinic_pkey + ' public key')
+
+                pat = healthcare_state.get_patient(claim.patient_pkey)
+                if pat is None:
+                    raise InvalidTransaction(
+                        'Invalid action: Patient having ' + claim.patient_pkey + ' public key does not exist')
 
                 healthcare_state.create_claim(claim.claim_id, claim.clinic_pkey, claim.patient_pkey)
             elif healthcare_payload.is_assign_doctor():

@@ -110,12 +110,12 @@ services:
 #    image: healthcare-rest-api
 #    container_name: healthcare-rest-api
 #    volumes:
-#      - .:/PycharmProjects/healthcare/sawtooth_healthcare
+#      - .:/project/sawtooth_healthcare
 #    ports:
 #      - '8040:8000'
-#    depends_on:
-#      - healthcare-shell
-#      - validator
+##    depends_on:
+##      - healthcare-shell
+##      - validator
 #    command: |
 #      bash -c "
 #        sleep 3 &&

@@ -27,7 +27,7 @@ if os.path.exists("tests"):
     data_files.append(('/data/tests/xo', ['tests/test_tp_xo.py']))
 
 setup(
-    name='sawtooth-healthcare-tests',
+    name='healthcare-tests',
     version=subprocess.check_output(
         ['../../../bin/get_version']).decode('utf-8').strip(),
     description='Sawtooth HealthCare Python Test',

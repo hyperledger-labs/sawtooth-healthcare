@@ -17,25 +17,28 @@
 
 FROM ubuntu:xenial
 
-RUN echo "deb apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD" && \
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD && \
     echo 'deb http://repo.sawtooth.me/ubuntu/1.0/stable xenial universe' >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y --allow-unauthenticated -q \
-        python3-pip \
-        python3-sawtooth-sdk \
-        python3-sawtooth-rest-api \
-        python3-sawtooth-cli \
-        python3-sawtooth-signing \
+    apt-get update
+
+RUN apt-get install -y --allow-unauthenticated -q \
+    python3-pip \
+    python3-sawtooth-sdk \
+    python3-sawtooth-rest-api \
+    python3-sawtooth-cli \
+    python3-sawtooth-signing \
 #        cron-apt \
-        curl
+    iputils-ping \
+    curl \
+    telnet
 
 #RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - \
 #    && apt-get install -y nodejs
 
-RUN pip3 install \
-    pylint==1.8.1 \
-    pycodestyle==2.3.1 \
-    grpcio-tools==1.7.0
+#RUN pip3 install \
+#    pylint==1.8.1 \
+#    pycodestyle==2.3.1 \
+#    grpcio-tools==1.7.0
 #    \
 #    nose2==0.7.2 \
 #    bcrypt \
@@ -51,3 +54,7 @@ WORKDIR /project/sawtooth-healthcare
 #RUN cd sawbuck_app/ && npm install
 
 ENV PATH $PATH:/project/sawtooth-healthcare/bin
+
+#CMD echo "\033[0;32m--- 2Building healthcare-rest-api ---\n\033[0m" \
+#    && init-healthcare-rest-api.sh \
+#    && healthcare-tp -v -C tcp://validator:4004
