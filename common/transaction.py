@@ -1,15 +1,15 @@
 import hashlib
 import random
 
-from sawtooth_rest_api.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
-from sawtooth_rest_api.protobuf.transaction_pb2 import Transaction, TransactionHeader
+from sawtooth_sdk.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
+from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
-import sawtooth_healthcare.common.helper as helper
-from sawtooth_healthcare.common.protobuf import payload_pb2
+import common.helper as helper
+from common.protobuf import payload_pb2
 
 
 def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
-    txn_header_bytes, signature = _transaction_header(txn_signer, inputs, outputs, payload)
+    txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
 
     txn = Transaction(
         header=txn_header_bytes,
@@ -30,10 +30,10 @@ def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
     # batch_list = BatchList(batches=[batch])
     # batch_id = batch_list.batches[0].header_signature
     # return batch_list, batch_id
-    return [batch], batch.header_signature
+    return batch, batch.header_signature
 
 
-def _transaction_header(txn_signer, inputs, outputs, payload):
+def _transaction_header(txn_signer, batch_signer, inputs, outputs, payload):
     txn_header_bytes = TransactionHeader(
         family_name=helper.TP_FAMILYNAME,
         family_version=helper.TP_VERSION,
@@ -43,7 +43,7 @@ def _transaction_header(txn_signer, inputs, outputs, payload):
         # In this example, we're signing the batch with the same private key,
         # but the batch can be signed by another party, in which case, the
         # public key will need to be associated with that key.
-        batcher_public_key=txn_signer.get_public_key().as_hex(),  # signer.get_public_key().as_hex(),
+        batcher_public_key=batch_signer.get_public_key().as_hex(),  # signer.get_public_key().as_hex(),
         # In this example, there are no dependencies.  This list should include
         # an previous transaction header signatures that must be applied for
         # this transaction to successfully commit.
@@ -67,6 +67,46 @@ def _batch_header(batch_signer, transactions):
     signature = batch_signer.sign(batch_header_bytes)
 
     return batch_header_bytes, signature
+
+
+def create_doctor(txn_signer, batch_signer, name, surname):
+    doctor = payload_pb2.CreateDoctor(
+        public_key=txn_signer.get_public_key().as_hex(),
+        name=name,
+        surname=surname)
+
+    payload = payload_pb2.TransactionPayload(
+        payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
+        create_doctor=doctor)
+
+    doctor_hex = helper.make_doctor_address(doctor_pkey=txn_signer.get_public_key().as_hex())
+
+    return _make_header_and_batch(
+        payload=payload,
+        inputs=[doctor_hex],
+        outputs=[doctor_hex],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
+
+def create_patient(txn_signer, batch_signer, name, surname):
+    patient = payload_pb2.CreatePatient(
+        public_key=txn_signer.get_public_key().as_hex(),
+        name=name,
+        surname=surname)
+
+    payload = payload_pb2.TransactionPayload(
+        payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
+        create_patient=patient)
+
+    patient_hex = helper.make_patient_address(patient_pkey=txn_signer.get_public_key().as_hex())
+
+    return _make_header_and_batch(
+        payload=payload,
+        inputs=[patient_hex],
+        outputs=[patient_hex],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
 
 
 def create_clinic(txn_signer, batch_signer, name):
