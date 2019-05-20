@@ -113,20 +113,23 @@ class BlockchainTest(unittest.TestCase):
     def test_02_create_clinic(self):
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_00,
+                txn_signer=self.signer_clinic_00,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_0_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_00,
+                txn_signer=self.signer_clinic_00,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_0_" + uuid4().hex)[0]['status'],
             "INVALID",
             "There can only be 1 clinic per public key.")
 
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_01,
+                txn_signer=self.signer_clinic_01,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_1_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
@@ -137,7 +140,8 @@ class BlockchainTest(unittest.TestCase):
     def test_03_create_claim(self):
         LOGGER.info("Prerequisite: create clinic 1")
         create_clinic = self.client.create_clinic(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             name="Clinic_Name_03_0_" + uuid4().hex)
         LOGGER.info("Response: {}".format(create_clinic))
 
@@ -322,23 +326,28 @@ class HealthCareClient(object):
         self._client.send_batches(batch_list)
         return self._client.get_statuses([batch_id], wait=40)
 
-    def create_clinic(self, txn_key, name):
-        clinic = payload_pb2.CreateClinic(
-            public_key=txn_key.get_public_key().as_hex(),
+    def create_clinic(self, txn_signer, batch_signer, name):
+
+        # clinic = payload_pb2.CreateClinic(
+        #     public_key=txn_signer.get_public_key().as_hex(),
+        #     name=name)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
+        #     create_clinic=clinic)
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_signer.get_public_key().as_hex())
+        #
+        # batch, batch_id = self._create_txn_and_batch(txn_signer, BATCH_KEY, [clinic_hex], [clinic_hex], payload)
+        batch, batch_id = transaction.create_clinic(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             name=name)
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
-            create_clinic=clinic)
-
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key.get_public_key().as_hex())
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [clinic_hex], [clinic_hex], payload)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=40)
+        return self._client.get_statuses([batch_id], wait=40)
 
     def create_claim(self, txn_signer, batch_signer, claim_id, patient_pkey):
         # clinic_pkey = txn_key.get_public_key().as_hex()

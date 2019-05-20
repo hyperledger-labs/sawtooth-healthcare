@@ -138,8 +138,8 @@ def create_clinic(txn_signer, batch_signer, name):
 
     return _make_header_and_batch(
         payload=payload,
-        inputs=inputs,
-        outputs=outputs,
+        inputs=[inputs],
+        outputs=[outputs],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
 
