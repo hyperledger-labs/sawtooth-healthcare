@@ -10,7 +10,7 @@ from uuid import uuid4
 from sawtooth_cli.rest_client import RestClient
 from sawtooth_sdk.protobuf import batch_pb2, transaction_pb2
 # from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
-from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
+# from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import create_context, CryptoFactory
 
 from common import transaction

@@ -5,11 +5,13 @@ import time
 
 import requests
 import yaml
+from sawtooth_sdk.protobuf import batch_pb2, transaction_pb2
 from sawtooth_sdk.protobuf.batch_pb2 import Batch, BatchList, BatchHeader
 from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import ParseError, CryptoFactory, create_context
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
+from common import transaction
 from common import helper
 from common.protobuf import payload_pb2
 from common.exceptions import HealthCareException
@@ -43,22 +45,33 @@ class HealthCareClient:
             .new_signer(private_key)
 
     def create_clinic(self, name, wait=None, auth_user=None, auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
 
-        inputs = outputs = helper.make_clinic_address(clinic_pkey=txn_key)
-
-        clinic = payload_pb2.CreateClinic(
-            public_key=txn_key,
+        batch, batch_id = transaction.create_clinic(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             name=name)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
-            create_clinic=clinic)
+        batch_list = batch_pb2.BatchList(batches=[batch])
+        # inputs = outputs = helper.make_clinic_address(clinic_pkey=txn_key)
+        #
+        # clinic = payload_pb2.CreateClinic(
+        #     public_key=txn_key,
+        #     name=name)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
+        #     create_clinic=clinic)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [inputs], [outputs], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        return self._send_healthcare_txn(txn_key, batch_key, [inputs], [outputs], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     # def create_clinic(self, name, wait=None, auth_user=None, auth_password=None):
     #     batch_key = txn_key = self._signer.get_public_key().as_hex()
@@ -79,208 +92,349 @@ class HealthCareClient:
     #                                      auth_password=auth_password)
 
     def create_doctor(self, name, surname, wait=None, auth_user=None, auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
-
-        address = helper.make_doctor_address(doctor_pkey=txn_key)
-
-        doctor = payload_pb2.CreateDoctor(
-            public_key=txn_key,
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # address = helper.make_doctor_address(doctor_pkey=txn_key)
+        #
+        # doctor = payload_pb2.CreateDoctor(
+        #     public_key=txn_key,
+        #     name=name,
+        #     surname=surname)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
+        #     create_doctor=doctor)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
+        batch, batch_id = transaction.create_doctor(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             name=name,
             surname=surname)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
-            create_doctor=doctor)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def create_patient(self, name, surname, wait=None, auth_user=None, auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # address = helper.make_patient_address(patient_pkey=txn_key)
+        #
+        # patient = payload_pb2.CreatePatient(
+        #     public_key=txn_key,
+        #     name=name,
+        #     surname=surname)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
+        #     create_patient=patient)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        address = helper.make_patient_address(patient_pkey=txn_key)
-
-        patient = payload_pb2.CreatePatient(
-            public_key=txn_key,
+        batch, batch_id = transaction.create_patient(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             name=name,
             surname=surname)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
-            create_patient=patient)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [address], [address], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def add_claim(self, claim_id, patient_pkey, wait=None, auth_user=None,
                   auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
-
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
-
-        claim = payload_pb2.CreateClaim(
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        #
+        # claim = payload_pb2.CreateClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     patient_pkey=patient_pkey,
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_CLAIM,
+        #     create_claim=claim)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, clinic_hex], [claim_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
+        batch, batch_id = transaction.register_claim(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
-            patient_pkey=patient_pkey,
-        )
+            patient_pkey=patient_pkey)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_CLAIM,
-            create_claim=claim)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, clinic_hex], [claim_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def assign_doctor(self, claim_id, doctor_pkey, wait=None, auth_user=None,
                       auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
-
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # assign = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description="Doctor pkey: {}, assigned to claim: {}".format(doctor_pkey, claim_hex),
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.ASSIGN_DOCTOR,
+        #     assign_doctor=assign)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        assign = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.assign_doctor(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
-            description="Doctor pkey: {}, assigned to claim: {}".format(doctor_pkey, claim_hex),
+            description="Doctor pkey: {}, assigned to claim: {}".format(doctor_pkey, claim_id),
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.ASSIGN_DOCTOR,
-            assign_doctor=assign)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def first_visit(self, claim_id, description, doctor_pkey, wait=None, auth_user=None,
                     auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # first_visit = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_hex, description),
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.FIRST_VISIT,
+        #     first_visit=first_visit)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        first_visit = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.first_visit(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
-            description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_hex, description),
+            description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_id, description),
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.FIRST_VISIT,
-            first_visit=first_visit)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def pass_tests(self, claim_id, description, wait=None, auth_user=None,
                    auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # pass_tests = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description=description,
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.PASS_TESTS,
+        #     pass_tests=pass_tests)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        pass_tests = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.pass_tests(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
             description=description,
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.PASS_TESTS,
-            pass_tests=pass_tests)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def attend_procedures(self, claim_id, description, wait=None, auth_user=None,
                           auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # attend_procedures = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description=description,
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.ATTEND_PROCEDURES,
+        #     attend_procedures=attend_procedures)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        attend_procedures = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.attend_procedures(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
             description=description,
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.ATTEND_PROCEDURES,
-            attend_procedures=attend_procedures)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def eat_pills(self, claim_id, description, wait=None, auth_user=None,
                   auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # address = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # eat_pills = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description=description,
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.EAT_PILLS,
+        #     eat_pills=eat_pills)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [address, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        address = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        eat_pills = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.eat_pills(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
             description=description,
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.EAT_PILLS,
-            eat_pills=eat_pills)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [address, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def next_visit(self, claim_id, description, doctor_pkey, wait=None, auth_user=None,
                    auth_password=None):
-        batch_key = txn_key = self._signer.get_public_key().as_hex()
+        # batch_key = txn_key = self._signer.get_public_key().as_hex()
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
+        #
+        # next_visit = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=txn_key,
+        #     description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_hex, description),
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.NEXT_VISIT,
+        #     next_visit=next_visit)
+        #
+        # return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
+        #                                  wait=wait,
+        #                                  auth_user=auth_user,
+        #                                  auth_password=auth_password)
 
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=txn_key)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=txn_key, event_time=current_times_str)
 
-        next_visit = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.next_visit(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
             claim_id=claim_id,
-            clinic_pkey=txn_key,
-            description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_hex, description),
+            description="Doctor pkey: {}, claim hex: {}, description: {}".format(doctor_pkey, claim_id, description),
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.NEXT_VISIT,
-            next_visit=next_visit)
+        batch_list = batch_pb2.BatchList(batches=[batch])
 
-        return self._send_healthcare_txn(txn_key, batch_key, [claim_hex, event_hex, clinic_hex], [event_hex], payload,
-                                         wait=wait,
-                                         auth_user=auth_user,
-                                         auth_password=auth_password)
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait,
+                                  auth_user=auth_user,
+                                  auth_password=auth_password)
 
     def list_claims(self, auth_user=None, auth_password=None):
         claim_list_prefix = helper.make_claim_list_address()
@@ -441,30 +595,7 @@ class HealthCareClient:
 
         return result.text
 
-    def _send_healthcare_txn(self, txn_key, batch_key, inputs, outputs, payload, wait,
-                             auth_user, auth_password):
-
-        txn_header_bytes, signature = self._transaction_header(txn_key, inputs, outputs, payload)
-
-        txn = Transaction(
-            header=txn_header_bytes,
-            header_signature=signature,
-            payload=payload.SerializeToString()
-        )
-
-        transactions = [txn]
-
-        batch_header_bytes, signature = self._batch_header(batch_key, transactions)
-
-        batch = Batch(
-            header=batch_header_bytes,
-            header_signature=signature,
-            transactions=transactions
-        )
-
-        batch_list = BatchList(batches=[batch])
-        batch_id = batch_list.batches[0].header_signature
-
+    def _send_batches(self, batch_list, batch_id, wait, auth_user, auth_password):
         if wait and wait > 0:
             wait_time = 0
             start_time = time.time()
@@ -492,6 +623,57 @@ class HealthCareClient:
             auth_user=auth_user,
             auth_password=auth_password)
 
+    # def _send_healthcare_txn(self, txn_key, batch_key, inputs, outputs, payload, wait,
+    #                          auth_user, auth_password):
+    #
+    #     txn_header_bytes, signature = self._transaction_header(txn_key, inputs, outputs, payload)
+    #
+    #     txn = Transaction(
+    #         header=txn_header_bytes,
+    #         header_signature=signature,
+    #         payload=payload.SerializeToString()
+    #     )
+    #
+    #     transactions = [txn]
+    #
+    #     batch_header_bytes, signature = self._batch_header(batch_key, transactions)
+    #
+    #     batch = Batch(
+    #         header=batch_header_bytes,
+    #         header_signature=signature,
+    #         transactions=transactions
+    #     )
+    #
+    #     batch_list = BatchList(batches=[batch])
+    #     batch_id = batch_list.batches[0].header_signature
+    #
+    #     if wait and wait > 0:
+    #         wait_time = 0
+    #         start_time = time.time()
+    #         response = self._send_request(
+    #             "batches", batch_list.SerializeToString(),
+    #             'application/octet-stream',
+    #             auth_user=auth_user,
+    #             auth_password=auth_password)
+    #         while wait_time < wait:
+    #             status = self._get_status(
+    #                 batch_id,
+    #                 wait - int(wait_time),
+    #                 auth_user=auth_user,
+    #                 auth_password=auth_password)
+    #             wait_time = time.time() - start_time
+    #
+    #             if status != 'PENDING':
+    #                 return response
+    #
+    #         return response
+    #
+    #     return self._send_request(
+    #         "batches", batch_list.SerializeToString(),
+    #         'application/octet-stream',
+    #         auth_user=auth_user,
+    #         auth_password=auth_password)
+
     def _get_status(self, batch_id, wait, auth_user=None, auth_password=None):
         try:
             result = self._send_request(
@@ -502,36 +684,36 @@ class HealthCareClient:
         except BaseException as err:
             raise HealthCareException(err)
 
-    def _transaction_header(self, txn_key, inputs, outputs, payload):
-        txn_header_bytes = TransactionHeader(
-            family_name=helper.TP_FAMILYNAME,
-            family_version=helper.TP_VERSION,
-            inputs=inputs,
-            outputs=outputs,
-            signer_public_key=txn_key,  # signer.get_public_key().as_hex(),
-            # In this example, we're signing the batch with the same private key,
-            # but the batch can be signed by another party, in which case, the
-            # public key will need to be associated with that key.
-            batcher_public_key=txn_key,  # signer.get_public_key().as_hex(),
-            # In this example, there are no dependencies.  This list should include
-            # an previous transaction header signatures that must be applied for
-            # this transaction to successfully commit.
-            # For example,
-            # dependencies=['540a6803971d1880ec73a96cb97815a95d374cbad5d865925e5aa0432fcf1931539afe10310c122c5eaae15df61236079abbf4f258889359c4d175516934484a'],
-            dependencies=[],
-            nonce=random.random().hex().encode(),
-            payload_sha512=hashlib.sha512(payload.SerializeToString()).hexdigest()
-        ).SerializeToString()
-
-        signature = self._signer.sign(txn_header_bytes)
-        return txn_header_bytes, signature
-
-    def _batch_header(self, batch_key, transactions):
-        batch_header_bytes = BatchHeader(
-            signer_public_key=batch_key,
-            transaction_ids=[txn.header_signature for txn in transactions],
-        ).SerializeToString()
-
-        signature = self._signer.sign(batch_header_bytes)
-
-        return batch_header_bytes, signature
+    # def _transaction_header(self, txn_key, inputs, outputs, payload):
+    #     txn_header_bytes = TransactionHeader(
+    #         family_name=helper.TP_FAMILYNAME,
+    #         family_version=helper.TP_VERSION,
+    #         inputs=inputs,
+    #         outputs=outputs,
+    #         signer_public_key=txn_key,  # signer.get_public_key().as_hex(),
+    #         # In this example, we're signing the batch with the same private key,
+    #         # but the batch can be signed by another party, in which case, the
+    #         # public key will need to be associated with that key.
+    #         batcher_public_key=txn_key,  # signer.get_public_key().as_hex(),
+    #         # In this example, there are no dependencies.  This list should include
+    #         # an previous transaction header signatures that must be applied for
+    #         # this transaction to successfully commit.
+    #         # For example,
+    #         # dependencies=['540a6803971d1880ec73a96cb97815a95d374cbad5d865925e5aa0432fcf1931539afe10310c122c5eaae15df61236079abbf4f258889359c4d175516934484a'],
+    #         dependencies=[],
+    #         nonce=random.random().hex().encode(),
+    #         payload_sha512=hashlib.sha512(payload.SerializeToString()).hexdigest()
+    #     ).SerializeToString()
+    #
+    #     signature = self._signer.sign(txn_header_bytes)
+    #     return txn_header_bytes, signature
+    #
+    # def _batch_header(self, batch_key, transactions):
+    #     batch_header_bytes = BatchHeader(
+    #         signer_public_key=batch_key,
+    #         transaction_ids=[txn.header_signature for txn in transactions],
+    #     ).SerializeToString()
+    #
+    #     signature = self._signer.sign(batch_header_bytes)
+    #
+    #     return batch_header_bytes, signature
