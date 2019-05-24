@@ -12,24 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-import base64
-
-import bcrypt
-
-from itsdangerous import BadSignature
+# import base64
+#
+# import bcrypt
+#
+# from itsdangerous import BadSignature
 
 from sanic import Blueprint
 from sanic import response
 
-from sawtooth_signing import CryptoFactory
+# from sawtooth_signing import CryptoFactory
 
 # from rest_api.workflow.authorization import authorized
 from common.protobuf import payload_pb2
 from common import helper
-from workflow import common
-from workflow import messaging
-from workflow.errors import ApiBadRequest
-from workflow.errors import ApiInternalError
+from rest_api.workflow import general
+from rest_api.workflow import messaging
+# from workflow.errors import ApiBadRequest
+# from workflow.errors import ApiInternalError
 # from db import accounts_query
 # from db import auth_query
 # import pandas as pd
@@ -39,7 +39,7 @@ from workflow.errors import ApiInternalError
 # from marketplace_transaction import transaction_creation
 
 
-DOCTORS_BP = Blueprint('doctors')
+PATIENTS_BP = Blueprint('patients')
 
 
 # @CLINICS_BP.post('accounts')
@@ -89,25 +89,26 @@ DOCTORS_BP = Blueprint('doctors')
 #         })
 
 
-@DOCTORS_BP.get('doctors')
-async def get_all_doctors(request):
+@PATIENTS_BP.get('patients')
+async def get_all_patients(request):
     """Fetches complete details of all Accounts in state"""
-    list_doctors_address = helper.make_doctor_list_address()
-    doctor_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_doctors_address)
+    list_patient_address = helper.make_patient_list_address()
+    patient_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_patient_address)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    doctors = []
-    for entity in doctor_resources.entries:
+    patients = []
+    for entity in patient_resources.entries:
         # dec_cl = base64.b64decode(entity.data)
-        doc = payload_pb2.CreateDoctor()
-        doc.ParseFromString(entity.data)
-        doctors.append({'public_key' : doc.public_key, 'name': doc.name, 'surname': doc.surname})
+        pat = payload_pb2.CreatePatient()
+        pat.ParseFromString(entity.data)
+        patients.append({'public_key' : pat.public_key, 'name': pat.name, 'surname': pat.surname})
 
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': doctors},
-                         headers=common.get_response_headers(common.get_request_origin(request)))
+    return response.json(body={'data': patients},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
+
 
 
 # @ACCOUNTS_BP.get('accounts/<key>')

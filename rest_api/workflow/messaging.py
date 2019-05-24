@@ -12,29 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-import base64
+# import base64
 
-from sawtooth_rest_api.protobuf import client_batch_submit_pb2
+from sawtooth_sdk.protobuf import client_batch_submit_pb2
 from sawtooth_rest_api.protobuf import client_state_pb2
 
 from sawtooth_rest_api.protobuf import validator_pb2
 
-from workflow.errors import ApiBadRequest
-from workflow.errors import ApiInternalError
+from rest_api.workflow.errors import ApiBadRequest
+from rest_api.workflow.errors import ApiInternalError
 
 
 async def send(conn, timeout, batches):
     batch_request = client_batch_submit_pb2.ClientBatchSubmitRequest()
-    batch_request.batches.extend(batches)
+    batch_request.batches.extend([batches])
     await conn.send(
         validator_pb2.Message.CLIENT_BATCH_SUBMIT_REQUEST,
         batch_request.SerializeToString(),
         timeout)
 
 
-async def check_batch_status(conn, batch_id):
+async def check_batch_status(conn, batch_ids):
     status_request = client_batch_submit_pb2.ClientBatchStatusRequest(
-        batch_ids=[batch_id], wait=True)
+        batch_ids=batch_ids, wait=True)
     validator_response = await conn.send(
         validator_pb2.Message.CLIENT_BATCH_STATUS_REQUEST,
         status_request.SerializeToString())

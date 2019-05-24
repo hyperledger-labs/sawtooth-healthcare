@@ -19,42 +19,49 @@ FROM ubuntu:xenial
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F1091A5FD && \
     echo 'deb http://repo.sawtooth.me/ubuntu/1.0/stable xenial universe' >> /etc/apt/sources.list && \
-    apt-get update
+    apt-get update --fix-missing
 
-RUN apt-get install -y --allow-unauthenticated -q \
+RUN apt-get install --fix-missing -y --allow-unauthenticated -q \
+    locales \
     python3-pip \
     python3-sawtooth-sdk \
+    python3-setuptools \
     python3-sawtooth-rest-api \
-    python3-sawtooth-cli \
+    python3-grpcio-tools \
+#    python3-sawtooth-cli \
     python3-sawtooth-signing \
 #        cron-apt \
     iputils-ping \
     curl \
     telnet
 
+RUN locale-gen en_US.UTF-8
 #RUN curl -sL https://deb.nodesource.com/setup_6.x | bash - \
 #    && apt-get install -y nodejs
 
-#RUN pip3 install \
+RUN pip3 install \
 #    pylint==1.8.1 \
 #    pycodestyle==2.3.1 \
-#    grpcio-tools==1.7.0
+#    grpcio-
 #    \
 #    nose2==0.7.2 \
 #    bcrypt \
-#    pycrypto \
+    pycrypto \
 #    rethinkdb \
-#    sanic \
-#    itsdangerous
+    sanic \
+    sanic_cors \
+    itsdangerous
 
-WORKDIR /project/sawtooth-healthcare
+WORKDIR /project/sawtooth_healthcare
 
 #COPY sawbuck_app/package.json /project/sawtooth-marketplace/sawbuck_app/
 
 #RUN cd sawbuck_app/ && npm install
 
-ENV PATH $PATH:/project/sawtooth-healthcare/bin
-
+ENV PATH $PATH:/project/sawtooth_healthcare/bin
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 #CMD echo "\033[0;32m--- 2Building healthcare-rest-api ---\n\033[0m" \
 #    && init-healthcare-rest-api.sh \
 #    && healthcare-tp -v -C tcp://validator:4004

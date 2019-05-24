@@ -28,11 +28,11 @@ data_files = [
 
 if os.path.exists("/etc/default"):
     data_files.append(
-        ('/etc/default', ['packaging/systemd/sawtooth-healthcare-rest-api-python']))
+        ('/etc/default', ['packaging/systemd/healthcare-rest-api']))
 
 if os.path.exists("/lib/systemd/system"):
     data_files.append(('/lib/systemd/system',
-                       ['packaging/systemd/sawtooth-healthcare-rest-api-python.service']))
+                       ['packaging/systemd/healthcare-rest-api.service']))
 
 # class CleanCommand(Command):
 #     """Custom clean command to tidy up the project root."""
@@ -63,6 +63,10 @@ setup(
         'protobuf',
         'sawtooth-sdk',
         'sawtooth-signing',
+        'Crypto',
+        'itsdangerous',
+        'sanic',
+        'sanic_cors',
         # 'PyYAML',
     ],
     # cmdclass={

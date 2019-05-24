@@ -30,15 +30,15 @@ from sawtooth_signing import ParseError
 from sawtooth_signing import CryptoFactory
 
 from sawtooth_rest_api.messaging import Connection
+from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from zmq.asyncio import ZMQEventLoop
-
-from workflow.claims import CLAIMS_BP
-from workflow.clinics import CLINICS_BP
-from workflow.common import get_keyfile, get_signer_from_file
-from workflow.doctors import DOCTORS_BP
-from workflow.patients import PATIENTS_BP
-from workflow.claim_details import CLAIM_DETAILS_BP
+from rest_api.workflow.claims import CLAIMS_BP
+from rest_api.workflow.clinics import CLINICS_BP
+from rest_api.workflow.general import get_keyfile, get_signer_from_file
+from rest_api.workflow.doctors import DOCTORS_BP
+from rest_api.workflow.patients import PATIENTS_BP
+from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 
 # from api.authorization import AUTH_BP
 # from api.errors import ERRORS_BP
@@ -57,9 +57,9 @@ DEFAULT_CONFIG = {
     # 'DB_NAME': 'marketplace',
     'DEBUG': True,
     'KEEP_ALIVE': False,
-    'SECRET_KEY': None,
-    'AES_KEY': None,
-    # 'BATCHER_PRIVATE_KEY': None
+    'SECRET_KEY': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
+    'AES_KEY': 'ffffffffffffffffffffffffffffffff',
+    'BATCHER_PRIVATE_KEY': '1111111111111111111111111111111111111111111111111111111111111111',
     'BATCHER_PRIVATE_KEY_FILE_NAME': None
 }
 
@@ -172,10 +172,10 @@ def load_config(app):  # pylint: disable=too-many-branches
         sys.exit(1)
 
     try:
-        private_key_file_name = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME)
-        private_key = get_signer_from_file(private_key_file_name)
-        # private_key = Secp256k1PrivateKey.from_hex(
-        #     app.config.BATCHER_PRIVATE_KEY)
+        # private_key_file_name = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME)
+        # private_key = get_signer_from_file(private_key_file_name)
+        private_key = Secp256k1PrivateKey.from_hex(
+            app.config.BATCHER_PRIVATE_KEY)
     except ParseError as err:
         LOGGER.exception('Unable to load private key: %s', str(err))
         sys.exit(1)

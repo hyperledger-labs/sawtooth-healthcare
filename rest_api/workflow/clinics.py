@@ -12,25 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-import base64
-
-import bcrypt
-
-from itsdangerous import BadSignature
+# import base64
+#
+# import bcrypt
+#
+# from itsdangerous import BadSignature
 
 from sanic import Blueprint
 from sanic import response
 # from sanic import request
 
-from sawtooth_signing import CryptoFactory
+# from sawtooth_signing import CryptoFactory
 
 # from rest_api.workflow.authorization import authorized
 from common.protobuf import payload_pb2
 from common import helper
-from workflow import common
-from workflow import messaging
-from workflow.errors import ApiBadRequest
-from workflow.errors import ApiInternalError
+from rest_api.workflow import general
+from rest_api.workflow import messaging
+# from workflow.errors import ApiBadRequest
+# from workflow.errors import ApiInternalError
 
 # from db import accounts_query
 # from db import auth_query
@@ -113,7 +113,7 @@ async def get_all_clinics(request):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': clinics},
-                         headers=common.get_response_headers(common.get_request_origin(request)))
+                         headers=general.get_response_headers(general.get_request_origin(request)))
     # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)
 
 # @ACCOUNTS_BP.get('accounts/<key>')
