@@ -45,7 +45,7 @@ from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 # from api.holdings import HOLDINGS_BP
 # from api.offers import OFFERS_BP
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 DEFAULT_CONFIG = {
     'HOST': 'localhost',
@@ -63,7 +63,6 @@ DEFAULT_CONFIG = {
     'BATCHER_PRIVATE_KEY_FILE_NAME': None
 }
 
-
 async def open_connections(app):
     # LOGGER.warning('opening database connection')
     # r.set_loop_type('asyncio')
@@ -74,7 +73,7 @@ async def open_connections(app):
 
     app.config.VAL_CONN = Connection(app.config.VALIDATOR_URL)
 
-    LOGGER.warning('opening validator connection')
+    LOGGER.warning('opening validator connection: ' + str(app.config.VALIDATOR_URL))
     app.config.VAL_CONN.open()
 
 
@@ -83,7 +82,7 @@ def close_connections(app):
     # app.config.DB_CONN.close()
 
     LOGGER.warning('closing validator connection')
-    app.config.VAL_CON.close()
+    app.config.VAL_CONN.close()
 
 
 def parse_args(args):
@@ -202,14 +201,14 @@ def main():
     zmq = ZMQEventLoop()
     asyncio.set_event_loop(zmq)
     server = app.create_server(
-        host=app.config.HOST, port=app.config.PORT, debug=app.config.DEBUG)
+        host=app.config.HOST, port=app.config.PORT, debug=app.config.DEBUG, return_asyncio_server=True)
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(server)
     asyncio.ensure_future(open_connections(app))
+    asyncio.ensure_future(server)
     signal(SIGINT, lambda s, f: loop.close())
     try:
+        LOGGER.info('Clinic Rest API server starting')
         loop.run_forever()
-        LOGGER.info('Clinic Rest API server started')
     except KeyboardInterrupt:
         LOGGER.info('Clinic Rest API started interrupted')
         close_connections(app)

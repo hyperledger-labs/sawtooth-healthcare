@@ -123,7 +123,7 @@ services:
         init-healthcare-rest-api.sh &&
         healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
         tail -f /dev/null
-      "
+               "
     #init-healthcare-rest-api.sh &&
   #        healthcare-rest-api \
   #          --host healthcare-rest-api \
