@@ -310,7 +310,7 @@ def next_visit(txn_signer, batch_signer, claim_id, description, event_time):
 
     event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=event_time)
 
-    next_visit = payload_pb2.ActionOnClaim(
+    visit = payload_pb2.ActionOnClaim(
         claim_id=claim_id,
         clinic_pkey=clinic_pkey,
         description=description,
@@ -319,7 +319,7 @@ def next_visit(txn_signer, batch_signer, claim_id, description, event_time):
 
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.NEXT_VISIT,
-        next_visit=next_visit)
+        next_visit=visit)
 
     # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
     #                                               [event_hex], payload)

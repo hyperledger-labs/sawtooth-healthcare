@@ -206,6 +206,73 @@ async def assign_doctor(request):
     return response.json(body={'status': general.DONE},
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
+
+@CLAIM_DETAILS_BP.post('claim/first_visit')
+async def doctor_visit(request):
+    claim_id = request.json.get('claim_id')
+    doctor_pkey = request.json.get('doctor_pkey')
+    current_times_str = str(time.time())
+
+    # private_key = common.get_signer_from_file(keyfile)
+    # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
+    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+
+    batch, batch_id = transaction.first_visit(
+        txn_signer=clinic_signer,
+        batch_signer=clinic_signer,
+        claim_id=claim_id,
+        description="Doctor: {}, completed first visit for claim: {}, \
+                need to pass procedures and eat pills".format(doctor_pkey, claim_id),
+        event_time=current_times_str)
+
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch])
+
+    try:
+        await messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    # token = common.deserialize_auth_token(
+    #     request.app.config.SECRET_KEY, request.token)
+    #
+    # update = {}
+    # if request.json.get('password'):
+    #     update['hashed_password'] = bcrypt.hashpw(
+    #         bytes(request.json.get('password'), 'utf-8'), bcrypt.gensalt())
+    # if request.json.get('email'):
+    #     update['email'] = request.json.get('email')
+
+    # if update:
+    #     updated_auth_info = await auth_query.update_auth_info(
+    #         request.app.config.DB_CONN,
+    #         token.get('email'),
+    #         token.get('public_key'),
+    #         update)
+    #     new_token = common.generate_auth_token(
+    #         request.app.config.SECRET_KEY,
+    #         updated_auth_info.get('email'),
+    #         updated_auth_info.get('publicKey'))
+    # else:
+    #     updated_auth_info = await accounts_query.fetch_account_resource(
+    #         request.app.config.DB_CONN,
+    #         token.get('public_key'),
+    #         token.get('public_key'))
+    #     new_token = request.token
+    # return response.json(
+    #     {
+    #         'authorization': new_token,
+    #         'account': updated_auth_info
+    #     })
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
+
 # @CLAIMS_BP.post('claims')
 # async def register_new_claim(request):
 #     """Updates auth information for the authorized account"""

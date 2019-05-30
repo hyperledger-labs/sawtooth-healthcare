@@ -63,6 +63,7 @@ DEFAULT_CONFIG = {
     'BATCHER_PRIVATE_KEY_FILE_NAME': None
 }
 
+
 async def open_connections(app):
     # LOGGER.warning('opening database connection')
     # r.set_loop_type('asyncio')

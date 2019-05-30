@@ -25,7 +25,7 @@ from rest_api.workflow.errors import ApiInternalError
 
 async def send(conn, timeout, batches):
     batch_request = client_batch_submit_pb2.ClientBatchSubmitRequest()
-    batch_request.batches.extend([batches])
+    batch_request.batches.extend(batches)
     await conn.send(
         validator_pb2.Message.CLIENT_BATCH_SUBMIT_REQUEST,
         batch_request.SerializeToString(),

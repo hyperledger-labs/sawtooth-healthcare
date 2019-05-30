@@ -17,7 +17,6 @@
 # import bcrypt
 #
 # from itsdangerous import BadSignature
-
 from sanic import Blueprint
 from sanic import response
 
@@ -129,14 +128,17 @@ async def get_all_claims(request):
 async def register_new_claim(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
+    required_fields = ['claim_id', 'patient_pkey']
+    general.validate_fields(required_fields, request.json)
+
     claim_id = request.json.get('claim_id')
-    patient_pkey = request.json.get('patient_public_key')
+    patient_pkey = request.json.get('patient_pkey')
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
 
-    batches, batch_id = transaction.register_claim(
+    batch, batch_id = transaction.register_claim(
         txn_signer=clinic_signer,
         batch_signer=clinic_signer,
         claim_id=claim_id,
@@ -145,11 +147,11 @@ async def register_new_claim(request):
     await messaging.send(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
-        batches)
+        [batch])
 
     try:
         await messaging.check_batch_status(
-            request.app.config.VAL_CONN, batch_id)
+            request.app.config.VAL_CONN, [batch_id])
     except (ApiBadRequest, ApiInternalError) as err:
         # await auth_query.remove_auth_entry(
         #     request.app.config.DB_CONN, request.json.get('email'))
