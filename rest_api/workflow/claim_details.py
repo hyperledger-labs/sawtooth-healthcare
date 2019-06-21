@@ -343,6 +343,8 @@ async def eat_pills(request):
 
 @CLAIM_DETAILS_BP.post('claim/next_visit')
 async def next_visit(request):
+    required_fields = ['claim_id', 'doctor_pkey']
+    general.validate_fields(required_fields, request.json)
     claim_id = request.json.get('claim_id')
     doctor_pkey = request.json.get('doctor_pkey')
     current_times_str = str(time.time())
