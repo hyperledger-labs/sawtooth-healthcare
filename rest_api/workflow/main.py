@@ -172,10 +172,10 @@ def load_config(app):  # pylint: disable=too-many-branches
         sys.exit(1)
 
     try:
-        # private_key_file_name = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME)
-        # private_key = get_signer_from_file(private_key_file_name)
-        private_key = Secp256k1PrivateKey.from_hex(
-            app.config.BATCHER_PRIVATE_KEY)
+        private_key_file_name = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME)
+        private_key = get_signer_from_file(private_key_file_name)
+        # private_key = Secp256k1PrivateKey.from_hex(
+        #     app.config.BATCHER_PRIVATE_KEY)
     except ParseError as err:
         LOGGER.exception('Unable to load private key: %s', str(err))
         sys.exit(1)

@@ -12,34 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-# import base64
-#
-# import bcrypt
-#
-# from itsdangerous import BadSignature
-
+from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 from sanic import Blueprint
 from sanic import response
-# from sanic import request
-
-# from sawtooth_signing import CryptoFactory
-
-# from rest_api.workflow.authorization import authorized
 from common.protobuf import payload_pb2
-from common import helper
+from common import helper, transaction
 from rest_api.workflow import general
 from rest_api.workflow import messaging
-# from workflow.errors import ApiBadRequest
-# from workflow.errors import ApiInternalError
-
-# from db import accounts_query
-# from db import auth_query
-# import pandas as pd
-# from google.protobuf.json_format import MessageToJson
-# from google.protobuf.json_format import MessageToDict
-
-# from marketplace_transaction import transaction_creation
-
 
 CLINICS_BP = Blueprint('clinics')
 
@@ -115,6 +94,41 @@ async def get_all_clinics(request):
     return response.json(body={'data': clinics},
                          headers=general.get_response_headers(general.get_request_origin(request)))
     # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)
+
+
+@CLINICS_BP.post('clinics')
+async def register_new_clinic(request):
+    """Updates auth information for the authorized account"""
+    # keyfile = common.get_keyfile(request.json.get['signer'])
+    required_fields = ['name']
+    general.validate_fields(required_fields, request.json)
+
+    name = request.json.get('name')
+
+    # private_key = common.get_signer_from_file(keyfile)
+    # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
+    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+
+    batch, batch_id = transaction.create_clinic(
+        txn_signer=clinic_signer,
+        batch_signer=clinic_signer,
+        name=name)
+
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch])
+
+    try:
+        await messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
 
 # @ACCOUNTS_BP.get('accounts/<key>')
 # async def get_account(request, key):
