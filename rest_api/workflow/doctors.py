@@ -17,7 +17,7 @@
 # import bcrypt
 #
 # from itsdangerous import BadSignature
-
+from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 from sanic import Blueprint
 from sanic import response
 
@@ -25,9 +25,10 @@ from sanic import response
 
 # from rest_api.workflow.authorization import authorized
 from common.protobuf import payload_pb2
-from common import helper
+from common import helper, transaction
 from rest_api.workflow import general
 from rest_api.workflow import messaging
+
 # from rest_api.workflow.errors import ApiBadRequest
 # from rest_api.workflow.errors import ApiInternalError
 # from db import accounts_query
@@ -101,7 +102,7 @@ async def get_all_doctors(request):
         # dec_cl = base64.b64decode(entity.data)
         doc = payload_pb2.CreateDoctor()
         doc.ParseFromString(entity.data)
-        doctors.append({'public_key' : doc.public_key, 'name': doc.name, 'surname': doc.surname})
+        doctors.append({'public_key': doc.public_key, 'name': doc.name, 'surname': doc.surname})
 
     # import json
     # result = json.dumps(clinics)
@@ -109,6 +110,42 @@ async def get_all_doctors(request):
     return response.json(body={'data': doctors},
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
+
+@DOCTORS_BP.post('doctors')
+async def register_new_doctor(request):
+    """Updates auth information for the authorized account"""
+    # keyfile = common.get_keyfile(request.json.get['signer'])
+    required_fields = ['name', 'surname']
+    general.validate_fields(required_fields, request.json)
+
+    name = request.json.get('name')
+    surname = request.json.get('surname')
+
+    # private_key = common.get_signer_from_file(keyfile)
+    # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
+    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+
+    batch, batch_id = transaction.create_doctor(
+        txn_signer=clinic_signer,
+        batch_signer=clinic_signer,
+        name=name,
+        surname=surname)
+
+    await messaging.send(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch])
+
+    try:
+        await messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
 
 # @ACCOUNTS_BP.get('accounts/<key>')
 # async def get_account(request, key):
