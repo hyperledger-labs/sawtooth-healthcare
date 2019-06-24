@@ -131,20 +131,6 @@ services:
 #          --validator tcp://validator:4004
 #      "
 
-#  market-sawbuck-app:
-#    build: ./sawbuck_app
-#    image: market-sawbuck-app
-#    container_name: market-sawbuck-app
-#    volumes:
-#      - ./sawbuck_app/public/:/usr/local/apache2/htdocs/
-#    expose:
-#      - 80
-#    ports:
-#      - '8041:80'
-#    depends_on:
-#      - market-shell
-#      - market-rest-api
-
   sawtooth-rest-api:
     image: hyperledger/sawtooth-rest-api:1.0
     container_name: sawtooth-rest-api
@@ -201,3 +187,18 @@ services:
           --bind component:tcp://eth0:4004 \
           --bind network:tcp://eth0:8800
       "
+
+  healthcare-web-app:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: healthcare-web-app
+    container_name: healthcare-web-app
+#    volumes:
+#      - .:/project/sawtooth_healthcare
+    volumes:
+      - ./web:/home/node/app
+    expose:
+      - 80
+    ports:
+      - '8041:80'
