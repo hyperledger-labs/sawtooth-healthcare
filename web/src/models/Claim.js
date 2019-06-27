@@ -6,7 +6,7 @@ var Claim = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "http://localhost:8000/claims",
+            url: "http://healthcare-rest-api:8000/claims",
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -39,7 +39,7 @@ var Claim = {
     register: function() {
         return m.request({
             method: "POST",
-            url: "http://localhost:8000/claims",
+            url: "http://healthcare-rest-api:8000/claims",
             data: Claim.current,
             useBody: true,
 //            headers: {

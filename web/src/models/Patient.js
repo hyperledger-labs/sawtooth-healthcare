@@ -5,7 +5,7 @@ var Patient = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "http://localhost:8000/patients",
+            url: "http://healthcare-rest-api:8000/patients",
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -28,7 +28,7 @@ var Patient = {
     register: function() {
         return m.request({
             method: "PUT",
-            url: "http://localhost:8000/patient/new",
+            url: "http://healthcare-rest-api:8000/patient/new",
             data: Patient.current,
 //            withCredentials: true,
         })

@@ -193,12 +193,19 @@ services:
       context: .
       dockerfile: web/Dockerfile
     image: healthcare-web-app
+    user: "node"
     container_name: healthcare-web-app
 #    volumes:
 #      - .:/project/sawtooth_healthcare
     volumes:
       - ./web:/home/node/app
     expose:
-      - 80
+      - 8080
     ports:
-      - '8041:80'
+      - '8041:8080'
+    command: |
+      sh -c "
+        echo '--- Starting healthcare-web-app by docker-compose---' &&
+        npm start
+      "
+#        tail -f /dev/null

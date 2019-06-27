@@ -5,7 +5,7 @@ var Clinic = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "http://localhost:8000/clinics",
+            url: "/api/clinics",
 //            url: "https://rem-rest-api.herokuapp.com/api/users",
 //               url: "http://localhost:8008/state?address=3d804901bbfeb7",
 //            withCredentials: true,

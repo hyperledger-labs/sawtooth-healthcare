@@ -12,45 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------------
-
-#FROM node:6
-#WORKDIR /usr/local/apache2/htdocs/
-##WORKDIR /project/sawtooth_healthcare/web
-##COPY package.json .
-#RUN npm install
-##COPY . .
-#RUN npm run build
-#
-#FROM httpd:2.4
-##WORKDIR .
-##COPY --from=0 /project/sawtooth_healthcare/web/public/ /usr/local/apache2/htdocs/
-#
-#RUN apt-get install --fix-missing -y --allow-unauthenticated -q \
-#    curl \
-#    telnet
-#
-#RUN echo "\
-#\n\
-#ServerName web\n\
-#AddDefaultCharset utf-8\n\
-#LoadModule proxy_module modules/mod_proxy.so\n\
-#LoadModule proxy_http_module modules/mod_proxy_http.so\n\
-#ProxyPass /api http://healthcare-rest-api:8000\n\
-#ProxyPassReverse /api http://healthcare-rest-api:8000\n\
-#\n\
-#" >>/usr/local/apache2/conf/httpd.conf
-#
-##ENV PATH $PATH:/project/sawtooth_healthcare/bin
-#
-#EXPOSE 80/tcp
-
 FROM node:10-alpine
 
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app && apk add --no-cache curl
 
 WORKDIR /home/node/app
 
-#COPY ./package.json ./
+COPY ./web/package*.json ./
+
+#COPY package*.json ./
 
 USER node
 
@@ -60,4 +30,4 @@ COPY --chown=node:node . .
 
 EXPOSE 8080
 
-#CMD [ "node", "bin/app.js" ]
+CMD [ "npm", "start" ]

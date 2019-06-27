@@ -6,7 +6,7 @@ var ClaimDetails = {
     load: function(clinic_pkey, claim_id) {
         return m.request({
             method: "GET",
-            url: "http://localhost:8000/claim/" + clinic_pkey + "/"+  claim_id,
+            url: "http://healthcare-rest-api:8000/claim/" + clinic_pkey + "/"+  claim_id,
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -24,7 +24,7 @@ var ClaimDetails = {
     assign_doctor: function() {
         return m.request({
             method: "POST",
-            url: "http://localhost:8000/claim/assign",
+            url: "http://healthcare-rest-api:8000/claim/assign",
             data: ClaimDetails.current,
             useBody: true,
 //            headers: {
