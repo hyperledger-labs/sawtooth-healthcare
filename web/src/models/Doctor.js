@@ -5,7 +5,7 @@ var Doctor = {
     loadList: function() {
         return m.request({
             method: "GET",
-            url: "http://healthcare-rest-api:8000/doctors",
+            url: "/api/doctors",
 //            withCredentials: true,
         })
         .then(function(result) {
