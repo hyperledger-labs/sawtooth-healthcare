@@ -18,6 +18,12 @@ var ClaimNewForm = require("./views/ClaimNewForm")
 var ClaimDetailsForm = require("./views/ClaimDetailsForm")
 
 var DoctorAssignForm = require("./views/DoctorAssignForm")
+var FirstVisitForm = require("./views/FirstVisitForm")
+var EatPillsForm = require("./views/EatPillsForm")
+var PassTestsForm = require("./views/PassTestsForm")
+var AttendProceduresForm = require("./views/AttendProceduresForm")
+var NextVisitForm = require("./views/NextVisitForm")
+
 var ActionsList = require("./views/ActionsList")
 var Layout = require("./views/Layout")
 
@@ -67,6 +73,31 @@ m.route(document.body, "/actions", {
     "/doctor/assign/": {
         render: function() {
             return m(Layout, m(DoctorAssignForm))
+        }
+    },
+    "/first_visit/": {
+        render: function() {
+            return m(Layout, m(FirstVisitForm))
+        }
+    },
+    "/eat_pills/": {
+        render: function() {
+            return m(Layout, m(EatPillsForm))
+        }
+    },
+    "/pass_tests/": {
+        render: function() {
+            return m(Layout, m(PassTestsForm))
+        }
+    },
+    "/attend_procedures/": {
+        render: function() {
+            return m(Layout, m(AttendProceduresForm))
+        }
+    },
+    "/next_visit/": {
+        render: function() {
+            return m(Layout, m(NextVisitForm))
         }
     },
     "/claim/new/": {

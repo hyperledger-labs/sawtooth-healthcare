@@ -20,11 +20,11 @@ module.exports = {
             m("a.user-list-item", {href: "/claim_list/", oncreate: m.route.link}, "Claims List"),
             m("a.user-list-item", {href: "/claim/new/", oncreate: m.route.link}, "Register Claim"),
             m("a.user-list-item", {href: "/doctor/assign/", oncreate: m.route.link}, "Assign Doctor"),
-            m("a.user-list-item", {href: "/first_visit/"}, "First Visit"),
-            m("a.user-list-item", {href: "/eat_pills/"}, "Eat Pills"),
-            m("a.user-list-item", {href: "/passtests/"}, "Pass Tests"),
-            m("a.user-list-item", {href: "/attend_procedures/"}, "Attend Procedures"),
-            m("a.user-list-item", {href: "/next_visit/"}, "Next Visit"),
+            m("a.user-list-item", {href: "/first_visit/", oncreate: m.route.link}, "First Visit"),
+            m("a.user-list-item", {href: "/eat_pills/", oncreate: m.route.link}, "Eat Pills"),
+            m("a.user-list-item", {href: "/pass_tests/", oncreate: m.route.link}, "Pass Tests"),
+            m("a.user-list-item", {href: "/attend_procedures/", oncreate: m.route.link}, "Attend Procedures"),
+            m("a.user-list-item", {href: "/next_visit/", oncreate: m.route.link}, "Next Visit"),
         ])
 
     }

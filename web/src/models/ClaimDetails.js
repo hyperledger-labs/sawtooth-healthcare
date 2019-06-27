@@ -27,16 +27,7 @@ var ClaimDetails = {
             url: "/api/claim/assign",
             data: ClaimDetails.current,
             useBody: true,
-//            headers: {
-//                    'Content-Type': 'text/plain',
-//                    'Access-Control-Allow-Origin': 'http://localhost:6334',
-//
-////            'Content-Type': 'application/json; charset=UTF-8',
-//                        'Access-Control-Request-Headers': 'Content-Type',
-//                        'Access-Control-Request-Method': 'POST,GET,OPTIONS',
-//                        'Access-Control-Allow-Headers': 'X-Requested-With,Content-Type'
-//            }
-//            withCredentials: true,
+
         })
         .then(function(items) {
 //            Data.todos.list = items
@@ -46,7 +37,97 @@ var ClaimDetails = {
             console.log(e)
             ClaimDetails.error = e.message
         })
-    }
+    },
+
+    first_visit: function() {
+        return m.request({
+            method: "POST",
+            url: "/api/claim/first_visit",
+            data: ClaimDetails.current,
+            useBody: true,
+
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            ClaimDetails.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            ClaimDetails.error = e.message
+        })
+    },
+
+    eat_pills: function() {
+        return m.request({
+            method: "POST",
+            url: "/api/claim/eat_pills",
+            data: ClaimDetails.current,
+            useBody: true,
+
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            ClaimDetails.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            ClaimDetails.error = e.message
+        })
+    },
+
+    pass_tests: function() {
+        return m.request({
+            method: "POST",
+            url: "/api/claim/pass_tests",
+            data: ClaimDetails.current,
+            useBody: true,
+
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            ClaimDetails.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            ClaimDetails.error = e.message
+        })
+    },
+
+    attend_procedures: function() {
+        return m.request({
+            method: "POST",
+            url: "/api/claim/attend_procedures",
+            data: ClaimDetails.current,
+            useBody: true,
+
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            ClaimDetails.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            ClaimDetails.error = e.message
+        })
+    },
+
+    next_visit: function() {
+        return m.request({
+            method: "POST",
+            url: "/api/claim/next_visit",
+            data: ClaimDetails.current,
+            useBody: true,
+
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            ClaimDetails.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            ClaimDetails.error = e.message
+        })
+    },
 }
 
 module.exports = ClaimDetails
