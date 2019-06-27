@@ -2,6 +2,7 @@ var m = require("mithril")
 
 var Clinic = {
     list: [],
+    error: "",
     loadList: function() {
         return m.request({
             method: "GET",
@@ -14,7 +15,12 @@ var Clinic = {
         })
         .then(function(result) {
             console.log("Get clinics list")
+            Clinic.error = ""
             Clinic.list = result.data
+        })
+        .catch(function(e) {
+            console.log(e)
+            Clinic.error = e.message
         })
     },
 
@@ -55,12 +61,29 @@ User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
         })
     },
 
-    save: function() {
+//    save: function() {
+//        return m.request({
+//            method: "PUT",
+//            url: "https://rem-rest-api.herokuapp.com/api/users/" + Clinic.current.id,
+//            data: Clinic.current,
+//            withCredentials: true,
+//        })
+//    }
+    register: function() {
         return m.request({
-            method: "PUT",
-            url: "https://rem-rest-api.herokuapp.com/api/users/" + Clinic.current.id,
+            method: "POST",
+            url: "/api/clinics",
             data: Clinic.current,
-            withCredentials: true,
+            useBody: true,
+//            withCredentials: true,
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            Clinic.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Clinic.error = e.message
         })
     }
 }

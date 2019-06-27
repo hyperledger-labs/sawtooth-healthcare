@@ -2,6 +2,7 @@ var m = require("mithril")
 
 var Doctor = {
     list: [],
+    error: "",
     loadList: function() {
         return m.request({
             method: "GET",
@@ -9,7 +10,12 @@ var Doctor = {
 //            withCredentials: true,
         })
         .then(function(result) {
+            Doctor.error = ""
             Doctor.list = result.data
+        })
+        .catch(function(e) {
+            console.log(e)
+            Doctor.error = e.message
         })
     },
 
@@ -25,12 +31,21 @@ var Doctor = {
         })
     },
 
-    save: function() {
+    register: function() {
         return m.request({
-            method: "PUT",
-            url: "https://rem-rest-api.herokuapp.com/api/users/" + Doctor.current.id,
+            method: "POST",
+            url: "/api/doctors",
             data: Doctor.current,
-            withCredentials: true,
+            useBody: true,
+//            withCredentials: true,
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            Doctor.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Doctor.error = e.message
         })
     }
 }

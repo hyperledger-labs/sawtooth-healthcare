@@ -27,7 +27,7 @@ var Claim = {
             withCredentials: true,
         })
         .then(function(result) {
-            Doctor.current = result
+            Claim.current = result
             Claim.error = ""
         })
         .catch(function(e) {

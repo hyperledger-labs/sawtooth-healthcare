@@ -22,8 +22,8 @@ module.exports = {
             }),
             m("label.label", "Patient public key"),
             m("input.input[placeholder=Patient public key]", {
-                oninput: m.withAttr("value", function(value) {Claim.current.patient_public_key = value}),
-                value: Claim.current.patient_public_key
+                oninput: m.withAttr("value", function(value) {Claim.current.patient_pkey = value}),
+                value: Claim.current.patient_pkey
             }),
             m("button.button[type=submit]", "Register"),
             m("label.error", Claim.error)

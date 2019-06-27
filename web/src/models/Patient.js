@@ -2,6 +2,7 @@ var m = require("mithril")
 
 var Patient = {
     list: [],
+    error: "",
     loadList: function() {
         return m.request({
             method: "GET",
@@ -9,7 +10,12 @@ var Patient = {
 //            withCredentials: true,
         })
         .then(function(result) {
+            Patient.error = ""
             Patient.list = result.data
+        })
+        .catch(function(e) {
+            console.log(e)
+            Patient.error = e.message
         })
     },
 
@@ -27,10 +33,19 @@ var Patient = {
 
     register: function() {
         return m.request({
-            method: "PUT",
-            url: "/api/patient/new",
+            method: "POST",
+            url: "/api/patients",
             data: Patient.current,
+            useBody: true,
 //            withCredentials: true,
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            Patient.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Patient.error = e.message
         })
     }
 }

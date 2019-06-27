@@ -5,13 +5,19 @@ var m = require("mithril")
 
 //var DoctorForm = require("./views/DoctorForm")
 var DoctorList = require("./views/DoctorList")
+var DoctorForm = require("./views/DoctorForm")
+
 var PatientList = require("./views/PatientList")
-var ClinicList = require("./views/ClinicList")
-var ClaimList = require("./views/ClaimList")
-var ClaimDetailsForm = require("./views/ClaimDetailsForm")
 var PatientForm = require("./views/PatientForm")
-var DoctorAssignForm = require("./views/DoctorAssignForm")
+
+var ClinicList = require("./views/ClinicList")
+var ClinicForm = require("./views/ClinicForm")
+
+var ClaimList = require("./views/ClaimList")
 var ClaimNewForm = require("./views/ClaimNewForm")
+var ClaimDetailsForm = require("./views/ClaimDetailsForm")
+
+var DoctorAssignForm = require("./views/DoctorAssignForm")
 var ActionsList = require("./views/ActionsList")
 var Layout = require("./views/Layout")
 
@@ -38,9 +44,19 @@ m.route(document.body, "/actions", {
             return m(Layout, m(DoctorList))
         }
     },
+    "/doctor/new/": {
+        render: function() {
+            return m(Layout, m(DoctorForm))
+        }
+    },
     "/clinic_list": {
         render: function() {
             return m(Layout, m(ClinicList))
+        }
+    },
+    "/clinic/new/": {
+        render: function() {
+            return m(Layout, m(ClinicForm))
         }
     },
     "/claim_list": {

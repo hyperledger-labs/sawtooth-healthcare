@@ -21,6 +21,7 @@ module.exports = {
                 value: Patient.current.surname
             }),
             m("button.button[type=submit]", "Register"),
+            m("label.error", Patient.error)
         ])
     }
 }
