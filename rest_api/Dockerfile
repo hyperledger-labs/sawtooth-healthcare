@@ -48,7 +48,7 @@ RUN pip3 install \
 #    bcrypt \
     pycrypto \
 #    rethinkdb \
-    sanic \
+    sanic==19.03.1 \
     sanic_cors \
     itsdangerous
 

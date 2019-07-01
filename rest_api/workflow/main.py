@@ -184,10 +184,12 @@ def load_config(app):  # pylint: disable=too-many-branches
         app.config.CONTEXT).new_signer(private_key)
 
 
+app = Sanic(__name__)
+app.config['CORS_AUTOMATIC_OPTIONS'] = True
+
+
 def main():
     LOGGER.info('Starting Clinic Rest API server...')
-    app = Sanic(__name__)
-    app.config['CORS_AUTOMATIC_OPTIONS'] = True
     CORS(app)
 
     app.blueprint(CLINICS_BP)
