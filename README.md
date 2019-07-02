@@ -33,7 +33,7 @@ Application operates with certain business object entities:
 
 ## Blockchain Server
 
-Is nothing but blockchain ledger with predefined API that corresponds to the worflow and aimed to store, update and validate data according to the business process.
+Is nothing but blockchain ledger with predefined API that corresponds to the workflow and aimed to store, update and validate data according to the business process.
 
 ## Blockchain Client
 
@@ -49,7 +49,7 @@ Also, it has helper class which includes certain constants, methods for internal
 
 ## Smart Contract (Transaction Processor)
 
-Heart of the app - custom module deployed into blcokchain which validates and handles data transfers.
+Heart of the app - custom module deployed into blockchain which validates and handles data transfers.
 
 ## Command Line Client (CLI)
 
@@ -84,11 +84,11 @@ This example shows how to use CLI client to operate with blockchain:
     root@dcc855da11ec:/project/sawtooth_healthcare#
     ```
     
-    - There are 3 privat key registered in the container: clinicCLI, doctorCLI, patientCLI (for clinic, doctor and patient accordingly). Every command to be invoked on behalf clinic's key.
+    - There are 3 private key registered in the container: clinicCLI, doctorCLI, patientCLI (for clinic, doctor and patient accordingly). Every command to be invoked on behalf clinic's key.
 
 1. Ensure clinic is registered in blockchain
 
-	- Check clinics list (the list is empty since no clinic registered in blockhain before):
+	- Check clinics list (the list is empty since no clinic registered in blockchain before):
 
     ```bash
     root@f1525454c702:/project/sawtooth_healthcare# healthcare-cli-python list_clinics --url http://sawtooth-rest-api:8008
