@@ -28,11 +28,11 @@ data_files = [
 
 if os.path.exists("/etc/default"):
     data_files.append(
-        ('/etc/default', ['packaging/systemd/sawtooth-healthcare-tp-python']))
+        ('/etc/default', ['packaging/systemd/healthcare-rest-api']))
 
 if os.path.exists("/lib/systemd/system"):
     data_files.append(('/lib/systemd/system',
-                       ['packaging/systemd/sawtooth-healthcare-tp-python.service']))
+                       ['packaging/systemd/healthcare-rest-api.service']))
 
 # class CleanCommand(Command):
 #     """Custom clean command to tidy up the project root."""
@@ -49,20 +49,24 @@ if os.path.exists("/lib/systemd/system"):
 
 
 setup(
-    name='healthcare-processor',
+    name='healthcare-rest-api',
     version='0.1',
-    description='Sawtooth HealthCare Processor Example',
+    description='Sawtooth HealthCare REST API Example',
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',
     # packages=find_packages(exclude=['cli', 'rest_api']),
-    packages=find_packages(include=['processor*', 'common*']),
+    packages=find_packages(include=['rest_api*', 'common*']),
     # package_dir={'': 'processor'},
     install_requires=[
         # 'aiohttp',
         'colorlog',
         'protobuf',
         'sawtooth-sdk',
-        # 'sawtooth-signing',
+        'sawtooth-signing',
+        'Crypto',
+        'itsdangerous',
+        'sanic',
+        'sanic_cors',
         # 'PyYAML',
     ],
     # cmdclass={
@@ -72,6 +76,6 @@ setup(
     entry_points={
         'console_scripts': [
             # 'xo = sawtooth_xo.xo_cli:main_wrapper',
-            'healthcare-tp = processor.workflow.main:main',
+            'healthcare-rest-api = rest_api.workflow.main:main',
         ]
     })

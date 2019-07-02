@@ -99,44 +99,37 @@ services:
         tail -f /dev/null
       "
 
-#  healthcare-rest-api:
-#    build:
-#      context: .
-#      dockerfile: ./rest_api/Dockerfile
-#      args:
-#        - http_proxy
-#        - https_proxy
-#        - no_proxy
-#    image: healthcare-rest-api
-#    container_name: healthcare-rest-api
-#    volumes:
-#      - .:/PycharmProjects/healthcare/sawtooth_healthcare
-#    ports:
-#      - '8040:8000'
+  healthcare-rest-api:
+    build:
+      context: .
+      dockerfile: rest_api/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-rest-api
+    container_name: healthcare-rest-api
+    volumes:
+      - .:/project/sawtooth_healthcare
+    ports:
+      - '8040:8000'
 #    depends_on:
 #      - healthcare-shell
 #      - validator
-#    command: |
-#      bash -c "
-#        sleep 3 &&
-#        healthcare-rest-api \
-#          --host healthcare-rest-api \
+    command: |
+      bash -c "
+        sleep 3 &&
+        echo '--- Building healthcare-rest-api by docker-compose---' &&
+        init-healthcare-rest-api.sh &&
+        healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
+        tail -f /dev/null
+               "
+    #init-healthcare-rest-api.sh &&
+#               healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
+  #        healthcare-rest-api \
+  #          --host healthcare-rest-api \
 #          --validator tcp://validator:4004
 #      "
-
-#  market-sawbuck-app:
-#    build: ./sawbuck_app
-#    image: market-sawbuck-app
-#    container_name: market-sawbuck-app
-#    volumes:
-#      - ./sawbuck_app/public/:/usr/local/apache2/htdocs/
-#    expose:
-#      - 80
-#    ports:
-#      - '8041:80'
-#    depends_on:
-#      - market-shell
-#      - market-rest-api
 
   sawtooth-rest-api:
     image: hyperledger/sawtooth-rest-api:1.0
@@ -194,3 +187,25 @@ services:
           --bind component:tcp://eth0:4004 \
           --bind network:tcp://eth0:8800
       "
+
+  healthcare-web-app:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: healthcare-web-app
+    user: "node"
+    container_name: healthcare-web-app
+#    volumes:
+#      - .:/project/sawtooth_healthcare
+    volumes:
+      - ./web:/home/node/app
+    expose:
+      - 8080
+    ports:
+      - '8041:8080'
+    command: |
+      sh -c "
+        echo '--- Starting healthcare-web-app by docker-compose---' &&
+        npm start
+      "
+#        tail -f /dev/null

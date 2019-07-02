@@ -35,12 +35,13 @@ conf_dir = "/etc/sawtooth"
 #                        ['packaging/systemd/sawtooth-healthcare-client-python.service']))
 
 setup(
-    name='sawtooth-healthcare',
+    name='healthcare-client',
     version='0.1',
     description='Sawtooth HealthCare Client Example',
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',
-    packages=find_packages(exclude=['processor', 'rest-api']),
+    # packages=find_packages(exclude=['processor', 'rest_api']),
+    packages=find_packages(include=['cli*', 'common*']),
     install_requires=[
         # 'aiohttp',
         'colorlog',

@@ -4,7 +4,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F10
     echo 'deb http://repo.sawtooth.me/ubuntu/1.0/stable xenial universe' >> /etc/apt/sources.list && \
     apt-get update
 
-RUN apt-get install -y -q \
+RUN apt-get install -y -f -q \
     python3-grpcio-tools \
     python3-setuptools \
     python3-sawtooth-sdk \

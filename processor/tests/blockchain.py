@@ -8,13 +8,14 @@ from urllib.request import urlopen
 from uuid import uuid4
 
 from sawtooth_cli.rest_client import RestClient
-from sawtooth_sdk.protobuf import batch_pb2
-from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
-from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
+from sawtooth_sdk.protobuf import batch_pb2, transaction_pb2
+# from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
+# from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import create_context, CryptoFactory
 
-from sawtooth_healthcare.common import helper
-from sawtooth_healthcare.processor.protobuf import payload_pb2
+from common import transaction
+from common import helper
+from common.protobuf import payload_pb2
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def make_key():
     return signer
 
 
-REST_URL = "localhost:8008"  # 'rest-api:8008'
+REST_URL = "localhost:8043"  # 'rest-api:8008'
 
 BATCH_KEY = make_key()
 
@@ -52,14 +53,16 @@ class BlockchainTest(unittest.TestCase):
     def test_00_create_doctor(self):
         self.assertEqual(
             self.client.create_doctor(
-                txn_key=self.signer_doctor_00,
+                txn_signer=self.signer_doctor_00,
+                batch_signer=BATCH_KEY,
                 name="Doctor_Name_00_0_" + uuid4().hex,
                 surname="Doctor_Surname_00_0_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
             self.client.create_doctor(
-                txn_key=self.signer_doctor_00,
+                txn_signer=self.signer_doctor_00,
+                batch_signer=BATCH_KEY,
                 name="Doctor_Name_00_0_" + uuid4().hex,
                 surname="Doctor_Surname_00_0_" + uuid4().hex)[0]['status'],
             "INVALID",
@@ -67,7 +70,8 @@ class BlockchainTest(unittest.TestCase):
 
         self.assertEqual(
             self.client.create_doctor(
-                txn_key=self.signer_doctor_01,
+                txn_signer=self.signer_doctor_01,
+                batch_signer=BATCH_KEY,
                 name="Doctor_Name_00_1_" + uuid4().hex,
                 surname="Doctor_Surname_00_1_" + uuid4().hex)[0]['status'],
             "COMMITTED")
@@ -79,14 +83,16 @@ class BlockchainTest(unittest.TestCase):
     def test_01_create_patient(self):
         self.assertEqual(
             self.client.create_patient(
-                txn_key=self.signer_patient_00,
+                txn_signer=self.signer_patient_00,
+                batch_signer=BATCH_KEY,
                 name="Patient_Name_01_0_" + uuid4().hex,
                 surname="Patient_Surname_01_0_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
             self.client.create_patient(
-                txn_key=self.signer_patient_00,
+                txn_signer=self.signer_patient_00,
+                batch_signer=BATCH_KEY,
                 name="Patient_Name_01_0_" + uuid4().hex,
                 surname="Patient_Surname_01_0_" + uuid4().hex)[0]['status'],
             "INVALID",
@@ -94,7 +100,8 @@ class BlockchainTest(unittest.TestCase):
 
         self.assertEqual(
             self.client.create_patient(
-                txn_key=self.signer_patient_01,
+                txn_signer=self.signer_patient_01,
+                batch_signer=BATCH_KEY,
                 name="Patient_Name_01_1_" + uuid4().hex,
                 surname="Patient_Surname_01_1_" + uuid4().hex)[0]['status'],
             "COMMITTED")
@@ -106,20 +113,23 @@ class BlockchainTest(unittest.TestCase):
     def test_02_create_clinic(self):
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_00,
+                txn_signer=self.signer_clinic_00,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_0_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_00,
+                txn_signer=self.signer_clinic_00,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_0_" + uuid4().hex)[0]['status'],
             "INVALID",
             "There can only be 1 clinic per public key.")
 
         self.assertEqual(
             self.client.create_clinic(
-                txn_key=self.signer_clinic_01,
+                txn_signer=self.signer_clinic_01,
+                batch_signer=BATCH_KEY,
                 name="Clinic_Name_02_1_" + uuid4().hex)[0]['status'],
             "COMMITTED")
 
@@ -130,7 +140,8 @@ class BlockchainTest(unittest.TestCase):
     def test_03_create_claim(self):
         LOGGER.info("Prerequisite: create clinic 1")
         create_clinic = self.client.create_clinic(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             name="Clinic_Name_03_0_" + uuid4().hex)
         LOGGER.info("Response: {}".format(create_clinic))
 
@@ -140,7 +151,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Prerequisite: create doctor 1")
         create_doctor = self.client.create_doctor(
-            txn_key=self.signer_doctor_new_claim_00,
+            txn_signer=self.signer_doctor_new_claim_00,
+            batch_signer=BATCH_KEY,
             name="Doctor_Name_03_0_" + uuid4().hex,
             surname="Doctor_Surname_03_0_" + uuid4().hex)
         LOGGER.info("Response: {}".format(create_doctor))
@@ -151,10 +163,11 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Prerequisite: create patient 1")
         create_patient = self.client.create_patient(
-            txn_key=self.signer_patient_new_claim_00,
+            txn_signer=self.signer_patient_new_claim_00,
+            batch_signer=BATCH_KEY,
             name="Patient_Name_03_0_" + uuid4().hex,
             surname="Patient_Surname_03_0_" + uuid4().hex)
-        LOGGER.info("Response: {}".format(create_doctor))
+        LOGGER.info("Response: {}".format(create_patient))
 
         self.assertEqual(
             create_patient[0]['status'],
@@ -163,14 +176,14 @@ class BlockchainTest(unittest.TestCase):
         clinic1_claim_id = "1"
         LOGGER.info("Create claim by clinic 1 for patient 1")
         create_claim1 = self.client.create_claim(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id,
             patient_pkey=self.signer_patient_new_claim_00.get_public_key().as_hex())
         LOGGER.info("Response: {}".format(create_claim1))
 
-        self.assertEqual(
-            create_claim1[0]['status'],
-            "COMMITTED")
+        self.assertEqual("COMMITTED",
+                         create_claim1[0]['status'])
 
         LOGGER.info("Get clinics list")
         list_claims = self.client.list_claims()
@@ -186,7 +199,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Assign doctor 1 to the claim")
         assign_doctor = self.client.assign_doctor(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id,
             doctor_pkey=self.signer_doctor_new_claim_00.get_public_key().as_hex())
         LOGGER.info("Response: {}".format(assign_doctor))
@@ -197,7 +211,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Pass first visit")
         initial_examination = self.client.first_visit(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id,
             doctor_pkey=self.signer_doctor_new_claim_00.get_public_key().as_hex())
         LOGGER.info("Response: {}".format(initial_examination))
@@ -208,7 +223,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Pass tests")
         tests = self.client.pass_tests(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id)
         LOGGER.info("Response: {}".format(tests))
 
@@ -218,7 +234,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Attend procedures")
         procedures = self.client.attend_procedures(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id)
         LOGGER.info("Response: {}".format(procedures))
 
@@ -228,7 +245,8 @@ class BlockchainTest(unittest.TestCase):
 
         LOGGER.info("Eat pills")
         pills = self.client.eat_pills(
-            txn_key=self.signer_clinic_new_claim_00,
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id)
         LOGGER.info("Response: {}".format(pills))
 
@@ -237,14 +255,15 @@ class BlockchainTest(unittest.TestCase):
             "COMMITTED")
 
         LOGGER.info("Complete next visit")
-        pills = self.client.next_visit(
-            txn_key=self.signer_clinic_new_claim_00,
+        next_visit = self.client.next_visit(
+            txn_signer=self.signer_clinic_new_claim_00,
+            batch_signer=BATCH_KEY,
             claim_id=clinic1_claim_id,
             doctor_pkey=self.signer_doctor_new_claim_00.get_public_key().as_hex())
-        LOGGER.info("Response: {}".format(pills))
+        LOGGER.info("Response: {}".format(next_visit))
 
         self.assertEqual(
-            pills[0]['status'],
+            next_visit[0]['status'],
             "COMMITTED")
 
         LOGGER.info("Get claim details list")
@@ -258,238 +277,337 @@ class HealthCareClient(object):
     def __init__(self, url):
         self._client = RestClient(base_url="http://{}".format(url))
 
-    def create_doctor(self, txn_key, name, surname):
-        doctor = payload_pb2.CreateDoctor(
-            public_key=txn_key.get_public_key().as_hex(),
+    def create_doctor(self, txn_signer, batch_signer, name, surname):
+        # doctor = payload_pb2.CreateDoctor(
+        #     public_key=txn_signer.get_public_key().as_hex(),
+        #     name=name,
+        #     surname=surname)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
+        #     create_doctor=doctor)
+        #
+        # doctor_hex = helper.make_doctor_address(doctor_pkey=txn_signer.get_public_key().as_hex())
+        #
+        # batch, signature = self._create_txn_and_batch(txn_signer, batch_signer, [doctor_hex], [doctor_hex], payload)
+
+        batch, batch_id = transaction.create_doctor(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             name=name,
             surname=surname)
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
-            create_doctor=doctor)
-
-        doctor_hex = helper.make_doctor_address(doctor_pkey=txn_key.get_public_key().as_hex())
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [doctor_hex], [doctor_hex], payload)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=40)
+        return self._client.get_statuses([batch_id], wait=40)
 
-    def create_patient(self, txn_key, name, surname):
-        patient = payload_pb2.CreatePatient(
-            public_key=txn_key.get_public_key().as_hex(),
+    def create_patient(self, txn_signer, batch_signer, name, surname):
+        # patient = payload_pb2.CreatePatient(
+        #     public_key=txn_key.get_public_key().as_hex(),
+        #     name=name,
+        #     surname=surname)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
+        #     create_patient=patient)
+        #
+        # patient_hex = helper.make_patient_address(patient_pkey=txn_key.get_public_key().as_hex())
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [patient_hex], [patient_hex], payload)
+        batch, batch_id = transaction.create_patient(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             name=name,
             surname=surname)
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
-            create_patient=patient)
-
-        patient_hex = helper.make_patient_address(patient_pkey=txn_key.get_public_key().as_hex())
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [patient_hex], [patient_hex], payload)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=40)
+        return self._client.get_statuses([batch_id], wait=40)
 
-    def create_clinic(self, txn_key, name):
-        clinic = payload_pb2.CreateClinic(
-            public_key=txn_key.get_public_key().as_hex(),
+    def create_clinic(self, txn_signer, batch_signer, name):
+
+        # clinic = payload_pb2.CreateClinic(
+        #     public_key=txn_signer.get_public_key().as_hex(),
+        #     name=name)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
+        #     create_clinic=clinic)
+        #
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=txn_signer.get_public_key().as_hex())
+        #
+        # batch, batch_id = self._create_txn_and_batch(txn_signer, BATCH_KEY, [clinic_hex], [clinic_hex], payload)
+        batch, batch_id = transaction.create_clinic(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             name=name)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
-            create_clinic=clinic)
-
-        clinic_hex = helper.make_clinic_address(clinic_pkey=txn_key.get_public_key().as_hex())
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [clinic_hex], [clinic_hex], payload)
-
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=40)
+        return self._client.get_statuses([batch_id], wait=40)
 
-    def create_claim(self, txn_key, claim_id, patient_pkey):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def create_claim(self, txn_signer, batch_signer, claim_id, patient_pkey):
+        # clinic_pkey = txn_key.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        #
+        # claim = payload_pb2.CreateClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     patient_pkey=patient_pkey)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.CREATE_CLAIM,
+        #     create_claim=claim)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, clinic_hex], [claim_hex], payload)
+        #
+        # batch_list = batch_pb2.BatchList(batches=[batch])
 
-        claim = payload_pb2.CreateClaim(
+        batch, batch_id = transaction.register_claim(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
             patient_pkey=patient_pkey)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.CREATE_CLAIM,
-            create_claim=claim)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, clinic_hex], [claim_hex], payload)
-
         batch_list = batch_pb2.BatchList(batches=[batch])
-
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=40)
+        return self._client.get_statuses([batch_id], wait=40)
 
-    def assign_doctor(self, txn_key, claim_id, doctor_pkey):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    # def create_claim(self, txn_key, claim_id, patient_pkey):
+    #     clinic_pkey = txn_key.get_public_key().as_hex()
+    #     clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+    #     claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    #
+    #     claim = payload_pb2.CreateClaim(
+    #         claim_id=claim_id,
+    #         clinic_pkey=clinic_pkey,
+    #         patient_pkey=patient_pkey)
+    #
+    #     payload = payload_pb2.TransactionPayload(
+    #         payload_type=payload_pb2.TransactionPayload.CREATE_CLAIM,
+    #         create_claim=claim)
+    #
+    #     batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, clinic_hex], [claim_hex], payload)
+    #
+    #     batch_list = batch_pb2.BatchList(batches=[batch])
+    #
+    #     self._client.send_batches(batch_list)
+    #     return self._client.get_statuses([signature], wait=40)
+
+    def assign_doctor(self, txn_signer, batch_signer, claim_id, doctor_pkey):
+        # clinic_pkey = txn_signer.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # assign = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Doctor: {}, assigned to claim: {}".format(doctor_pkey, claim_hex),
+        #     event_time=current_times_str)
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.ASSIGN_DOCTOR,
+        #     assign_doctor=assign)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_signer, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
+
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        assign = payload_pb2.ActionOnClaim(
+        # clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+
+        batch, batch_id = transaction.assign_doctor(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
-            description="Doctor: {}, assigned to claim: {}".format(doctor_pkey, claim_hex),
+            description="Doctor pkey: {}, assigned to claim: {}".format(doctor_pkey, claim_id),
             event_time=current_times_str)
 
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.ASSIGN_DOCTOR,
-            assign_doctor=assign)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
-
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
-    def first_visit(self, txn_key, claim_id, doctor_pkey):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def first_visit(self, txn_signer, batch_signer, claim_id, doctor_pkey):
+        # clinic_pkey = txn_key.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # first_visit = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Doctor: {}, completed first visit for claim: {}, \
+        #     need to pass procedures and eat pills".format(doctor_pkey, claim_hex),
+        #     event_time=current_times_str
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.FIRST_VISIT,
+        #     first_visit=first_visit)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        first_visit = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.first_visit(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
             description="Doctor: {}, completed first visit for claim: {}, \
-            need to pass procedures and eat pills".format(doctor_pkey, claim_hex),
-            event_time=current_times_str
-        )
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.FIRST_VISIT,
-            first_visit=first_visit)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
+                need to pass procedures and eat pills".format(doctor_pkey, claim_id),
+            event_time=current_times_str)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
-    def pass_tests(self, txn_key, claim_id):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def pass_tests(self, txn_signer, batch_signer, claim_id):
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        tests = payload_pb2.ActionOnClaim(
+        # clinic_pkey = txn_signer.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        #
+        #
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # tests = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Pass tests in scope of claim: {}".format(claim_hex),
+        #     event_time=current_times_str
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.PASS_TESTS,
+        #     pass_tests=tests)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
+        batch, batch_id = transaction.pass_tests(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
-            description="Pass tests in scope of claim: {}".format(claim_hex),
-            event_time=current_times_str
-        )
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.PASS_TESTS,
-            pass_tests=tests)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
+            description="Pass tests in scope of claim: {}".format(claim_id),
+            event_time=current_times_str)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
-    def attend_procedures(self, txn_key, claim_id):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def attend_procedures(self, txn_signer, batch_signer, claim_id):
+        # clinic_pkey = txn_key.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # procedures = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Complete procedure in scope of claim: {}".format(claim_hex),
+        #     event_time=current_times_str
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.ATTEND_PROCEDURES,
+        #     attend_procedures=procedures)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        procedures = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.attend_procedures(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
-            description="Complete procedure in scope of claim: {}".format(claim_hex),
-            event_time=current_times_str
-        )
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.ATTEND_PROCEDURES,
-            attend_procedures=procedures)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
+            description="Complete procedure in scope of claim: {}".format(claim_id),
+            event_time=current_times_str)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
-    def eat_pills(self, txn_key, claim_id):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def eat_pills(self, txn_signer, batch_signer, claim_id):
+        # clinic_pkey = txn_signer.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # pills = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Eat pills in scope of claim: {}".format(claim_hex),
+        #     event_time=current_times_str
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.EAT_PILLS,
+        #     eat_pills=pills)
+        #
+        # batch, batch_id = self._create_txn_and_batch(txn_signer, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
+
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        pills = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.eat_pills(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
-            description="Eat pills in scope of claim: {}".format(claim_hex),
-            event_time=current_times_str
-        )
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.EAT_PILLS,
-            eat_pills=pills)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
+            description="Eat pills in scope of claim: {}".format(claim_id),
+            event_time=current_times_str)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
-    def next_visit(self, txn_key, claim_id, doctor_pkey):
-        clinic_pkey = txn_key.get_public_key().as_hex()
-        clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-        claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+    def next_visit(self, txn_signer, batch_signer, claim_id, doctor_pkey):
+        # clinic_pkey = txn_key.get_public_key().as_hex()
+        # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+        # claim_hex = helper.make_claim_address(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        # current_times_str = str(time.time())
+        # event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
+        #
+        # next_visit = payload_pb2.ActionOnClaim(
+        #     claim_id=claim_id,
+        #     clinic_pkey=clinic_pkey,
+        #     description="Doctor: {}, completed next visit for claim: {}".format(doctor_pkey, claim_hex),
+        #     event_time=current_times_str
+        # )
+        #
+        # payload = payload_pb2.TransactionPayload(
+        #     payload_type=payload_pb2.TransactionPayload.NEXT_VISIT,
+        #     next_visit=next_visit)
+        #
+        # batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
+        #                                               [event_hex], payload)
         current_times_str = str(time.time())
-        event_hex = helper.make_event_address(claim_id=claim_id, clinic_pkey=clinic_pkey, event_time=current_times_str)
 
-        next_visit = payload_pb2.ActionOnClaim(
+        batch, batch_id = transaction.next_visit(
+            txn_signer=txn_signer,
+            batch_signer=batch_signer,
             claim_id=claim_id,
-            clinic_pkey=clinic_pkey,
-            description="Doctor: {}, completed next visit for claim: {}".format(doctor_pkey, claim_hex),
-            event_time=current_times_str
-        )
-
-        payload = payload_pb2.TransactionPayload(
-            payload_type=payload_pb2.TransactionPayload.NEXT_VISIT,
-            next_visit=next_visit)
-
-        batch, signature = self._create_txn_and_batch(txn_key, BATCH_KEY, [claim_hex, event_hex, clinic_hex],
-                                                      [event_hex], payload)
+            description="Doctor: {}, completed next visit for claim: {}".format(doctor_pkey, claim_id),
+            event_time=current_times_str)
 
         batch_list = batch_pb2.BatchList(batches=[batch])
 
         self._client.send_batches(batch_list)
-        return self._client.get_statuses([signature], wait=80)
+        return self._client.get_statuses([batch_id], wait=80)
 
     def list_claims(self):
         claim_list_prefix = helper.make_claim_list_address()
@@ -514,7 +632,7 @@ class HealthCareClient(object):
     def _create_txn_and_batch(self, txn_key, batch_key, inputs, outputs, payload):
         txn_header_bytes, signature = self._transaction_header(txn_key, batch_key, inputs, outputs, payload)
 
-        txn = Transaction(
+        txn = transaction_pb2.Transaction(
             header=txn_header_bytes,
             header_signature=signature,
             payload=payload.SerializeToString()
@@ -524,7 +642,7 @@ class HealthCareClient(object):
 
         batch_header_bytes, signature = self._batch_header(batch_key, transactions)
 
-        batch = Batch(
+        batch = batch_pb2.Batch(
             header=batch_header_bytes,
             header_signature=signature,
             transactions=transactions
@@ -533,7 +651,7 @@ class HealthCareClient(object):
 
     @staticmethod
     def _transaction_header(txn_key, batch_key, inputs, outputs, payload):
-        txn_header_bytes = TransactionHeader(
+        txn_header_bytes = transaction_pb2.TransactionHeader(
             family_name=helper.TP_FAMILYNAME,
             family_version=helper.TP_VERSION,
             inputs=inputs,
@@ -558,7 +676,7 @@ class HealthCareClient(object):
 
     @staticmethod
     def _batch_header(batch_key, transactions):
-        batch_header_bytes = BatchHeader(
+        batch_header_bytes = batch_pb2.BatchHeader(
             signer_public_key=batch_key.get_public_key().as_hex(),
             transaction_ids=[txn.header_signature for txn in transactions]
         ).SerializeToString()
