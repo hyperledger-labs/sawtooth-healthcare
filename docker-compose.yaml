@@ -199,6 +199,7 @@ services:
 #      - .:/project/sawtooth_healthcare
     volumes:
       - ./web:/home/node/app
+      - /home/node/app/node_modules
     expose:
       - 8080
     ports:
