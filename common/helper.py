@@ -11,6 +11,7 @@ DOCTOR_ENTITY_NAME = 'doctor'
 PATIENT_ENTITY_NAME = 'patient'
 CLAIM_ENTITY_NAME = 'claim'
 EVENT_ENTITY_NAME = 'event'
+LAB_TEST_ENTITY_NAME = 'lab_test'
 
 CLAIM_ENTITY_HEX6 = hashlib.sha512(CLAIM_ENTITY_NAME.encode("utf-8")).hexdigest()[0:6]
 CLINIC_ENTITY_HEX64 = hashlib.sha512(CLINIC_ENTITY_NAME.encode("utf-8")).hexdigest()[0:64]
@@ -20,6 +21,7 @@ DOCTOR_ENTITY_CODE = '02'
 PATIENT_ENTITY_CODE = '03'
 CLAIM_ENTITY_CODE = '04'
 EVENT_ENTITY_CODE = '05'
+LAB_TEST_ENTITY_CODE = '06'
 
 
 def _hash(identifier):
@@ -73,3 +75,20 @@ def make_event_list_address(claim_id, clinic_pkey):
     return TP_PREFFIX_HEX6 + EVENT_ENTITY_CODE + \
            _hash(CLAIM_ENTITY_NAME)[0:6] + _hash(claim_id)[:6] + \
            _hash(CLINIC_ENTITY_NAME)[0:6] + _hash(clinic_pkey)[:6]
+
+
+def make_lab_test_address(clinic_pkey, event_time):
+    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + \
+           _hash(LAB_TEST_ENTITY_NAME)[0:6] + _hash(clinic_pkey)[:6] + \
+           _hash(event_time)[:50]
+
+
+def make_lab_test_list_by_clinic_address(clinic_pkey):
+    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + \
+           _hash(LAB_TEST_ENTITY_NAME)[0:6] + _hash(clinic_pkey)[:6]
+
+
+def make_lab_test_list_address():
+    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + \
+           _hash(LAB_TEST_ENTITY_NAME)[0:6]
+

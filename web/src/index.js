@@ -17,6 +17,9 @@ var ClaimList = require("./views/ClaimList")
 var ClaimNewForm = require("./views/ClaimNewForm")
 var ClaimDetailsForm = require("./views/ClaimDetailsForm")
 
+var LabTestsList = require("./views/LabTestsList")
+var LabTestForm = require("./views/LabTestForm")
+
 var DoctorAssignForm = require("./views/DoctorAssignForm")
 var FirstVisitForm = require("./views/FirstVisitForm")
 var EatPillsForm = require("./views/EatPillsForm")
@@ -108,6 +111,16 @@ m.route(document.body, "/actions", {
     "/claim/:clinic_pkey/:claim_id": {
         render: function(vnode) {
             return m(Layout, m(ClaimDetailsForm, vnode.attrs))
+        }
+    },
+    "/lab_test_list": {
+        render: function() {
+            return m(Layout, m(LabTestsList))
+        }
+    },
+    "/lab_test_list/new/": {
+        render: function() {
+            return m(Layout, m(LabTestForm))
         }
     },
 //    "/list": {
