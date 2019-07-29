@@ -1,5 +1,6 @@
 import hashlib
 import random
+import time
 
 from sawtooth_sdk.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
@@ -140,6 +141,40 @@ def create_clinic(txn_signer, batch_signer, name):
         payload=payload,
         inputs=[inputs],
         outputs=[outputs],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
+
+def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, albumin, alkaline_phosphatase, appearance,
+                 bilirubin, casts, color):
+    clinic_pkey = txn_signer.get_public_key().as_hex()
+
+    clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+    current_times_str = str(time.time())
+    lab_test_hex = helper.make_lab_test_address(clinic_pkey=clinic_pkey, event_time=current_times_str)
+
+    lab_test = payload_pb2.AddLabTest(
+        height=height,
+        weight=weight,
+        gender=gender,
+        a_g_ratio=a_g_ratio,
+        albumin=albumin,
+        alkaline_phosphatase=alkaline_phosphatase,
+        appearance=appearance,
+        bilirubin=bilirubin,
+        casts=casts,
+        color=color,
+        event_time=current_times_str
+    )
+
+    payload = payload_pb2.TransactionPayload(
+        payload_type=payload_pb2.TransactionPayload.ADD_LAB_TEST,
+        lab_test=lab_test)
+
+    return _make_header_and_batch(
+        payload=payload,
+        inputs=[lab_test_hex, clinic_hex],
+        outputs=[lab_test_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
 
@@ -329,3 +364,4 @@ def next_visit(txn_signer, batch_signer, claim_id, description, event_time):
         outputs=[event_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
+

@@ -63,6 +63,15 @@ class HealthCareState(object):
         self._store_event(claim_id=claim_id, clinic_pkey=clinic_pkey, description=description,
                           event_time=event_time, event=payload_pb2.ActionOnClaim.NEXT_VISIT)
 
+    def add_lab_test(self, clinic_pkey, height, weight, gender,
+                     a_g_ratio, albumin, alkaline_phosphatase,
+                     appearance, bilirubin, casts,
+                     color, event_time):
+        self._store_lab_test(clinic_pkey=clinic_pkey, height=height, weight=weight, gender=gender,
+                             a_g_ratio=a_g_ratio, albumin=albumin, alkaline_phosphatase=alkaline_phosphatase,
+                             appearance=appearance, bilirubin=bilirubin, casts=casts, color=color,
+                             event_time=event_time)
+
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
         return clinic
@@ -94,6 +103,14 @@ class HealthCareState(object):
     def get_patients(self):
         patient = self._load_patient()
         return patient
+
+    def get_lab_tests(self):
+        lab_tests = self._load_lab_tests()
+        return lab_tests
+
+    def get_lab_tests_by_clinic(self, clinic_pkey):
+        lab_tests = self._load_lab_tests(clinic_pkey=clinic_pkey)
+        return lab_tests
 
     def _load_clinic(self, public_key=None):
         clinic = None
@@ -149,6 +166,18 @@ class HealthCareState(object):
             claim = payload_pb2.CreateClaim()
             claim.ParseFromString(state_entries[0].data)
         return claim
+
+    def _load_lab_tests(self, clinic_pkey=None):
+        lab_test = None
+        lab_test_hex = [] if clinic_pkey is None \
+            else [helper.make_lab_test_list_by_clinic_address(clinic_pkey=clinic_pkey)]
+        state_entries = self._context.get_state(
+            lab_test_hex,
+            timeout=self.TIMEOUT)
+        if state_entries:
+            lab_test = payload_pb2.AddLabTest()
+            lab_test.ParseFromString(state_entries[0].data)
+        return lab_test
 
     def _store_clinic(self, public_key, name):
         address = helper.make_clinic_address(public_key)
@@ -210,6 +239,27 @@ class HealthCareState(object):
         ev.event = event
 
         state_data = ev.SerializeToString()
+        self._context.set_state(
+            {address: state_data},
+            timeout=self.TIMEOUT)
+
+    def _store_lab_test(self, clinic_pkey, height, weight, gender, a_g_ratio, albumin, alkaline_phosphatase,
+                        appearance, bilirubin, casts, color, event_time):
+        address = helper.make_lab_test_address(clinic_pkey, event_time)
+        lt = payload_pb2.AddLabTest()
+        lt.height = height
+        lt.weight = weight
+        lt.gender = gender
+        lt.a_g_ratio = a_g_ratio
+        lt.albumin = albumin
+        lt.alkaline_phosphatase = alkaline_phosphatase
+        lt.appearance = appearance
+        lt.bilirubin = bilirubin
+        lt.casts = casts
+        lt.color = color
+        lt.event_time = event_time
+
+        state_data = lt.SerializeToString()
         self._context.set_state(
             {address: state_data},
             timeout=self.TIMEOUT)
