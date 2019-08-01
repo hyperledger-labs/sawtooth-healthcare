@@ -108,3 +108,5 @@ venv.bak/
 /web/bin/
 /web/node_modules/
 .idea/
+/common/protobuf/__init__.py
+/common/protobuf/payload_pb2.py
