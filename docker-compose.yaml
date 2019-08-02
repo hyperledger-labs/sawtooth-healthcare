@@ -152,7 +152,7 @@ services:
 #      "
 
   sawtooth-rest-api:
-    image: hyperledger/sawtooth-rest-api:1.0
+    image: hyperledger/sawtooth-rest-api:1.1
     container_name: sawtooth-rest-api
     expose:
       - 8008
@@ -181,14 +181,14 @@ services:
 #        tail -f /dev/null
 #      "
   settings-tp:
-    image: hyperledger/sawtooth-settings-tp:1.0
+    image: hyperledger/sawtooth-settings-tp:1.1
     container_name: sawtooth-settings-tp
     depends_on:
       - validator
     command: settings-tp -vv --connect tcp://validator:4004
 
   validator:
-    image: hyperledger/sawtooth-validator:1.0
+    image: hyperledger/sawtooth-validator:1.1
     container_name: sawtooth-validator
     expose:
       - 4004
