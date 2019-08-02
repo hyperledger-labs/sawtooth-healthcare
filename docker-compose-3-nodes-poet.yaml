@@ -202,8 +202,8 @@ services:
     container_name: healthcare-rest-api-1
     volumes:
       - .:/project/sawtooth_healthcare
-#    ports:
-#      - '8040:8000'
+    ports:
+      - '8140:8000'
 #    depends_on:
 #      - healthcare-shell
 #      - validator
@@ -228,8 +228,8 @@ services:
     container_name: healthcare-rest-api-2
     volumes:
       - .:/project/sawtooth_healthcare
-#    ports:
-#      - '8040:8000'
+    ports:
+      - '8240:8000'
 #    depends_on:
 #      - healthcare-shell
 #      - validator
@@ -286,12 +286,12 @@ services:
       - /home/node/app/node_modules
     expose:
       - 8080
-#    ports:
-#      - '8041:8080'
+    ports:
+      - '8041:8080'
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-0 by docker-compose---' &&
-      npm start
+      npm run start-0
       "
   #              tail -f /dev/null
 
@@ -309,12 +309,12 @@ services:
       - /home/node/app/node_modules
     expose:
       - 8080
-#    ports:
-#      - '8041:8080'
+    ports:
+      - '8141:8080'
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-1 by docker-compose---' &&
-      npm start
+      npm run start-1
       "
   #              tail -f /dev/null
 
@@ -332,12 +332,12 @@ services:
       - /home/node/app/node_modules
     expose:
       - 8080
-#    ports:
-#      - '8041:8080'
+    ports:
+      - '8241:8080'
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-2 by docker-compose---' &&
-      npm start
+      npm run start-2
       "
   #              tail -f /dev/null
 
@@ -461,8 +461,8 @@ services:
     container_name: sawtooth-rest-api-0
     expose:
       - 8008
-#    ports:
-#      - '8043:8008'
+    ports:
+      - '8043:8008'
 #    depends_on:
 #      - validator
     entrypoint: |
@@ -475,8 +475,8 @@ services:
     container_name: sawtooth-rest-api-1
     expose:
       - 8008
-#    ports:
-#      - '8043:8008'
+    ports:
+      - '8143:8008'
 #    depends_on:
 #      - validator
     entrypoint: |
@@ -489,8 +489,8 @@ services:
     container_name: sawtooth-rest-api-2
     expose:
       - 8008
-#    ports:
-#      - '8043:8008'
+    ports:
+      - '8243:8008'
 #    depends_on:
 #      - validator
     entrypoint: |
