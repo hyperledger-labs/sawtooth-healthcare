@@ -1,0 +1,632 @@
+version: '3'
+
+
+volumes:
+  poet-shared:
+
+services:
+
+#  healthcare-processor:
+#    build:
+#      context: .
+#      dockerfile: processor/Dockerfile
+#      args:
+#        - http_proxy
+#        - https_proxy
+#        - no_proxy
+#    image: healthcare-tp
+#    container_name: healthcare-processor
+#    volumes:
+#      - ./:/project/sawtooth_healthcare
+##    depends_on:
+##      - healthcare-shell
+#    command: |
+#      bash -c "
+#        sleep 1 &&
+#        echo '--- Building healthcare-tp by docker-compose---\n' &&
+#        init-healthcare-tp.sh &&
+#        healthcare-tp -v -C tcp://validator:4004 &&
+#        tail -f /dev/null
+#      "
+
+  healthcare-processor-0:
+    build:
+      context: .
+      dockerfile: processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-tp-0
+    container_name: healthcare-processor-0
+    volumes:
+      - ./:/project/sawtooth_healthcare
+#    depends_on:
+#      - healthcare-shell
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building healthcare-tp-0 by docker-compose---\n' &&
+        init-healthcare-tp.sh &&
+        healthcare-tp -v -C tcp://validator-0:4004 &&
+        tail -f /dev/null
+      "
+
+  healthcare-processor-1:
+    build:
+      context: .
+      dockerfile: processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-tp-1
+    container_name: healthcare-processor-1
+    volumes:
+      - ./:/project/sawtooth_healthcare
+#    depends_on:
+#      - healthcare-shell
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building healthcare-tp-1 by docker-compose---\n' &&
+        init-healthcare-tp.sh &&
+        healthcare-tp -v -C tcp://validator-1:4004 &&
+        tail -f /dev/null
+      "
+
+  healthcare-processor-2:
+    build:
+      context: .
+      dockerfile: processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-tp-2
+    container_name: healthcare-processor-2
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    #    depends_on:
+    #      - healthcare-shell
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building healthcare-tp-2 by docker-compose---\n' &&
+        init-healthcare-tp.sh &&
+        healthcare-tp -v -C tcp://validator-2:4004 &&
+        tail -f /dev/null
+      "
+
+  healthcare-cli:
+    build:
+      context: .
+      dockerfile: cli/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-cli
+    container_name: healthcare-client
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building healthcare-cli by docker-compose---\n' &&
+        init-healthcare-cli.sh &&
+        tail -f /dev/null
+      "
+
+  healthcare-cli-hk:
+    build:
+      context: .
+      dockerfile: cli_hk/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-cli-hk
+    container_name: healthcare-client-hk
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building healthcare-cli-hk by docker-compose---\n' &&
+        init-healthcare-cli-hk.sh &&
+        tail -f /dev/null
+      "
+
+#  healthcare-rest-api:
+#    build:
+#      context: .
+#      dockerfile: rest_api/Dockerfile
+#      args:
+#        - http_proxy
+#        - https_proxy
+#        - no_proxy
+#    image: healthcare-rest-api
+#    container_name: healthcare-rest-api
+#    volumes:
+#      - .:/project/sawtooth_healthcare
+#    ports:
+#      - '8040:8000'
+##    depends_on:
+##      - healthcare-shell
+##      - validator
+#    command: |
+#      bash -c "
+#        sleep 3 &&
+#        echo '--- Building healthcare-rest-api by docker-compose---' &&
+#        init-healthcare-rest-api.sh &&
+#        healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
+#        tail -f /dev/null
+#               "
+
+  healthcare-rest-api-0:
+    build:
+      context: .
+      dockerfile: rest_api/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-rest-api
+    container_name: healthcare-rest-api-0
+    volumes:
+      - .:/project/sawtooth_healthcare
+    ports:
+      - '8040:8000'
+#    depends_on:
+#      - healthcare-shell
+#      - validator
+    command: |
+      bash -c "
+        sleep 3 &&
+        echo '--- Building healthcare-rest-api-0 by docker-compose---' &&
+        init-healthcare-rest-api.sh &&
+        healthcare-rest-api --host healthcare-rest-api-0 --validator tcp://validator-0:4004 &&
+        tail -f /dev/null
+               "
+
+  healthcare-rest-api-1:
+    build:
+      context: .
+      dockerfile: rest_api/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-rest-api
+    container_name: healthcare-rest-api-1
+    volumes:
+      - .:/project/sawtooth_healthcare
+    ports:
+      - '8140:8000'
+#    depends_on:
+#      - healthcare-shell
+#      - validator
+    command: |
+      bash -c "
+        sleep 3 &&
+        echo '--- Building healthcare-rest-api-1 by docker-compose---' &&
+        init-healthcare-rest-api.sh &&
+        healthcare-rest-api --host healthcare-rest-api-1 --validator tcp://validator-1:4004 &&
+        tail -f /dev/null
+               "
+
+  healthcare-rest-api-2:
+    build:
+      context: .
+      dockerfile: rest_api/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: healthcare-rest-api
+    container_name: healthcare-rest-api-2
+    volumes:
+      - .:/project/sawtooth_healthcare
+    ports:
+      - '8240:8000'
+#    depends_on:
+#      - healthcare-shell
+#      - validator
+    command: |
+      bash -c "
+        sleep 3 &&
+        echo '--- Building healthcare-rest-api-2 by docker-compose---' &&
+        init-healthcare-rest-api.sh &&
+        healthcare-rest-api --host healthcare-rest-api-2 --validator tcp://validator-2:4004 &&
+        tail -f /dev/null
+               "
+    #init-healthcare-rest-api.sh &&
+#               healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
+  #        healthcare-rest-api \
+  #          --host healthcare-rest-api \
+#          --validator tcp://validator:4004
+#      "
+
+
+#  healthcare-web-app:
+#    build:
+#      context: .
+#      dockerfile: web/Dockerfile
+#    image: healthcare-web-app
+#    user: "node"
+#    container_name: healthcare-web-app
+#    #    volumes:
+#    #      - .:/project/sawtooth_healthcare
+#    volumes:
+#      - ./web:/home/node/app
+#      - /home/node/app/node_modules
+#    expose:
+#      - 8080
+#    ports:
+#      - '8041:8080'
+#    command: |
+#      sh -c "
+#      echo '--- Starting healthcare-web-app by docker-compose---' &&
+#      npm start
+#      "
+#  #              tail -f /dev/null
+
+  healthcare-web-app-0:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: healthcare-web-app
+    user: "node"
+    container_name: healthcare-web-app-0
+    #    volumes:
+    #      - .:/project/sawtooth_healthcare
+    volumes:
+      - ./web:/home/node/app
+      - /home/node/app/node_modules
+    expose:
+      - 8080
+    ports:
+      - '8041:8080'
+    command: |
+      sh -c "
+      echo '--- Starting healthcare-web-app-0 by docker-compose---' &&
+      npm run start-0
+      "
+  #              tail -f /dev/null
+
+  healthcare-web-app-1:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: healthcare-web-app
+    user: "node"
+    container_name: healthcare-web-app-1
+    #    volumes:
+    #      - .:/project/sawtooth_healthcare
+    volumes:
+      - ./web:/home/node/app
+      - /home/node/app/node_modules
+    expose:
+      - 8080
+    ports:
+      - '8141:8080'
+    command: |
+      sh -c "
+      echo '--- Starting healthcare-web-app-1 by docker-compose---' &&
+      npm run start-1
+      "
+  #              tail -f /dev/null
+
+  healthcare-web-app-2:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: healthcare-web-app
+    user: "node"
+    container_name: healthcare-web-app-2
+    #    volumes:
+    #      - .:/project/sawtooth_healthcare
+    volumes:
+      - ./web:/home/node/app
+      - /home/node/app/node_modules
+    expose:
+      - 8080
+    ports:
+      - '8241:8080'
+    command: |
+      sh -c "
+      echo '--- Starting healthcare-web-app-2 by docker-compose---' &&
+      npm run start-2
+      "
+  #              tail -f /dev/null
+
+#  settings-tp:
+#    image: hyperledger/sawtooth-settings-tp:1.1
+#    container_name: sawtooth-settings-tp
+#    depends_on:
+#      - validator
+#    command: settings-tp -vv --connect tcp://validator:4004
+
+  settings-tp-0:
+    image: hyperledger/sawtooth-settings-tp:1.1
+    container_name: sawtooth-settings-tp-0
+#    depends_on:
+#      - validator
+    command: settings-tp -vv --connect tcp://validator-0:4004
+
+  settings-tp-1:
+    image: hyperledger/sawtooth-settings-tp:1.1
+    container_name: sawtooth-settings-tp-1
+#    depends_on:
+#      - validator
+    command: settings-tp -vv --connect tcp://validator-1:4004
+
+  settings-tp-2:
+    image: hyperledger/sawtooth-settings-tp:1.1
+    container_name: sawtooth-settings-tp-2
+#    depends_on:
+#      - validator
+    command: settings-tp -vv --connect tcp://validator-2:4004
+
+  poet-engine-0:
+    image: hyperledger/sawtooth-poet-engine:1.1
+    container_name: sawtooth-poet-engine-0
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+        if [ ! -f /poet-shared/poet-enclave-measurement ]; then \
+            poet enclave measurement >> /poet-shared/poet-enclave-measurement; \
+        fi && \
+        if [ ! -f /poet-shared/poet-enclave-basename ]; then \
+            poet enclave basename >> /poet-shared/poet-enclave-basename; \
+        fi && \
+        if [ ! -f /poet-shared/simulator_rk_pub.pem ]; then \
+            cp /etc/sawtooth/simulator_rk_pub.pem /poet-shared; \
+        fi && \
+        while [ ! -f /poet-shared/validator-0/keys/validator.priv ]; do sleep 1; done && \
+        cp -a /poet-shared/validator-0/keys /etc/sawtooth && \
+        poet registration create -k /etc/sawtooth/keys/validator.priv -o /poet-shared/poet.batch && \
+        poet-engine -C tcp://validator-0:5050 --component tcp://validator-0:4004 \
+    \""
+
+  poet-engine-1:
+    image: hyperledger/sawtooth-poet-engine:1.1
+    container_name: sawtooth-poet-engine-1
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+        while [ ! -f /poet-shared/validator-1/keys/validator.priv ]; do sleep 1; done && \
+        cp -a /poet-shared/validator-1/keys /etc/sawtooth && \
+        poet-engine -C tcp://validator-1:5050 --component tcp://validator-1:4004 \
+    \""
+
+  poet-engine-2:
+    image: hyperledger/sawtooth-poet-engine:1.1
+    container_name: sawtooth-poet-engine-2
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+        while [ ! -f /poet-shared/validator-2/keys/validator.priv ]; do sleep 1; done && \
+        cp -a /poet-shared/validator-2/keys /etc/sawtooth && \
+        poet-engine -C tcp://validator-2:5050 --component tcp://validator-2:4004 \
+    \""
+
+  poet-validator-registry-tp-0:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.1
+    container_name: sawtooth-poet-validator-registry-tp-0
+    expose:
+      - 4004
+    command: poet-validator-registry-tp -C tcp://validator-0:4004
+#    environment:
+#      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+#    stop_signal: SIGKILL
+
+  poet-validator-registry-tp-1:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.1
+    container_name: sawtooth-poet-validator-registry-tp-1
+    expose:
+      - 4004
+    command: poet-validator-registry-tp -C tcp://validator-1:4004
+#    environment:
+#      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+#    stop_signal: SIGKILL
+
+  poet-validator-registry-tp-2:
+    image: hyperledger/sawtooth-poet-validator-registry-tp:1.1
+    container_name: sawtooth-poet-validator-registry-tp-2
+    expose:
+      - 4004
+    command: poet-validator-registry-tp -C tcp://validator-2:4004
+#    environment:
+#      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
+#    stop_signal: SIGKILL
+
+#  sawtooth-rest-api:
+#    image: hyperledger/sawtooth-rest-api:1.1
+#    container_name: sawtooth-rest-api
+#    expose:
+#      - 8008
+#    ports:
+#      - '8043:8008'
+#    depends_on:
+#      - validator
+#    entrypoint: |
+#      sawtooth-rest-api -vv
+#        --connect tcp://validator:4004
+#        --bind sawtooth-rest-api:8008
+
+  sawtooth-rest-api-0:
+    image: hyperledger/sawtooth-rest-api:1.1
+    container_name: sawtooth-rest-api-0
+    expose:
+      - 8008
+    ports:
+      - '8043:8008'
+#    depends_on:
+#      - validator
+    entrypoint: |
+      sawtooth-rest-api -vv
+        --connect tcp://validator-0:4004
+        --bind sawtooth-rest-api-0:8008
+
+  sawtooth-rest-api-1:
+    image: hyperledger/sawtooth-rest-api:1.1
+    container_name: sawtooth-rest-api-1
+    expose:
+      - 8008
+    ports:
+      - '8143:8008'
+#    depends_on:
+#      - validator
+    entrypoint: |
+      sawtooth-rest-api -vv
+        --connect tcp://validator-1:4004
+        --bind sawtooth-rest-api-1:8008
+
+  sawtooth-rest-api-2:
+    image: hyperledger/sawtooth-rest-api:1.1
+    container_name: sawtooth-rest-api-2
+    expose:
+      - 8008
+    ports:
+      - '8243:8008'
+#    depends_on:
+#      - validator
+    entrypoint: |
+      sawtooth-rest-api -vv
+        --connect tcp://validator-2:4004
+        --bind sawtooth-rest-api-2:8008
+
+  #  validator:
+  #    image: hyperledger/sawtooth-validator:1.1
+  #    container_name: sawtooth-validator
+  #    expose:
+  #      - 4004
+  #    ports:
+  #      - '4040:4004'
+  #    command: |
+  #      bash -c "
+  #        if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
+  #        sawadm keygen &&
+  #        sawtooth keygen my_key &&
+  #        sawset genesis -k /root/.sawtooth/keys/my_key.priv &&
+#        sawadm genesis config-genesis.batch
+#        fi;
+#        sawtooth-validator -vv \
+#          --endpoint tcp://validator:8800 \
+#          --bind component:tcp://eth0:4004 \
+#      --bind network:tcp://eth0:8800
+#               "
+
+  validator-0:
+    image: hyperledger/sawtooth-validator:1.1
+    container_name: sawtooth-validator-0
+    expose:
+      - 4004
+      - 5050
+      - 8800
+    volumes:
+      - poet-shared:/poet-shared
+    command: "bash -c \"\
+        sawadm keygen --force && \
+        mkdir -p /poet-shared/validator-0 || true && \
+        cp -a /etc/sawtooth/keys /poet-shared/validator-0/ && \
+        while [ ! -f /poet-shared/poet-enclave-measurement ]; do sleep 1; done && \
+        while [ ! -f /poet-shared/poet-enclave-basename ]; do sleep 1; done && \
+        while [ ! -f /poet-shared/poet.batch ]; do sleep 1; done && \
+        cp /poet-shared/poet.batch / && \
+        sawset genesis \
+          -k /etc/sawtooth/keys/validator.priv \
+          -o config-genesis.batch && \
+        sawset proposal create \
+          -k /etc/sawtooth/keys/validator.priv \
+          sawtooth.consensus.algorithm.name=PoET \
+          sawtooth.consensus.algorithm.version=0.1 \
+          sawtooth.poet.report_public_key_pem=\
+          \\\"$$(cat /poet-shared/simulator_rk_pub.pem)\\\" \
+          sawtooth.poet.valid_enclave_measurements=$$(cat /poet-shared/poet-enclave-measurement) \
+          sawtooth.poet.valid_enclave_basenames=$$(cat /poet-shared/poet-enclave-basename) \
+          -o config.batch && \
+        sawset proposal create \
+          -k /etc/sawtooth/keys/validator.priv \
+             sawtooth.poet.target_wait_time=5 \
+             sawtooth.poet.initial_wait_time=25 \
+             sawtooth.publisher.max_batches_per_block=100 \
+          -o poet-settings.batch && \
+        sawadm genesis \
+          config-genesis.batch config.batch poet.batch poet-settings.batch && \
+        sawtooth-validator -v \
+          --bind network:tcp://eth0:8800 \
+          --bind component:tcp://eth0:4004 \
+          --bind consensus:tcp://eth0:5050 \
+          --peering static \
+          --endpoint tcp://validator-0:8800 \
+          --scheduler parallel \
+          --network-auth trust
+    \""
+#    environment:
+#      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+#        /project/sawtooth-core/consensus/poet/simulator:\
+#        /project/sawtooth-core/consensus/poet/core"
+#    stop_signal: SIGKILL
+
+  validator-1:
+    image: hyperledger/sawtooth-validator:1.1
+    container_name: sawtooth-validator-1
+    expose:
+      - 4004
+      - 5050
+      - 8800
+    volumes:
+      - poet-shared:/poet-shared
+    command: |
+      bash -c "
+        sawadm keygen --force && \
+        mkdir -p /poet-shared/validator-1 || true && \
+        cp -a /etc/sawtooth/keys /poet-shared/validator-1/ && \
+        sawtooth-validator -v \
+            --bind network:tcp://eth0:8800 \
+            --bind component:tcp://eth0:4004 \
+            --bind consensus:tcp://eth0:5050 \
+            --peering static \
+            --endpoint tcp://validator-1:8800 \
+            --peers tcp://validator-0:8800,tcp://validator-2:8800 \
+            --scheduler parallel \
+            --network-auth trust
+      "
+#    environment:
+#      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+#        /project/sawtooth-core/consensus/poet/simulator:\
+#        /project/sawtooth-core/consensus/poet/core"
+#    stop_signal: SIGKILL
+
+  validator-2:
+    image: hyperledger/sawtooth-validator:1.1
+    container_name: sawtooth-validator-2
+    expose:
+      - 4004
+      - 5050
+      - 8800
+    volumes:
+      - poet-shared:/poet-shared
+    command: |
+      bash -c "
+        sawadm keygen --force && \
+        mkdir -p /poet-shared/validator-2 && \
+        cp -a /etc/sawtooth/keys /poet-shared/validator-2/ && \
+        sawtooth-validator -v \
+            --bind network:tcp://eth0:8800 \
+            --bind component:tcp://eth0:4004 \
+            --bind consensus:tcp://eth0:5050 \
+            --peering static \
+            --endpoint tcp://validator-2:8800 \
+            --peers tcp://validator-0:8800,tcp://validator-1:8800 \
+            --scheduler parallel \
+            --network-auth trust
+      "
+#    environment:
+#      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+#        /project/sawtooth-core/consensus/poet/simulator:\
+#        /project/sawtooth-core/consensus/poet/core"
+#    stop_signal: SIGKILL

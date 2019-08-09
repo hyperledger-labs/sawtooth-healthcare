@@ -14,6 +14,7 @@ message TransactionPayload {
         ATTEND_PROCEDURES = 8;
         EAT_PILLS = 9;
         NEXT_VISIT = 10;
+        ADD_LAB_TEST = 11;
     }
 
     PayloadType payload_type = 1;
@@ -28,6 +29,7 @@ message TransactionPayload {
     ActionOnClaim attend_procedures = 9;
     ActionOnClaim eat_pills = 10;
     ActionOnClaim next_visit = 11;
+    AddLabTest lab_test = 12;
 }
 
 message CreateClinic {
@@ -45,6 +47,20 @@ message CreatePatient {
     string public_key = 1;
     string name = 2;
     string surname = 3;
+}
+
+message AddLabTest {
+    string height=1;
+    string weight=2;
+    string gender=3;
+    string a_g_ratio=4;
+    string albumin=5;
+    string alkaline_phosphatase=6;
+    string appearance=7;
+    string bilirubin=8;
+    string casts=9;
+    string color=10;
+    string event_time=11;
 }
 
 message CreateClaim {

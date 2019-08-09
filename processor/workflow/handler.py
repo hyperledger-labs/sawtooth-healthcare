@@ -178,6 +178,19 @@ class HealthCareTransactionHandler(TransactionHandler):
                 healthcare_state.next_visit(examination.claim_id, examination.clinic_pkey,
                                             examination.description,
                                             examination.event_time)
+            elif healthcare_payload.is_lab_test():
+                lab_test = healthcare_payload.lab_test()
+
+                clinic = healthcare_state.get_clinic(signer)
+                if clinic is None:
+                    raise InvalidTransaction(
+                        'Invalid action: Clinic does not exist: ' + signer)
+
+                healthcare_state.add_lab_test(signer, lab_test.height, lab_test.weight, lab_test.gender,
+                                              lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
+                                              lab_test.appearance, lab_test.bilirubin, lab_test.casts,
+                                              lab_test.color, lab_test.event_time)
+
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(healthcare_payload.transaction_type()))
         except Exception as e:
