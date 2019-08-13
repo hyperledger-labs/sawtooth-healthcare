@@ -191,7 +191,7 @@ app.config['CORS_AUTOMATIC_OPTIONS'] = True
 
 def main():
     LOGGER.info('Starting Clinic Rest API server...')
-    CORS(app)
+    # CORS(app)
 
     app.blueprint(CLINICS_BP)
     app.blueprint(DOCTORS_BP)

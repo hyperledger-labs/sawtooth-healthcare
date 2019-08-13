@@ -37,12 +37,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-tp-0
+    image: healthcare-tp
     container_name: healthcare-processor-0
     volumes:
       - ./:/project/sawtooth_healthcare
-#    depends_on:
-#      - healthcare-shell
+      - /project/sawtooth_healthcare/build
+    depends_on:
+      - healthcare-cli
     command: |
       bash -c "
         sleep 1 &&
@@ -60,12 +61,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-tp-1
+    image: healthcare-tp
     container_name: healthcare-processor-1
     volumes:
       - ./:/project/sawtooth_healthcare
-#    depends_on:
-#      - healthcare-shell
+      - /project/sawtooth_healthcare/build
+    depends_on:
+      - healthcare-processor-0
     command: |
       bash -c "
         sleep 1 &&
@@ -83,12 +85,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-tp-2
+    image: healthcare-tp
     container_name: healthcare-processor-2
     volumes:
       - ./:/project/sawtooth_healthcare
-    #    depends_on:
-    #      - healthcare-shell
+      - /project/sawtooth_healthcare/build
+    depends_on:
+      - healthcare-processor-1
     command: |
       bash -c "
         sleep 1 &&
@@ -110,6 +113,9 @@ services:
     container_name: healthcare-client
     volumes:
       - ./:/project/sawtooth_healthcare
+      - /project/sawtooth_healthcare/build
+    depends_on:
+      - healthcare-cli-hk
     command: |
       bash -c "
         sleep 1 &&
@@ -130,6 +136,7 @@ services:
     container_name: healthcare-client-hk
     volumes:
       - ./:/project/sawtooth_healthcare
+      - /project/sawtooth_healthcare/build
     command: |
       bash -c "
         sleep 1 &&
@@ -176,11 +183,12 @@ services:
     container_name: healthcare-rest-api-0
     volumes:
       - .:/project/sawtooth_healthcare
+      - /project/sawtooth_healthcare/build
     ports:
       - '8040:8000'
-#    depends_on:
-#      - healthcare-shell
-#      - validator
+    depends_on:
+      - validator-0
+      - healthcare-processor-2
     command: |
       bash -c "
         sleep 3 &&
@@ -202,11 +210,12 @@ services:
     container_name: healthcare-rest-api-1
     volumes:
       - .:/project/sawtooth_healthcare
+      - /project/sawtooth_healthcare/build
     ports:
       - '8140:8000'
-#    depends_on:
-#      - healthcare-shell
-#      - validator
+    depends_on:
+      - validator-1
+      - healthcare-rest-api-0
     command: |
       bash -c "
         sleep 3 &&
@@ -228,11 +237,12 @@ services:
     container_name: healthcare-rest-api-2
     volumes:
       - .:/project/sawtooth_healthcare
+      - /project/sawtooth_healthcare/build
     ports:
       - '8240:8000'
-#    depends_on:
-#      - healthcare-shell
-#      - validator
+    depends_on:
+      - validator-2
+      - healthcare-rest-api-1
     command: |
       bash -c "
         sleep 3 &&
@@ -288,6 +298,8 @@ services:
       - 8080
     ports:
       - '8041:8080'
+    depends_on:
+      - healthcare-rest-api-2
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-0 by docker-compose---' &&
@@ -311,6 +323,8 @@ services:
       - 8080
     ports:
       - '8141:8080'
+    depends_on:
+      - healthcare-web-app-0
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-1 by docker-compose---' &&
@@ -334,6 +348,8 @@ services:
       - 8080
     ports:
       - '8241:8080'
+    depends_on:
+      - healthcare-web-app-1
     command: |
       sh -c "
       echo '--- Starting healthcare-web-app-2 by docker-compose---' &&
@@ -351,27 +367,29 @@ services:
   settings-tp-0:
     image: hyperledger/sawtooth-settings-tp:1.1
     container_name: sawtooth-settings-tp-0
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-0
     command: settings-tp -vv --connect tcp://validator-0:4004
 
   settings-tp-1:
     image: hyperledger/sawtooth-settings-tp:1.1
     container_name: sawtooth-settings-tp-1
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-1
     command: settings-tp -vv --connect tcp://validator-1:4004
 
   settings-tp-2:
     image: hyperledger/sawtooth-settings-tp:1.1
     container_name: sawtooth-settings-tp-2
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-2
     command: settings-tp -vv --connect tcp://validator-2:4004
 
   poet-engine-0:
     image: hyperledger/sawtooth-poet-engine:1.1
     container_name: sawtooth-poet-engine-0
+    depends_on:
+      - validator-0
     volumes:
       - poet-shared:/poet-shared
     command: "bash -c \"\
@@ -393,6 +411,8 @@ services:
   poet-engine-1:
     image: hyperledger/sawtooth-poet-engine:1.1
     container_name: sawtooth-poet-engine-1
+    depends_on:
+      - validator-1
     volumes:
       - poet-shared:/poet-shared
     command: "bash -c \"\
@@ -404,6 +424,8 @@ services:
   poet-engine-2:
     image: hyperledger/sawtooth-poet-engine:1.1
     container_name: sawtooth-poet-engine-2
+    depends_on:
+      - validator-2
     volumes:
       - poet-shared:/poet-shared
     command: "bash -c \"\
@@ -463,8 +485,8 @@ services:
       - 8008
     ports:
       - '8043:8008'
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-0
     entrypoint: |
       sawtooth-rest-api -vv
         --connect tcp://validator-0:4004
@@ -477,8 +499,8 @@ services:
       - 8008
     ports:
       - '8143:8008'
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-1
     entrypoint: |
       sawtooth-rest-api -vv
         --connect tcp://validator-1:4004
@@ -491,8 +513,8 @@ services:
       - 8008
     ports:
       - '8243:8008'
-#    depends_on:
-#      - validator
+    depends_on:
+      - validator-2
     entrypoint: |
       sawtooth-rest-api -vv
         --connect tcp://validator-2:4004
@@ -541,8 +563,7 @@ services:
           -o config-genesis.batch && \
         sawset proposal create \
           -k /etc/sawtooth/keys/validator.priv \
-          sawtooth.consensus.algorithm.name=PoET \
-          sawtooth.consensus.algorithm.version=0.1 \
+          sawtooth.consensus.algorithm.name=poet \
           sawtooth.poet.report_public_key_pem=\
           \\\"$$(cat /poet-shared/simulator_rk_pub.pem)\\\" \
           sawtooth.poet.valid_enclave_measurements=$$(cat /poet-shared/poet-enclave-measurement) \
@@ -560,13 +581,13 @@ services:
           --bind network:tcp://eth0:8800 \
           --bind component:tcp://eth0:4004 \
           --bind consensus:tcp://eth0:5050 \
-          --peering static \
           --endpoint tcp://validator-0:8800 \
-          --scheduler parallel \
+          --peering static \
+          --scheduler serial \
           --network-auth trust
     \""
-#    environment:
-#      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
+  #    environment:
+  #      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
 #        /project/sawtooth-core/consensus/poet/simulator:\
 #        /project/sawtooth-core/consensus/poet/core"
 #    stop_signal: SIGKILL
@@ -580,6 +601,8 @@ services:
       - 8800
     volumes:
       - poet-shared:/poet-shared
+    depends_on:
+      - validator-0
     command: |
       bash -c "
         sawadm keygen --force && \
@@ -591,15 +614,11 @@ services:
             --bind consensus:tcp://eth0:5050 \
             --peering static \
             --endpoint tcp://validator-1:8800 \
-            --peers tcp://validator-0:8800,tcp://validator-2:8800 \
-            --scheduler parallel \
+            --peers tcp://validator-0:8800 \
+            --scheduler serial \
             --network-auth trust
       "
-#    environment:
-#      PYTHONPATH: "/project/sawtooth-core/consensus/poet/common:\
-#        /project/sawtooth-core/consensus/poet/simulator:\
-#        /project/sawtooth-core/consensus/poet/core"
-#    stop_signal: SIGKILL
+
 
   validator-2:
     image: hyperledger/sawtooth-validator:1.1
@@ -610,6 +629,8 @@ services:
       - 8800
     volumes:
       - poet-shared:/poet-shared
+    depends_on:
+      - validator-1
     command: |
       bash -c "
         sawadm keygen --force && \
@@ -621,8 +642,9 @@ services:
             --bind consensus:tcp://eth0:5050 \
             --peering static \
             --endpoint tcp://validator-2:8800 \
-            --peers tcp://validator-0:8800,tcp://validator-1:8800 \
-            --scheduler parallel \
+            --peers tcp://validator-0:8800 \
+            --peers tcp://validator-1:8800 \
+            --scheduler serial \
             --network-auth trust
       "
 #    environment:
