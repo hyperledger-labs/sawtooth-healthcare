@@ -25,7 +25,7 @@ LAB_TEST_ENTITY_CODE = '06'
 
 
 def _hash(identifier):
-    return hashlib.sha256(identifier.encode('utf-8')).hexdigest()
+    return hashlib.sha512(identifier.encode('utf-8')).hexdigest()
 
 
 TP_PREFFIX_HEX6 = _hash(TP_FAMILYNAME)[0:6]

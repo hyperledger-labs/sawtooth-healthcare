@@ -30,7 +30,7 @@ from sawtooth_signing import ParseError
 from sawtooth_signing import CryptoFactory
 
 from sawtooth_rest_api.messaging import Connection
-from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
+# from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from zmq.asyncio import ZMQEventLoop
 from rest_api.workflow.claims import CLAIMS_BP
