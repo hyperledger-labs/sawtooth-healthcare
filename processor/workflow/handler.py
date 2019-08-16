@@ -35,7 +35,7 @@ class HealthCareTransactionHandler(TransactionHandler):
 
             header = transaction.header
             signer = header.signer_public_key
-
+            LOGGER.debug("transaction payload: " + str(transaction.payload))
             healthcare_payload = HealthCarePayload(payload=transaction.payload)
 
             healthcare_state = HealthCareState(context)

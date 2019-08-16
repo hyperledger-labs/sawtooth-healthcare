@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 bin/healthcare-protogen
+#python3 setup_cli.py clean --bdist-base ./cli/bdist.linux-x86_64 --build-lib ./cli/lib --all
+#python3 setup_cli.py build -b ./cli install
 python3 setup_cli.py clean --all
 python3 setup_cli.py build
 python3 setup_cli.py install
