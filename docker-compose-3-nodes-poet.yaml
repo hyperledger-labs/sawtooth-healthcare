@@ -551,33 +551,40 @@ services:
     volumes:
       - poet-shared:/poet-shared
     command: "bash -c \"\
-        sawadm keygen --force && \
-        mkdir -p /poet-shared/validator-0 || true && \
-        cp -a /etc/sawtooth/keys /poet-shared/validator-0/ && \
-        while [ ! -f /poet-shared/poet-enclave-measurement ]; do sleep 1; done && \
-        while [ ! -f /poet-shared/poet-enclave-basename ]; do sleep 1; done && \
-        while [ ! -f /poet-shared/poet.batch ]; do sleep 1; done && \
-        cp /poet-shared/poet.batch / && \
-        sawset genesis \
-          -k /etc/sawtooth/keys/validator.priv \
-          -o config-genesis.batch && \
-        sawset proposal create \
-          -k /etc/sawtooth/keys/validator.priv \
-          sawtooth.consensus.algorithm.name=poet \
-          sawtooth.consensus.algorithm.version=0.1 \
-          sawtooth.poet.report_public_key_pem=\
-          \\\"$$(cat /poet-shared/simulator_rk_pub.pem)\\\" \
-          sawtooth.poet.valid_enclave_measurements=$$(cat /poet-shared/poet-enclave-measurement) \
-          sawtooth.poet.valid_enclave_basenames=$$(cat /poet-shared/poet-enclave-basename) \
-          -o config.batch && \
-        sawset proposal create \
-          -k /etc/sawtooth/keys/validator.priv \
-             sawtooth.poet.target_wait_time=5 \
-             sawtooth.poet.initial_wait_time=25 \
-             sawtooth.publisher.max_batches_per_block=100 \
-          -o poet-settings.batch && \
-        sawadm genesis \
-          config-genesis.batch config.batch poet.batch poet-settings.batch && \
+        if [ ! -f /poet-shared/network_status.txt ]; then \
+          echo '--- First run setup started... ---\n'; \
+          sawadm keygen --force; \
+          mkdir -p /poet-shared/validator-0 || true; \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-0/ ; \
+          while [ ! -f /poet-shared/poet-enclave-measurement ]; do sleep 1; done; \
+          while [ ! -f /poet-shared/poet-enclave-basename ]; do sleep 1; done; \
+          while [ ! -f /poet-shared/poet.batch ]; do sleep 1; done; \
+          cp /poet-shared/poet.batch / ; \
+          sawset genesis \
+            -k /etc/sawtooth/keys/validator.priv \
+            -o config-genesis.batch ; \
+          sawset proposal create \
+            -k /etc/sawtooth/keys/validator.priv \
+            sawtooth.consensus.algorithm.name=poet \
+            sawtooth.consensus.algorithm.version=0.1 \
+            sawtooth.poet.report_public_key_pem=\
+            \\\"$$(cat /poet-shared/simulator_rk_pub.pem)\\\" \
+            sawtooth.poet.valid_enclave_measurements=$$(cat /poet-shared/poet-enclave-measurement) \
+            sawtooth.poet.valid_enclave_basenames=$$(cat /poet-shared/poet-enclave-basename) \
+            -o config.batch ; \
+          sawset proposal create \
+            -k /etc/sawtooth/keys/validator.priv \
+               sawtooth.poet.target_wait_time=5 \
+               sawtooth.poet.initial_wait_time=25 \
+               sawtooth.publisher.max_batches_per_block=100 \
+            -o poet-settings.batch ; \
+          sawadm genesis \
+            config-genesis.batch config.batch poet.batch poet-settings.batch ; \
+          echo Done > /poet-shared/network_status.txt ; \
+          echo '--- First run setup completed... ---\n' ; \
+        else \
+          echo '--- First run setup skipped... ---\n' ; \
+        fi && \
         sawtooth-validator -v \
           --bind network:tcp://eth0:8800 \
           --bind component:tcp://eth0:4004 \
@@ -606,9 +613,15 @@ services:
       - validator-0
     command: |
       bash -c "
-        sawadm keygen --force && \
-        mkdir -p /poet-shared/validator-1 || true && \
-        cp -a /etc/sawtooth/keys /poet-shared/validator-1/ && \
+        if [ ! -f /poet-shared/network_status.txt ]; then
+          echo '--- First run setup started... ---\n' && \
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-1 || true && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-1/ && \
+          echo '--- First run setup completed... ---\n'
+        else
+          echo '--- First run setup skipped... ---\n'
+        fi;
         sawtooth-validator -v \
             --bind network:tcp://eth0:8800 \
             --bind component:tcp://eth0:4004 \
@@ -634,9 +647,15 @@ services:
       - validator-1
     command: |
       bash -c "
-        sawadm keygen --force && \
-        mkdir -p /poet-shared/validator-2 && \
-        cp -a /etc/sawtooth/keys /poet-shared/validator-2/ && \
+        if [ ! -f /poet-shared/network_status.txt ]; then
+          echo '--- First run setup started... ---\n' && \
+          sawadm keygen --force && \
+          mkdir -p /poet-shared/validator-2 && \
+          cp -a /etc/sawtooth/keys /poet-shared/validator-2/ && \
+          echo '--- First run setup completed... ---\n'
+        else
+          echo '--- First run setup skipped... ---\n'
+        fi;
         sawtooth-validator -v \
             --bind network:tcp://eth0:8800 \
             --bind component:tcp://eth0:4004 \
