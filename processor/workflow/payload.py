@@ -40,6 +40,9 @@ class HealthCarePayload(object):
     def lab_test(self):
         return self._transaction.lab_test
 
+    def pulse(self):
+        return self._transaction.pulse
+
     def is_create_clinic(self):
         return self._transaction.payload_type == payload_pb2.TransactionPayload.CREATE_CLINIC
 
@@ -72,6 +75,9 @@ class HealthCarePayload(object):
 
     def is_lab_test(self):
         return self._transaction.payload_type == payload_pb2.TransactionPayload.ADD_LAB_TEST
+
+    def is_pulse(self):
+        return self._transaction.payload_type == payload_pb2.TransactionPayload.ADD_PULSE
 
     def transaction_type(self):
         return self._transaction.payload_type

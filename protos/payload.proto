@@ -15,6 +15,7 @@ message TransactionPayload {
         EAT_PILLS = 9;
         NEXT_VISIT = 10;
         ADD_LAB_TEST = 11;
+        ADD_PULSE = 12;
     }
 
     PayloadType payload_type = 1;
@@ -30,6 +31,7 @@ message TransactionPayload {
     ActionOnClaim eat_pills = 10;
     ActionOnClaim next_visit = 11;
     AddLabTest lab_test = 12;
+    AddPulse pulse = 13;
 }
 
 message CreateClinic {
@@ -61,6 +63,12 @@ message AddLabTest {
     string casts=9;
     string color=10;
     string event_time=11;
+}
+
+message AddPulse {
+    string public_key=1;
+    string pulse=2;
+    string timestamp=3;
 }
 
 message CreateClaim {

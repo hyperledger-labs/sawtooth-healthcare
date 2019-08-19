@@ -10,6 +10,8 @@ module.exports = {
                 m("a[href='/patient_list']", {oncreate: m.route.link}, "Patients"),
                 m("a[href='/lab_test_list']", {oncreate: m.route.link}, "Lab Tests"),
                 m("a[href='/lab_test_list/new/']", {oncreate: m.route.link}, "Add Lab Test"),
+                m("a[href='/pulse_list']", {oncreate: m.route.link}, "Pulse List"),
+                m("a[href='/pulse_list/new/']", {oncreate: m.route.link}, "Add Pulse"),
             ]),
             m("section", vnode.children),
         ])

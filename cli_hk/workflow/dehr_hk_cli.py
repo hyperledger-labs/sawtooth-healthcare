@@ -348,6 +348,50 @@ def add_lab_test_parser(subparsers, parent_parser):
         type=int,
         help='set time, in seconds, to wait for game to commit')
 
+
+def add_pulse_parser(subparsers, parent_parser):
+
+    parser = subparsers.add_parser(
+        'add_pulse',
+        help='Adds a pulse',
+        description='Sends a transaction to create a pulse',
+        parents=[parent_parser])
+
+    parser.add_argument(
+        '--name',
+        type=str,
+        required=True,
+        help='specify patient name')
+
+    parser.add_argument(
+        '--pulse',
+        type=str,
+        required=True,
+        help='specify pulse value')
+
+    parser.add_argument(
+        '--timestamp',
+        type=str,
+        required=True,
+        default='0',
+        help='specify timestamp')
+
+    parser.add_argument(
+        '--url',
+        type=str,
+        help='specify URL of REST API')
+
+    parser.add_argument(
+        '--key-dir',
+        type=str,
+        help="identify directory of user's private key file")
+
+    parser.add_argument(
+        '--wait',
+        nargs='?',
+        const=sys.maxsize,
+        type=int,
+        help='set time, in seconds, to wait for game to commit')
 #
 # def add_create_claim_parser(subparsers, parent_parser):
 #     parser = subparsers.add_parser(
@@ -858,6 +902,23 @@ def add_list_lab_test_parser(subparsers, parent_parser):
         help="identify directory of user's private key file")
 
 
+def add_list_pulse_parser(subparsers, parent_parser):
+    parser = subparsers.add_parser(
+        'list_pulse',
+        help='Displays information for all pulse items',
+        description='Displays information for all pulse items in state.',
+        parents=[parent_parser])
+
+    parser.add_argument(
+        '--url',
+        type=str,
+        help='specify URL of REST API')
+
+    parser.add_argument(
+        '--key-dir',
+        type=str,
+        help="identify directory of user's private key file")
+
 # def add_list_claim_details_parser(subparsers, parent_parser):
 #     parser = subparsers.add_parser(
 #         'list_claim_details',
@@ -983,11 +1044,13 @@ def create_parser(prog_name):
     add_create_doctor_parser(subparsers, parent_parser)
     add_create_patient_parser(subparsers, parent_parser)
     add_lab_test_parser(subparsers, parent_parser)
+    add_pulse_parser(subparsers, parent_parser)
     # add_list_claims_parser(subparsers, parent_parser)
     add_list_clinics_parser(subparsers, parent_parser)
     add_list_doctors_parser(subparsers, parent_parser)
     add_list_patients_parser(subparsers, parent_parser)
     add_list_lab_test_parser(subparsers, parent_parser)
+    add_list_pulse_parser(subparsers, parent_parser)
     # add_list_claim_details_parser(subparsers, parent_parser)
     return parser
 
@@ -1060,6 +1123,24 @@ def do_list_lab_test(args):
                          value.alkaline_phosphatase, value.appearance, value.bilirubin, value.casts, value.color))
     else:
         raise HealthCareException("Could not retrieve lab test listing.")
+
+
+def do_list_pulse(args):
+    url = _get_url(args)
+    # auth_user, auth_password = _get_auth_info(args)
+
+    client = HealthCareClient(base_url=url, keyfile=None)
+
+    pulse_list = client.list_pulse()
+
+    if pulse_list is not None:
+        fmt = "%-15s %-15s %-15s %-15s"
+        print(fmt % ('PATIENT HEX', 'PATIENT PKEY', 'PULSE', 'TIMESTAMP'))
+        for key, value in pulse_list.items():
+            print(fmt % (key, value.public_key, value.pulse, value.timestamp))
+    else:
+        raise HealthCareException("Could not retrieve pulse listing.")
+
 # def do_list_claims(args):
 #     url = _get_url(args)
 #     auth_user, auth_password = _get_auth_info(args)
@@ -1232,6 +1313,29 @@ def do_add_lab_test(args):
             bilirubin,
             casts,
             color)
+
+    print("Response: {}".format(response))
+
+
+def do_add_pulse(args):
+    pulse = args.pulse
+    timestamp = args.timestamp
+
+    url = _get_url(args)
+    keyfile = _get_keyfile(args)
+    # auth_user, auth_password = _get_auth_info(args)
+
+    client = HealthCareClient(base_url=url, keyfile=keyfile)
+
+    if args.wait and args.wait > 0:
+        response = client.add_pulse(
+            pulse,
+            timestamp,
+            wait=args.wait)
+    else:
+        response = client.add_pulse(
+            pulse,
+            timestamp)
 
     print("Response: {}".format(response))
 # def do_assign_doctor(args):
@@ -1464,6 +1568,8 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_create_patient(args)
     elif args.command == 'add_lab_test':
         do_add_lab_test(args)
+    elif args.command == 'add_pulse':
+        do_add_pulse(args)
     # elif args.command == 'assign_doctor':
     #     do_assign_doctor(args)
     # elif args.command == 'pass_tests':
@@ -1484,6 +1590,9 @@ def main(prog_name=os.path.basename(sys.argv[0]), args=None):
         do_list_patients(args)
     elif args.command == 'list_lab_test':
         do_list_lab_test(args)
+    elif args.command == 'list_pulse':
+        do_list_pulse(args)
+
     # elif args.command == 'list_claims':
     #     do_list_claims(args)
     # elif args.command == 'list_claim_details':

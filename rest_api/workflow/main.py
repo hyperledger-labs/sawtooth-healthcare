@@ -40,6 +40,7 @@ from rest_api.workflow.doctors import DOCTORS_BP
 from rest_api.workflow.patients import PATIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
+from rest_api.workflow.pulse import PULSE_BP
 
 # from api.authorization import AUTH_BP
 # from api.errors import ERRORS_BP
@@ -199,6 +200,7 @@ def main():
     app.blueprint(CLAIMS_BP)
     app.blueprint(CLAIM_DETAILS_BP)
     app.blueprint(LAB_TESTS_BP)
+    app.blueprint(PULSE_BP)
     # app.blueprint(HOLDINGS_BP)
     # app.blueprint(OFFERS_BP)
 

@@ -179,6 +179,29 @@ def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, al
         batch_signer=batch_signer)
 
 
+def add_pulse(txn_signer, batch_signer, pulse, timestamp):
+    patient_pkey = txn_signer.get_public_key().as_hex()
+
+    pulse_hex = helper.make_pulse_address(public_key=patient_pkey, timestamp=str(timestamp))
+
+    pulse_payload = payload_pb2.AddPulse(
+        public_key=patient_pkey,
+        pulse=str(pulse),
+        timestamp=str(timestamp)
+    )
+
+    payload = payload_pb2.TransactionPayload(
+        payload_type=payload_pb2.TransactionPayload.ADD_PULSE,
+        pulse=pulse_payload)
+
+    return _make_header_and_batch(
+        payload=payload,
+        inputs=[pulse_hex],
+        outputs=[pulse_hex],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
+
 def register_claim(txn_signer, batch_signer, claim_id, patient_pkey):
     # batch_key = txn_key = self._signer.get_public_key().as_hex()
     clinic_pkey = txn_signer.get_public_key().as_hex()

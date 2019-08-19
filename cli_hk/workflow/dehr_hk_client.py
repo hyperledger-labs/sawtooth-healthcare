@@ -167,6 +167,18 @@ class HealthCareClient:
                                   batch_id=batch_id,
                                   wait=wait)
 
+    def add_pulse(self, pulse, timestamp, wait=None):
+        batch, batch_id = transaction.add_pulse(
+            txn_signer=self._signer,
+            batch_signer=self._signer,
+            pulse=pulse,
+            timestamp=timestamp)
+
+        batch_list = batch_pb2.BatchList(batches=[batch])
+
+        return self._send_batches(batch_list=batch_list,
+                                  batch_id=batch_id,
+                                  wait=wait)
     # def add_claim(self, claim_id, patient_pkey, wait=None, auth_user=None,
     #               auth_password=None):
     #     batch, batch_id = transaction.register_claim(
@@ -392,6 +404,27 @@ class HealthCareClient:
             pass
 
         return lab_tests
+
+    def list_pulse(self):
+        pulse_list_prefix = helper.make_pulse_list_address()
+
+        result = self._send_request(
+            "state?address={}".format(pulse_list_prefix))
+        pulse_list = {}
+
+        try:
+            data = yaml.safe_load(result)["data"]
+            if data is not None:
+                for value in data:
+                    dec_p = base64.b64decode(value["data"])
+                    p = payload_pb2.AddPulse()
+                    p.ParseFromString(dec_p)
+                    pulse_list[value["address"]] = p
+
+        except BaseException:
+            pass
+
+        return pulse_list
     #
     # def list_claim_details(self, claim_id, clinic_hex, auth_user=None, auth_password=None):
     #     claim_details_prefix = helper.make_event_list_address(claim_id=claim_id, clinic_pkey=clinic_hex)

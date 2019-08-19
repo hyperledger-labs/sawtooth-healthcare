@@ -190,7 +190,15 @@ class HealthCareTransactionHandler(TransactionHandler):
                                               lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
                                               lab_test.appearance, lab_test.bilirubin, lab_test.casts,
                                               lab_test.color, lab_test.event_time)
+            elif healthcare_payload.is_pulse():
+                pulse = healthcare_payload.pulse()
 
+                # patient = healthcare_state.get_patient(signer)
+                # if patient is None:
+                #     raise InvalidTransaction(
+                #         'Invalid action: Patient does not exist: ' + signer)
+
+                healthcare_state.add_patient(pulse.public_key, pulse.pulse, pulse.timestamp)
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(healthcare_payload.transaction_type()))
         except Exception as e:
