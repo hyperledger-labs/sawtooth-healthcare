@@ -41,7 +41,7 @@ setup(
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',
     # packages=find_packages(exclude=['processor', 'rest_api']),
-    packages=find_packages(include=['cli*', 'common*']),
+    packages=find_packages(include=['cli', 'common*']),
     install_requires=[
         # 'aiohttp',
         'colorlog',

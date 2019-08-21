@@ -30,7 +30,7 @@ from sawtooth_signing import ParseError
 from sawtooth_signing import CryptoFactory
 
 from sawtooth_rest_api.messaging import Connection
-from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
+# from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from zmq.asyncio import ZMQEventLoop
 from rest_api.workflow.claims import CLAIMS_BP
@@ -40,6 +40,7 @@ from rest_api.workflow.doctors import DOCTORS_BP
 from rest_api.workflow.patients import PATIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
+from rest_api.workflow.pulse import PULSE_BP
 
 # from api.authorization import AUTH_BP
 # from api.errors import ERRORS_BP
@@ -191,7 +192,7 @@ app.config['CORS_AUTOMATIC_OPTIONS'] = True
 
 def main():
     LOGGER.info('Starting Clinic Rest API server...')
-    CORS(app)
+    # CORS(app)
 
     app.blueprint(CLINICS_BP)
     app.blueprint(DOCTORS_BP)
@@ -199,6 +200,7 @@ def main():
     app.blueprint(CLAIMS_BP)
     app.blueprint(CLAIM_DETAILS_BP)
     app.blueprint(LAB_TESTS_BP)
+    app.blueprint(PULSE_BP)
     # app.blueprint(HOLDINGS_BP)
     # app.blueprint(OFFERS_BP)
 

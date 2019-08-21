@@ -72,6 +72,9 @@ class HealthCareState(object):
                              appearance=appearance, bilirubin=bilirubin, casts=casts, color=color,
                              event_time=event_time)
 
+    def add_patient(self, public_key, pulse, timestamp):
+        self._store_pulse(public_key=public_key, pulse=pulse, timestamp=timestamp)
+
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
         return clinic
@@ -111,6 +114,14 @@ class HealthCareState(object):
     def get_lab_tests_by_clinic(self, clinic_pkey):
         lab_tests = self._load_lab_tests(clinic_pkey=clinic_pkey)
         return lab_tests
+
+    def get_pulse(self):
+        pulse_list = self._load_pulse()
+        return pulse_list
+
+    def get_pulse_by_patient(self, patient_pkey):
+        pulse_list = self._load_pulse(patient_pkey=patient_pkey)
+        return pulse_list
 
     def _load_clinic(self, public_key=None):
         clinic = None
@@ -178,6 +189,18 @@ class HealthCareState(object):
             lab_test = payload_pb2.AddLabTest()
             lab_test.ParseFromString(state_entries[0].data)
         return lab_test
+
+    def _load_pulse(self, patient_pkey=None):
+        pulse = None
+        pulse_hex = [] if patient_pkey is None \
+            else [helper.make_pulse_list_by_patient_address(patient_pkey=patient_pkey)]
+        state_entries = self._context.get_state(
+            pulse_hex,
+            timeout=self.TIMEOUT)
+        if state_entries:
+            pulse = payload_pb2.AddPulse()
+            pulse.ParseFromString(state_entries[0].data)
+        return pulse
 
     def _store_clinic(self, public_key, name):
         address = helper.make_clinic_address(public_key)
@@ -260,6 +283,18 @@ class HealthCareState(object):
         lt.event_time = event_time
 
         state_data = lt.SerializeToString()
+        self._context.set_state(
+            {address: state_data},
+            timeout=self.TIMEOUT)
+
+    def _store_pulse(self, public_key, pulse, timestamp):
+        address = helper.make_pulse_address(public_key=public_key, timestamp=timestamp)
+        p = payload_pb2.AddPulse()
+        p.public_key = public_key
+        p.pulse = pulse
+        p.timestamp = timestamp
+
+        state_data = p.SerializeToString()
         self._context.set_state(
             {address: state_data},
             timeout=self.TIMEOUT)

@@ -12,6 +12,7 @@ PATIENT_ENTITY_NAME = 'patient'
 CLAIM_ENTITY_NAME = 'claim'
 EVENT_ENTITY_NAME = 'event'
 LAB_TEST_ENTITY_NAME = 'lab_test'
+PULSE_ENTITY_NAME = 'pulse'
 
 CLAIM_ENTITY_HEX6 = hashlib.sha512(CLAIM_ENTITY_NAME.encode("utf-8")).hexdigest()[0:6]
 CLINIC_ENTITY_HEX64 = hashlib.sha512(CLINIC_ENTITY_NAME.encode("utf-8")).hexdigest()[0:64]
@@ -22,10 +23,10 @@ PATIENT_ENTITY_CODE = '03'
 CLAIM_ENTITY_CODE = '04'
 EVENT_ENTITY_CODE = '05'
 LAB_TEST_ENTITY_CODE = '06'
-
+PULSE_ENTITY_CODE = '07'
 
 def _hash(identifier):
-    return hashlib.sha256(identifier.encode('utf-8')).hexdigest()
+    return hashlib.sha512(identifier.encode('utf-8')).hexdigest()
 
 
 TP_PREFFIX_HEX6 = _hash(TP_FAMILYNAME)[0:6]
@@ -92,3 +93,20 @@ def make_lab_test_list_address():
     return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + \
            _hash(LAB_TEST_ENTITY_NAME)[0:6]
 
+
+def make_pulse_address(public_key, timestamp):
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + \
+            _hash(PULSE_ENTITY_NAME)[:6] + \
+            _hash(public_key)[:6] + \
+            _hash(str(timestamp))[:50]
+
+
+def make_pulse_list_by_patient_address(patient_pkey):
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + \
+            _hash(PULSE_ENTITY_NAME)[:6] + \
+            _hash(patient_pkey)[:6]
+
+
+def make_pulse_list_address():
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + \
+            _hash(PULSE_ENTITY_NAME)[0:6]

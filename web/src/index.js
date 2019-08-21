@@ -20,6 +20,9 @@ var ClaimDetailsForm = require("./views/ClaimDetailsForm")
 var LabTestsList = require("./views/LabTestsList")
 var LabTestForm = require("./views/LabTestForm")
 
+var PulseList = require("./views/PulseList")
+var PulseForm = require("./views/PulseForm")
+
 var DoctorAssignForm = require("./views/DoctorAssignForm")
 var FirstVisitForm = require("./views/FirstVisitForm")
 var EatPillsForm = require("./views/EatPillsForm")
@@ -121,6 +124,16 @@ m.route(document.body, "/actions", {
     "/lab_test_list/new/": {
         render: function() {
             return m(Layout, m(LabTestForm))
+        }
+    },
+    "/pulse_list": {
+        render: function() {
+            return m(Layout, m(PulseList))
+        }
+    },
+    "/pulse_list/new/": {
+        render: function() {
+            return m(Layout, m(PulseForm))
         }
     },
 //    "/list": {

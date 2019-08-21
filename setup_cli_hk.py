@@ -35,7 +35,7 @@ conf_dir = "/etc/sawtooth"
 #                        ['packaging/systemd/sawtooth-healthcare-client-python.service']))
 
 setup(
-    name='cli-hk',
+    name='healthcare-client-hk',
     version='0.1',
     description='Sawtooth HealthCare Client Example',
     author='Hyperledger Sawtooth',
