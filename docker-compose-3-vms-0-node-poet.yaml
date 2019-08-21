@@ -185,6 +185,8 @@ services:
       - 4004
       - 5050
       - 8800
+    ports:
+      - '8044:8800'
     volumes:
       - poet-shared:/poet-shared
     command: "bash -c \"\
@@ -226,7 +228,7 @@ services:
           --bind network:tcp://eth0:8800 \
           --bind component:tcp://eth0:4004 \
           --bind consensus:tcp://eth0:5050 \
-          --endpoint tcp://validator-0:8800 \
+          --endpoint tcp://192.168.1.11:8044 \
           --peering static \
           --scheduler serial \
           --network-auth trust

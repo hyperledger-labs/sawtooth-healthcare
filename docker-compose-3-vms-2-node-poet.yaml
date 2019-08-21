@@ -175,6 +175,8 @@ services:
       - 4004
       - 5050
       - 8800
+    ports:
+      - '8244:8800'
     volumes:
       - poet-shared:/poet-shared
 #    depends_on:
@@ -195,9 +197,9 @@ services:
             --bind component:tcp://eth0:4004 \
             --bind consensus:tcp://eth0:5050 \
             --peering static \
-            --endpoint tcp://validator-2:8800 \
-            --peers tcp://192.168.1.22:8800 \
-            --peers tcp://192.168.1.33:8800 \
+            --endpoint tcp://192.168.1.33:8244 \
+            --peers tcp://192.168.1.11:8044 \
+            --peers tcp://192.168.1.22:8144 \
             --scheduler serial \
             --network-auth trust
       "
