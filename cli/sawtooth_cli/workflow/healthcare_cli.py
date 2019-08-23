@@ -9,7 +9,7 @@ import pkg_resources
 from colorlog import ColoredFormatter
 
 from common.helper import DISTRIBUTION_NAME, DEFAULT_URL
-from cli.workflow.healthcare_client import HealthCareClient
+from sawtooth_cli import HealthCareClient
 from common.exceptions import HealthCareException
 
 
