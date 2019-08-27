@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 bin/healthcare-protogen
-#python3 setup_rest_api.py clean --bdist-base ./rest_api/bdist.linux-x86_64 --build-lib ./rest_api/lib --all
-#python3 setup_rest_api.py build -b ./rest_api install
-python3 setup_rest_api.py clean --all
-python3 setup_rest_api.py build
-python3 setup_rest_api.py install
+cp -R common rest_api/rest_api
+cd rest_api
+#python3 setup.py clean --bdist-base ./rest_api/bdist.linux-x86_64 --build-lib ./rest_api/lib --all
+#python3 setup.py build -b ./rest_api install
+python3 setup.py clean --all
+python3 setup.py build
+python3 setup.py install
 
 if [[ ! -f /root/.sawtooth/keys/clinicWEB.priv ]]; then
     sawtooth keygen clinicWEB

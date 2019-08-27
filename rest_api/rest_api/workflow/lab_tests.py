@@ -12,15 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
+# import base64
+#
+# import bcrypt
+#
+# from itsdangerous import BadSignature
 from sanic import Blueprint
 from sanic import response
-from common.protobuf import payload_pb2
-from common import helper, transaction
-from rest_api.workflow import general
-from rest_api.workflow import messaging
 
-CLINICS_BP = Blueprint('clinics')
+# from sawtooth_signing import CryptoFactory
+
+# from rest_api.workflow.authorization import authorized
+from rest_api.common.protobuf import payload_pb2
+from rest_api.common import helper, transaction
+from rest_api.workflow import general, messaging
+from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
+
+# from rest_api.workflow.errors import ApiBadRequest
+# from rest_api.workflow.errors import ApiInternalError
+# from db import accounts_query
+# from db import auth_query
+# import pandas as pd
+# from google.protobuf.json_format import MessageToJson
+# from google.protobuf.json_format import MessageToDict
+
+# from marketplace_transaction import transaction_creation
+
+
+LAB_TESTS_BP = Blueprint('labtests')
 
 
 # @CLINICS_BP.post('accounts')
@@ -70,49 +89,74 @@ CLINICS_BP = Blueprint('clinics')
 #         })
 
 
-@CLINICS_BP.get('clinics')
-async def get_all_clinics(request):
+@LAB_TESTS_BP.get('labtests')
+async def get_all_lab_tests(request):
     """Fetches complete details of all Accounts in state"""
-
-    # origin = None
-    # if 'Origin' in request.headers:
-    #     origin = request.headers['Origin']
-    list_clinic_address = helper.make_clinic_list_address()
-    account_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_clinic_address)
+    lab_tests_address = helper.make_lab_test_list_address()
+    lab_test_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, lab_tests_address)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    clinics = []
-    for entity in account_resources.entries:
+    lab_tests = []
+    for entity in lab_test_resources.entries:
         # dec_cl = base64.b64decode(entity.data)
-        cl = payload_pb2.CreateClinic()
-        cl.ParseFromString(entity.data)
-        clinics.append({'public_key': cl.public_key, 'name': cl.name})
+        lt = payload_pb2.AddLabTest()
+        lt.ParseFromString(entity.data)
+        lab_tests.append({
+            'height': lt.height,
+            'weight': lt.weight,
+            'gender': lt.gender,
+            'a_g_ratio': lt.a_g_ratio,
+            'albumin': lt.albumin,
+            'alkaline_phosphatase': lt.alkaline_phosphatase,
+            'appearance': lt.appearance,
+            'bilirubin': lt.bilirubin,
+            'casts': lt.casts,
+            'color': lt.color
+        })
 
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': clinics},
+    return response.json(body={'data': lab_tests},
                          headers=general.get_response_headers(general.get_request_origin(request)))
-    # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)
 
 
-@CLINICS_BP.post('clinics')
-async def register_new_clinic(request):
+@LAB_TESTS_BP.post('labtests')
+async def add_new_lab_test(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
-    required_fields = ['name']
+    required_fields = ['height', 'weight', 'gender', 'a_g_ratio', 'albumin', 'alkaline_phosphatase',
+                       'appearance', 'bilirubin', 'casts', 'color']
     general.validate_fields(required_fields, request.json)
 
-    name = request.json.get('name')
+    height = request.json.get('height')
+    weight = request.json.get('weight')
+    gender = request.json.get('gender')
+    a_g_ratio = request.json.get('a_g_ratio')
+    albumin = request.json.get('albumin')
+    alkaline_phosphatase = request.json.get('alkaline_phosphatase')
+    appearance = request.json.get('appearance')
+    bilirubin = request.json.get('bilirubin')
+    casts = request.json.get('casts')
+    color = request.json.get('color')
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.create_clinic(
+    batch, batch_id = transaction.add_lab_test(
         txn_signer=clinic_signer,
         batch_signer=clinic_signer,
-        name=name)
+        height=height,
+        weight=weight,
+        gender=gender,
+        a_g_ratio=a_g_ratio,
+        albumin=albumin,
+        alkaline_phosphatase=alkaline_phosphatase,
+        appearance=appearance,
+        bilirubin=bilirubin,
+        casts=casts,
+        color=color)
 
     await messaging.send(
         request.app.config.VAL_CONN,

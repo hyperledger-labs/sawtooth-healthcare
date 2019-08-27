@@ -1,20 +1,16 @@
 import base64
-import hashlib
-import random
 import time
 
 import requests
 import yaml
 from sawtooth_sdk.protobuf import batch_pb2, transaction_pb2
-from sawtooth_sdk.protobuf.batch_pb2 import Batch, BatchList, BatchHeader
-from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import ParseError, CryptoFactory, create_context
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
-from common import transaction
-from common import helper
-from common.protobuf import payload_pb2
-from common.exceptions import HealthCareException
+from cli.common import transaction
+from cli.common import helper
+from cli.common.protobuf import payload_pb2
+from cli.common.exceptions import HealthCareException
 
 
 class HealthCareClient:

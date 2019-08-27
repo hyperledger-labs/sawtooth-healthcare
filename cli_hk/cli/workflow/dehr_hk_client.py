@@ -3,13 +3,13 @@ import time
 
 import requests
 import yaml
-from common.protobuf import payload_pb2
 from sawtooth_sdk.protobuf import batch_pb2
 from sawtooth_signing import ParseError, CryptoFactory, create_context
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
-from common import transaction, helper
-from common.exceptions import HealthCareException
+from cli.common.protobuf import payload_pb2
+from cli.common import transaction, helper
+from cli.common.exceptions import HealthCareException
 
 
 class HealthCareClient:

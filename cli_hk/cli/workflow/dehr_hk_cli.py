@@ -9,9 +9,9 @@ import pkg_resources
 from colorlog import ColoredFormatter
 from sawtooth_signing import create_context #, CryptoFactory
 
-from common.helper import DISTRIBUTION_NAME, DEFAULT_URL
-from common.exceptions import HealthCareException
-from cli_hk.workflow.dehr_hk_client import HealthCareClient
+from cli.common.helper import DISTRIBUTION_NAME, DEFAULT_URL
+from cli.common.exceptions import HealthCareException
+from cli.workflow.dehr_hk_client import HealthCareClient
 
 
 def create_console_handler(verbose_level):

@@ -48,7 +48,7 @@ from sawtooth_sdk.processor.log import log_configuration
 from sawtooth_sdk.processor.config import get_log_config
 from sawtooth_sdk.processor.config import get_log_dir
 
-from common.helper import TP_PREFFIX_HEX6
+from processor.common.helper import TP_PREFFIX_HEX6
 from processor.workflow.handler import HealthCareTransactionHandler
 
 

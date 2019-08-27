@@ -13,9 +13,9 @@ from sawtooth_sdk.protobuf import batch_pb2, transaction_pb2
 # from sawtooth_sdk.protobuf.transaction_pb2 import TransactionHeader, Transaction
 from sawtooth_signing import create_context, CryptoFactory
 
-from common import transaction
-from common import helper
-from common.protobuf import payload_pb2
+from processor.common import transaction
+from processor.common import helper
+# from processor.common.protobuf import payload_pb2
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)

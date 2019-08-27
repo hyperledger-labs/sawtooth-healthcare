@@ -1,5 +1,5 @@
-from common import helper
-from common.protobuf import payload_pb2
+from processor.common import helper
+from processor.common.protobuf import payload_pb2
 
 
 class HealthCareState(object):

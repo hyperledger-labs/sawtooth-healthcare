@@ -22,14 +22,12 @@ import sys
 # import rethinkdb as r
 
 from sanic import Sanic
-from sanic_cors import CORS
 
 from sawtooth_signing import create_context
 from sawtooth_signing import ParseError
 # from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 from sawtooth_signing import CryptoFactory
 
-from sawtooth_rest_api.messaging import Connection
 # from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 from zmq.asyncio import ZMQEventLoop
@@ -41,6 +39,7 @@ from rest_api.workflow.patients import PATIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
 from rest_api.workflow.pulse import PULSE_BP
+from sawtooth_rest_api.messaging import Connection
 
 # from api.authorization import AUTH_BP
 # from api.errors import ERRORS_BP

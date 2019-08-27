@@ -1,4 +1,4 @@
-from common.protobuf import payload_pb2
+from processor.common.protobuf import payload_pb2
 
 
 class HealthCarePayload(object):

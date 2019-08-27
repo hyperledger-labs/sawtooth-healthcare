@@ -3,7 +3,7 @@ import logging
 from sawtooth_sdk.processor.exceptions import InvalidTransaction
 from sawtooth_sdk.processor.handler import TransactionHandler
 
-import common.helper as helper
+import processor.common.helper as helper
 from processor.workflow.payload import HealthCarePayload
 from processor.workflow.state import HealthCareState
 

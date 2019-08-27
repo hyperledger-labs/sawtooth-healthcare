@@ -15,24 +15,9 @@
 
 from __future__ import print_function
 
-# import os
-# import subprocess
-
 from setuptools import setup, find_packages
 
 conf_dir = "/etc/sawtooth"
-
-# data_files = [
-#     (conf_dir, ['packaging/healthcare.toml'])
-# ]
-#
-# if os.path.exists("/etc/default"):
-#     data_files.append(
-#         ('/etc/default', ['packaging/systemd/sawtooth-healthcare-client-python']))
-#
-# if os.path.exists("/lib/systemd/system"):
-#     data_files.append(('/lib/systemd/system',
-#                        ['packaging/systemd/sawtooth-healthcare-client-python.service']))
 
 setup(
     name='healthcare-client',
@@ -41,7 +26,7 @@ setup(
     author='Hyperledger Sawtooth',
     url='https://github.com/hyperledger/sawtooth-core',
     # packages=find_packages(exclude=['processor', 'rest_api']),
-    packages=find_packages(include=['cli', 'common*']),
+    packages=find_packages(),
     install_requires=[
         # 'aiohttp',
         'colorlog',
@@ -56,6 +41,6 @@ setup(
     entry_points={
         'console_scripts': [
             'healthcare-cli-python = cli.workflow.healthcare_cli:main_wrapper',
-            # 'healthcare-tp-python = processor.workflow.main:main',
         ]
 })
+

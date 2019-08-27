@@ -23,14 +23,13 @@ from sanic import response
 # from sawtooth_signing import CryptoFactory
 
 # from rest_api.workflow.authorization import authorized
-from common import transaction
-from common.protobuf import payload_pb2
-from common import helper
-from rest_api.workflow import general
-from rest_api.workflow import messaging
-from rest_api.workflow.errors import ApiBadRequest
-from rest_api.workflow.errors import ApiInternalError
+from rest_api.common.protobuf import payload_pb2
+from rest_api.common import helper, transaction
+from rest_api.workflow import general, messaging
+from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
 
+# from workflow.errors import ApiBadRequest
+# from workflow.errors import ApiInternalError
 # from db import accounts_query
 # from db import auth_query
 # import pandas as pd
@@ -40,7 +39,7 @@ from rest_api.workflow.errors import ApiInternalError
 # from marketplace_transaction import transaction_creation
 
 
-CLAIMS_BP = Blueprint('claims')
+PATIENTS_BP = Blueprint('patients')
 
 
 # @CLINICS_BP.post('accounts')
@@ -90,59 +89,46 @@ CLAIMS_BP = Blueprint('claims')
 #         })
 
 
-@CLAIMS_BP.get('claims')
-async def get_all_claims(request):
+@PATIENTS_BP.get('patients')
+async def get_all_patients(request):
     """Fetches complete details of all Accounts in state"""
-    list_claims_address = helper.make_claim_list_address()
-    claim_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_claims_address)
+    list_patient_address = helper.make_patient_list_address()
+    patient_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_patient_address)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    claims = []
-    for entity in claim_resources.entries:
+    patients = []
+    for entity in patient_resources.entries:
         # dec_cl = base64.b64decode(entity.data)
-        cla = payload_pb2.CreateClaim()
-        cla.ParseFromString(entity.data)
-        claims.append({'clinic_pkey': cla.clinic_pkey, 'claim_id': cla.claim_id, 'patient_pkey': cla.patient_pkey})
+        pat = payload_pb2.CreatePatient()
+        pat.ParseFromString(entity.data)
+        patients.append({'public_key': pat.public_key, 'name': pat.name, 'surname': pat.surname})
+
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': claims},
+    return response.json(body={'data': patients},
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
-# @ACCOUNTS_BP.get('accounts/<key>')
-# async def get_account(request, key):
-#     """Fetches the details of particular Account in state"""
-#     try:
-#         auth_key = common.deserialize_auth_token(
-#             request.app.config.SECRET_KEY,
-#             request.token).get('public_key')
-#     except (BadSignature, TypeError):
-#         auth_key = None
-#     account_resource = await accounts_query.fetch_account_resource(
-#         request.app.config.DB_CONN, key, auth_key)
-#     return response.json(account_resource)
-#
-
-@CLAIMS_BP.post('claims')
-async def register_new_claim(request):
+@PATIENTS_BP.post('patients')
+async def register_new_patient(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
-    required_fields = ['claim_id', 'patient_pkey']
+    required_fields = ['name', 'surname']
     general.validate_fields(required_fields, request.json)
 
-    claim_id = request.json.get('claim_id')
-    patient_pkey = request.json.get('patient_pkey')
+    name = request.json.get('name')
+    surname = request.json.get('surname')
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.register_claim(
+    batch, batch_id = transaction.create_patient(
         txn_signer=clinic_signer,
         batch_signer=clinic_signer,
-        claim_id=claim_id,
-        patient_pkey=patient_pkey)
+        name=name,
+        surname=surname)
 
     await messaging.send(
         request.app.config.VAL_CONN,
@@ -159,3 +145,79 @@ async def register_new_claim(request):
 
     return response.json(body={'status': general.DONE},
                          headers=general.get_response_headers(general.get_request_origin(request)))
+
+# @ACCOUNTS_BP.get('accounts/<key>')
+# async def get_account(request, key):
+#     """Fetches the details of particular Account in state"""
+#     try:
+#         auth_key = common.deserialize_auth_token(
+#             request.app.config.SECRET_KEY,
+#             request.token).get('public_key')
+#     except (BadSignature, TypeError):
+#         auth_key = None
+#     account_resource = await accounts_query.fetch_account_resource(
+#         request.app.config.DB_CONN, key, auth_key)
+#     return response.json(account_resource)
+#
+
+# @ACCOUNTS_BP.patch('accounts')
+# @authorized()
+# async def update_account_info(request):
+#     """Updates auth information for the authorized account"""
+#     token = common.deserialize_auth_token(
+#         request.app.config.SECRET_KEY, request.token)
+#
+#     update = {}
+#     if request.json.get('password'):
+#         update['hashed_password'] = bcrypt.hashpw(
+#             bytes(request.json.get('password'), 'utf-8'), bcrypt.gensalt())
+#     if request.json.get('email'):
+#         update['email'] = request.json.get('email')
+#
+#     if update:
+#         updated_auth_info = await auth_query.update_auth_info(
+#             request.app.config.DB_CONN,
+#             token.get('email'),
+#             token.get('public_key'),
+#             update)
+#         new_token = common.generate_auth_token(
+#             request.app.config.SECRET_KEY,
+#             updated_auth_info.get('email'),
+#             updated_auth_info.get('publicKey'))
+#     else:
+#         updated_auth_info = await accounts_query.fetch_account_resource(
+#             request.app.config.DB_CONN,
+#             token.get('public_key'),
+#             token.get('public_key'))
+#         new_token = request.token
+#
+#     return response.json(
+#         {
+#             'authorization': new_token,
+#             'account': updated_auth_info
+#         })
+
+#
+# def _create_account_dict(body, public_key):
+#     keys = ['label', 'description', 'email']
+#
+#     account = {k: body[k] for k in keys if body.get(k) is not None}
+#
+#     account['publicKey'] = public_key
+#     account['holdings'] = []
+#
+#     return account
+
+
+# def _create_auth_dict(request, public_key, private_key):
+#     auth_entry = {
+#         'public_key': public_key,
+#         'email': request.json['email']
+#     }
+#
+#     auth_entry['encrypted_private_key'] = common.encrypt_private_key(
+#         request.app.config.AES_KEY, public_key, private_key)
+#     auth_entry['hashed_password'] = bcrypt.hashpw(
+#         bytes(request.json.get('password'), 'utf-8'), bcrypt.gensalt())
+#
+# return auth_entry

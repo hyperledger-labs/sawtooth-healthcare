@@ -12,35 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-# import base64
-#
-# import bcrypt
-#
-# from itsdangerous import BadSignature
-from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
 from sanic import Blueprint
 from sanic import response
 
-# from sawtooth_signing import CryptoFactory
+from rest_api.common.protobuf import payload_pb2
+from rest_api.common import helper, transaction
+from rest_api.workflow import general, messaging
+from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 
-# from rest_api.workflow.authorization import authorized
-from common.protobuf import payload_pb2
-from common import helper, transaction
-from rest_api.workflow import general
-from rest_api.workflow import messaging
-
-# from workflow.errors import ApiBadRequest
-# from workflow.errors import ApiInternalError
-# from db import accounts_query
-# from db import auth_query
-# import pandas as pd
-# from google.protobuf.json_format import MessageToJson
-# from google.protobuf.json_format import MessageToDict
-
-# from marketplace_transaction import transaction_creation
-
-
-PATIENTS_BP = Blueprint('patients')
+CLINICS_BP = Blueprint('clinics')
 
 
 # @CLINICS_BP.post('accounts')
@@ -90,46 +70,49 @@ PATIENTS_BP = Blueprint('patients')
 #         })
 
 
-@PATIENTS_BP.get('patients')
-async def get_all_patients(request):
+@CLINICS_BP.get('clinics')
+async def get_all_clinics(request):
     """Fetches complete details of all Accounts in state"""
-    list_patient_address = helper.make_patient_list_address()
-    patient_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_patient_address)
+
+    # origin = None
+    # if 'Origin' in request.headers:
+    #     origin = request.headers['Origin']
+    list_clinic_address = helper.make_clinic_list_address()
+    account_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_clinic_address)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    patients = []
-    for entity in patient_resources.entries:
+    clinics = []
+    for entity in account_resources.entries:
         # dec_cl = base64.b64decode(entity.data)
-        pat = payload_pb2.CreatePatient()
-        pat.ParseFromString(entity.data)
-        patients.append({'public_key': pat.public_key, 'name': pat.name, 'surname': pat.surname})
+        cl = payload_pb2.CreateClinic()
+        cl.ParseFromString(entity.data)
+        clinics.append({'public_key': cl.public_key, 'name': cl.name})
 
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': patients},
+    return response.json(body={'data': clinics},
                          headers=general.get_response_headers(general.get_request_origin(request)))
+    # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)
 
 
-@PATIENTS_BP.post('patients')
-async def register_new_patient(request):
+@CLINICS_BP.post('clinics')
+async def register_new_clinic(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
-    required_fields = ['name', 'surname']
+    required_fields = ['name']
     general.validate_fields(required_fields, request.json)
 
     name = request.json.get('name')
-    surname = request.json.get('surname')
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.create_patient(
+    batch, batch_id = transaction.create_clinic(
         txn_signer=clinic_signer,
         batch_signer=clinic_signer,
-        name=name,
-        surname=surname)
+        name=name)
 
     await messaging.send(
         request.app.config.VAL_CONN,
