@@ -110,3 +110,9 @@ venv.bak/
 .idea/
 /common/protobuf/__init__.py
 /common/protobuf/payload_pb2.py
+common/protobuf/
+
+cli/cli/common
+cli_hk/cli/common
+processor/processor/common
+rest_api/rest_api/common
