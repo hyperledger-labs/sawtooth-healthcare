@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 bin/healthcare-protogen
-#python3 setup_cli.py clean --bdist-base ./cli/bdist.linux-x86_64 --build-lib ./cli/lib --all
-#python3 setup_cli.py build -b ./cli install
-python3 setup_cli.py clean --all
-python3 setup_cli.py build
-python3 setup_cli.py install
+cp -R common cli/cli
+cd cli
+#python3 setup.py clean --bdist-base ./cli/bdist.linux-x86_64 --build-lib ./cli/lib --all
+#python3 setup.py build -b ./cli install
+python3 setup.py clean --all
+python3 setup.py build
+python3 setup.py install
 
 if [[ ! -f /root/.sawtooth/keys/clinicCLI.priv ]]; then
     sawtooth keygen clinicCLI

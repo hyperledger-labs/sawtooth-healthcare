@@ -5,8 +5,10 @@ import time
 from sawtooth_sdk.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
-import common.helper as helper
-from common.protobuf import payload_pb2
+# import common.helper as helper
+# from common.protobuf import payload_pb2
+from . import helper as helper
+from .protobuf import payload_pb2
 
 
 def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
