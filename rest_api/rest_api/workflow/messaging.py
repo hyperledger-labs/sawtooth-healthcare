@@ -58,7 +58,7 @@ async def get_state_by_address(conn, address_suffix):
 
     status_response = client_state_pb2.ClientStateListResponse()
     status_response.ParseFromString(validator_response.content)
-    resp = status_response
+    # resp = status_response
 
     return status_response  # resp.entries
 
