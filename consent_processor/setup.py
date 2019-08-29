@@ -34,7 +34,7 @@ conf_dir = "/etc/sawtooth"
 #                        ['packaging/systemd/sawtooth-healthcare-tp-python.service']))
 
 setup(
-    name='consent-consent_processor',
+    name='consent-processor',
     version='0.1',
     description='Sawtooth Consent Processor Example',
     author='Hyperledger Sawtooth',

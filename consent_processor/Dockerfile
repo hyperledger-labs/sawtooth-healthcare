@@ -25,6 +25,6 @@ WORKDIR /project/sawtooth_healthcare
 ENV PATH $PATH:/project/sawtooth_healthcare/bin
 
 #CMD ["echo", "$PATH"]
-CMD echo "\033[0;32m--- 2Building healthcare-tp ---\n\033[0m" \
-    && init-healthcare-tp.sh \
-    && healthcare-tp -v -C tcp://validator:4004
+CMD echo "\033[0;32m--- 2Building consent-tp ---\n\033[0m" \
+    && init-consent-tp.sh \
+    && consent-tp -v -C tcp://validator:4004

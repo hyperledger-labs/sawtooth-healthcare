@@ -78,18 +78,18 @@ message ConsentTransactionPayload {
 //}
 
 message ActionOnAccess {
-    enum Event {
-        GRANT = 0;
-        REVOKE = 1;
-//        PASS_TEST = 2;
-//        PASS_PROCEDURE = 3;
-//        EAT_PILLS = 4;
-//        NEXT_VISIT = 5;
-    }
+//    enum Event {
+//        GRANT = 0;
+//        REVOKE = 1;
+////        PASS_TEST = 2;
+////        PASS_PROCEDURE = 3;
+////        EAT_PILLS = 4;
+////        NEXT_VISIT = 5;
+//    }
 
     string doctor_pkey = 1;
     string patient_pkey = 2;
 //    string description = 3;
-    Event event = 4;
+//    Event event = 3;
 //    string event_time = 5;
 }

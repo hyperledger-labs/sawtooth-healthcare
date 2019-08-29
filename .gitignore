@@ -118,3 +118,4 @@ cli_hk/cli/common
 processor/processor/common
 consent_processor/consent_processor/consent_common
 rest_api/rest_api/common
+rest_api/rest_api/consent_common
