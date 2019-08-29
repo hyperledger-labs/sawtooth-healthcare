@@ -1,2 +1,0 @@
-class ConsentException(Exception):
-    pass

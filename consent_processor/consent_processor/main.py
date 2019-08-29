@@ -23,7 +23,7 @@ from sawtooth_sdk.processor.config import get_log_config
 from sawtooth_sdk.processor.config import get_log_dir
 
 from consent_common.helper import TP_PREFFIX_HEX6
-from consent_processor.workflow.handler import ConsentTransactionHandler
+from consent_common import ConsentTransactionHandler
 
 
 def parse_args(args):
