@@ -1,29 +1,3 @@
-# from sawtooth_sdk.processor.core import TransactionProcessor
-#
-# from sawtooth_healthcare.common.helper import TP_PREFFIX_HEX6
-# from sawtooth_healthcare.processor import HealthCareTransactionHandler
-#
-#
-# def main():
-#     # In docker, the url would be the validator's container name with
-#     # port 4004
-#     print("Starting...")
-#     try:
-#         processor = TransactionProcessor(url='tcp://127.0.0.1:4004')
-#
-#         handler = HealthCareTransactionHandler(TP_PREFFIX_HEX6)
-#         processor.add_handler(handler)
-#
-#         processor.start()
-#         print("Started!!!")
-#     except Exception as e:
-#         print("Error: {}".format(e))
-#     print("Done!!!")
-#
-#
-# if __name__ == "__main__":
-#     main()
-
 # Copyright 2017 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,8 +22,8 @@ from sawtooth_sdk.processor.log import log_configuration
 from sawtooth_sdk.processor.config import get_log_config
 from sawtooth_sdk.processor.config import get_log_dir
 
-from processor.common.helper import TP_PREFFIX_HEX6
-from processor.workflow.handler import HealthCareTransactionHandler
+from consent_processor.consent_common.helper import TP_PREFFIX_HEX6
+from consent_processor.handler import ConsentTransactionHandler
 
 
 def parse_args(args):
@@ -76,24 +50,24 @@ def main(args=None):
     processor = None
     try:
         processor = TransactionProcessor(url=opts.connect)
-        log_config = get_log_config(filename="healthcare_log_config.toml")
+        log_config = get_log_config(filename="consent_log_config.toml")
 
         # If no toml, try loading yaml
         if log_config is None:
-            log_config = get_log_config(filename="healthcare_log_config.yaml")
+            log_config = get_log_config(filename="consent_log_config.yaml")
 
         if log_config is not None:
             log_configuration(log_config=log_config)
         else:
             log_dir = get_log_dir()
-            # use the transaction processor zmq identity for filename
+            # use the transaction consent_processor zmq identity for filename
             # log_configuration(
                 # log_dir=log_dir,
-                # name="healthcare-" + str(processor.zmq_id)[2:-1])
+                # name="healthcare-" + str(consent_processor.zmq_id)[2:-1])
 
         init_console_logging(verbose_level=opts.verbose)
 
-        handler = HealthCareTransactionHandler(TP_PREFFIX_HEX6)
+        handler = ConsentTransactionHandler(TP_PREFFIX_HEX6)
 
         processor.add_handler(handler)
 

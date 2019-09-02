@@ -9,6 +9,7 @@ var DoctorForm = require("./views/DoctorForm")
 
 var PatientList = require("./views/PatientList")
 var PatientForm = require("./views/PatientForm")
+var PatientDetailsForm = require("./views/PatientDetailsForm")
 
 var ClinicList = require("./views/ClinicList")
 var ClinicForm = require("./views/ClinicForm")
@@ -134,6 +135,11 @@ m.route(document.body, "/actions", {
     "/pulse_list/new/": {
         render: function() {
             return m(Layout, m(PulseForm))
+        }
+    },
+    "/patient/:patient_pkey": {
+        render: function(vnode) {
+            return m(Layout, m(PatientDetailsForm, vnode.attrs))
         }
     },
 //    "/list": {

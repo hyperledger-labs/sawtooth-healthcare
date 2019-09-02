@@ -52,6 +52,15 @@ def validate_fields(required_fields, request_json):
         raise ApiBadRequest("Improper JSON format")
 
 
+# def validate_input_params(required_fields, request_params):
+#     try:
+#         for field in required_fields:
+#             if request_params.get(field) is None:
+#                 raise ApiBadRequest("{} is required".format(field))
+#     except (ValueError, AttributeError):
+#         raise ApiBadRequest("Improper URL params")
+
+
 def encrypt_private_key(aes_key, public_key, private_key):
     init_vector = bytes.fromhex(public_key[:32])
     cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
