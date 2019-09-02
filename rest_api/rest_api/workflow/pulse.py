@@ -48,12 +48,12 @@ async def get_all_pulse_items(request):
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
-@PULSE_BP.get('own_pulse')
-async def get_own_pulse_items(request):
+@PULSE_BP.get('pulse/<patient_pkey>')
+async def get_own_pulse_items(request, patient_pkey):
     """Fetches complete details of all Accounts in state"""
-    required_fields = ['patient_pkey']
-    general.validate_input_params(required_fields, request.args)
-    patient_pkey = request.args.get('patient_pkey')
+    # required_fields = ['patient_pkey']
+    # general.validate_input_params(required_fields, request.args)
+    # patient_pkey = request.args.get('patient_pkey')
 
     pulse_list_address = helper.make_pulse_list_by_patient_address(patient_pkey=patient_pkey)
     pulse_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, pulse_list_address)
@@ -72,17 +72,17 @@ async def get_own_pulse_items(request):
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
-@PULSE_BP.get('consent_pulse')
-async def get_pulse_items_by_consent(request):
+@PULSE_BP.get('pulse/<patient_pkey>/<doctor_pkey>')
+async def get_pulse_items_by_consent(request, patient_pkey, doctor_pkey):
     """Fetches complete details of all Accounts in state"""
-    required_fields = ['doctor_pkey', 'patient_pkey']
-    general.validate_input_params(required_fields, request.args)
-    doctor_pkey = request.args.get('doctor_pkey')
-    patient_pkey = request.args.get('patient_pkey')
+    # required_fields = ['doctor_pkey', 'patient_pkey']
+    # general.validate_input_params(required_fields, request.args)
+    # doctor_pkey = request.args.get('doctor_pkey')
+    # patient_pkey = request.args.get('patient_pkey')
     access_address = consent_helper.make_consent_address(doctor_pkey=doctor_pkey, patient_pkey=patient_pkey)
     access_state = await messaging.get_state_by_address(request.app.config.VAL_CONN, access_address)
     if len(access_state.entries) == 0:
-        raise ConsentException("No consent to retrieve such data")
+        raise ApiInternalError("No consent to retrieve such data")
 
     pulse_list_address = helper.make_pulse_list_by_patient_address(patient_pkey=patient_pkey)
     pulse_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, pulse_list_address)
