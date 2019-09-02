@@ -6,7 +6,7 @@ var PatientDetails = {
     load: function(patient_pkey, doctor_pkey) {
         return m.request({
             method: "GET",
-            url: "/api/pulse/" + patient_pkey + "/" + doctor_pkey,
+            url: "/api/sec_pulse/" + patient_pkey + "/" + doctor_pkey,
 //            withCredentials: true,
         })
         .then(function(result) {

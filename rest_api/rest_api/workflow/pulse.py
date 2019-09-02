@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
+import logging
+
 from sanic import Blueprint
 from sanic import response
 
@@ -24,11 +26,14 @@ from rest_api.workflow import general, messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 
 PULSE_BP = Blueprint('pulse')
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 
 @PULSE_BP.get('pulse')
 async def get_all_pulse_items(request):
     """Fetches complete details of all Accounts in state"""
+    LOGGER.debug("Call 'pulse' request")
     pulse_list_address = helper.make_pulse_list_address()
     pulse_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, pulse_list_address)
     # account_resources2 = MessageToJson(account_resources)
@@ -48,13 +53,13 @@ async def get_all_pulse_items(request):
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
-@PULSE_BP.get('pulse/<patient_pkey>')
+@PULSE_BP.get('own_pulse/<patient_pkey>')
 async def get_own_pulse_items(request, patient_pkey):
     """Fetches complete details of all Accounts in state"""
     # required_fields = ['patient_pkey']
     # general.validate_input_params(required_fields, request.args)
     # patient_pkey = request.args.get('patient_pkey')
-
+    LOGGER.debug("Call 'own_pulse/<patient_pkey>' request")
     pulse_list_address = helper.make_pulse_list_by_patient_address(patient_pkey=patient_pkey)
     pulse_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, pulse_list_address)
     pulse_list = []
@@ -72,9 +77,10 @@ async def get_own_pulse_items(request, patient_pkey):
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
-@PULSE_BP.get('pulse/<patient_pkey>/<doctor_pkey>')
+@PULSE_BP.get('sec_pulse/<patient_pkey>/<doctor_pkey>')
 async def get_pulse_items_by_consent(request, patient_pkey, doctor_pkey):
     """Fetches complete details of all Accounts in state"""
+    LOGGER.debug("Call 'pulse/<patient_pkey>/<doctor_pkey>' request")
     # required_fields = ['doctor_pkey', 'patient_pkey']
     # general.validate_input_params(required_fields, request.args)
     # doctor_pkey = request.args.get('doctor_pkey')
