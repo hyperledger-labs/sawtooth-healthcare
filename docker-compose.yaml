@@ -87,7 +87,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-tp
+    image: consent-tp
     container_name: consent-processor
     volumes:
       - ./:/project/sawtooth_healthcare

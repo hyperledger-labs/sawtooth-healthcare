@@ -16,6 +16,7 @@ var PatientDetails = {
         .catch(function(e) {
             console.log(e)
             PatientDetails.error = e.message
+            PatientDetails.pulseList = []
         })
     },
 
