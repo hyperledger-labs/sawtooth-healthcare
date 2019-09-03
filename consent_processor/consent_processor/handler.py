@@ -41,9 +41,11 @@ class ConsentTransactionHandler(TransactionHandler):
             consent_state = ConsentState(context)
 
             if consent_payload.is_revoke_access():
+                LOGGER.debug("Revoke Access")
                 access = consent_payload.revoke_access()
                 consent_state.revoke_access(doctor_pkey=access.doctor_pkey, patient_pkey=access.patient_pkey)
             elif consent_payload.is_grant_access():
+                LOGGER.debug("Grant Access")
                 access = consent_payload.grant_access()
                 consent_state.grant_access(doctor_pkey=access.doctor_pkey, patient_pkey=access.patient_pkey)
             else:

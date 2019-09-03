@@ -30,8 +30,8 @@ TP_PREFFIX_HEX6 = _hash(TP_FAMILYNAME)[0:6]
 
 def make_consent_address(doctor_pkey, patient_pkey):
     return TP_PREFFIX_HEX6 + CONSENT_ENTITY_CODE \
-           + DOCTOR_ENTITY_CODE + _hash(doctor_pkey)[:29] \
-           + PATIENT_ENTITY_NAME + _hash(patient_pkey)[:29]
+           + _hash(DOCTOR_ENTITY_NAME)[:6] + _hash(doctor_pkey)[:25] \
+           + _hash(PATIENT_ENTITY_NAME)[:6] + _hash(patient_pkey)[:25]
 
 
 def make_consent_list_address():
@@ -40,7 +40,7 @@ def make_consent_list_address():
 
 def make_consent_list_address_by_doctor(doctor_pkey):
     return TP_PREFFIX_HEX6 + CONSENT_ENTITY_CODE \
-           + DOCTOR_ENTITY_CODE + _hash(doctor_pkey)[:29]
+           + _hash(DOCTOR_ENTITY_NAME)[:6] + _hash(doctor_pkey)[:25]
 
 
 # def make_doctor_address(doctor_pkey):
