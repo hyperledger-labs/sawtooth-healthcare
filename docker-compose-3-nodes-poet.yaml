@@ -1,33 +1,9 @@
 version: '3'
 
-
 volumes:
   poet-shared:
 
 services:
-
-#  healthcare-processor:
-#    build:
-#      context: .
-#      dockerfile: processor/Dockerfile
-#      args:
-#        - http_proxy
-#        - https_proxy
-#        - no_proxy
-#    image: healthcare-tp
-#    container_name: healthcare-processor
-#    volumes:
-#      - ./:/project/sawtooth_healthcare
-##    depends_on:
-##      - healthcare-shell
-#    command: |
-#      bash -c "
-#        sleep 1 &&
-#        echo '--- Building healthcare-tp by docker-compose---\n' &&
-#        init-healthcare-tp.sh &&
-#        healthcare-tp -v -C tcp://validator:4004 &&
-#        tail -f /dev/null
-#      "
 
   healthcare-processor-0:
     build:
@@ -101,6 +77,69 @@ services:
         tail -f /dev/null
       "
 
+  consent-processor-0:
+    build:
+      context: .
+      dockerfile: consent_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: consent-tp
+    container_name: consent-processor-0
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building consent-tp-0 by docker-compose---\n' &&
+        init-consent-tp.sh &&
+        consent-tp -v -C tcp://validator-0:4004 &&
+        tail -f /dev/null
+               "
+
+  consent-processor-1:
+    build:
+      context: .
+      dockerfile: consent_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: consent-tp
+    container_name: consent-processor-1
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building consent-tp-1 by docker-compose---\n' &&
+        init-consent-tp.sh &&
+        consent-tp -v -C tcp://validator-1:4004 &&
+        tail -f /dev/null
+               "
+
+  consent-processor-2:
+    build:
+      context: .
+      dockerfile: consent_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: consent-tp
+    container_name: consent-processor-2
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building consent-tp-2 by docker-compose---\n' &&
+        init-consent-tp.sh &&
+        consent-tp -v -C tcp://validator-2:4004 &&
+        tail -f /dev/null
+               "
+
   healthcare-cli:
     build:
       context: .
@@ -144,32 +183,6 @@ services:
         init-healthcare-cli-hk.sh &&
         tail -f /dev/null
       "
-
-#  healthcare-rest-api:
-#    build:
-#      context: .
-#      dockerfile: rest_api/Dockerfile
-#      args:
-#        - http_proxy
-#        - https_proxy
-#        - no_proxy
-#    image: healthcare-rest-api
-#    container_name: healthcare-rest-api
-#    volumes:
-#      - .:/project/sawtooth_healthcare
-#    ports:
-#      - '8040:8000'
-##    depends_on:
-##      - healthcare-shell
-##      - validator
-#    command: |
-#      bash -c "
-#        sleep 3 &&
-#        echo '--- Building healthcare-rest-api by docker-compose---' &&
-#        init-healthcare-rest-api.sh &&
-#        healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
-#        tail -f /dev/null
-#               "
 
   healthcare-rest-api-0:
     build:
@@ -251,36 +264,6 @@ services:
         healthcare-rest-api --host healthcare-rest-api-2 --validator tcp://validator-2:4004 &&
         tail -f /dev/null
                "
-    #init-healthcare-rest-api.sh &&
-#               healthcare-rest-api --host healthcare-rest-api --validator tcp://validator:4004 &&
-  #        healthcare-rest-api \
-  #          --host healthcare-rest-api \
-#          --validator tcp://validator:4004
-#      "
-
-
-#  healthcare-web-app:
-#    build:
-#      context: .
-#      dockerfile: web/Dockerfile
-#    image: healthcare-web-app
-#    user: "node"
-#    container_name: healthcare-web-app
-#    #    volumes:
-#    #      - .:/project/sawtooth_healthcare
-#    volumes:
-#      - ./web:/home/node/app
-#      - /home/node/app/node_modules
-#    expose:
-#      - 8080
-#    ports:
-#      - '8041:8080'
-#    command: |
-#      sh -c "
-#      echo '--- Starting healthcare-web-app by docker-compose---' &&
-#      npm start
-#      "
-#  #              tail -f /dev/null
 
   healthcare-web-app-0:
     build:
@@ -355,14 +338,6 @@ services:
       echo '--- Starting healthcare-web-app-2 by docker-compose---' &&
       npm run start-2
       "
-  #              tail -f /dev/null
-
-#  settings-tp:
-#    image: hyperledger/sawtooth-settings-tp:1.1
-#    container_name: sawtooth-settings-tp
-#    depends_on:
-#      - validator
-#    command: settings-tp -vv --connect tcp://validator:4004
 
   settings-tp-0:
     image: hyperledger/sawtooth-settings-tp:1.1
@@ -464,20 +439,6 @@ services:
 #      PYTHONPATH: /project/sawtooth-core/consensus/poet/common
 #    stop_signal: SIGKILL
 
-#  sawtooth-rest-api:
-#    image: hyperledger/sawtooth-rest-api:1.1
-#    container_name: sawtooth-rest-api
-#    expose:
-#      - 8008
-#    ports:
-#      - '8043:8008'
-#    depends_on:
-#      - validator
-#    entrypoint: |
-#      sawtooth-rest-api -vv
-#        --connect tcp://validator:4004
-#        --bind sawtooth-rest-api:8008
-
   sawtooth-rest-api-0:
     image: hyperledger/sawtooth-rest-api:1.1
     container_name: sawtooth-rest-api-0
@@ -519,27 +480,6 @@ services:
       sawtooth-rest-api -vv
         --connect tcp://validator-2:4004
         --bind sawtooth-rest-api-2:8008
-
-  #  validator:
-  #    image: hyperledger/sawtooth-validator:1.1
-  #    container_name: sawtooth-validator
-  #    expose:
-  #      - 4004
-  #    ports:
-  #      - '4040:4004'
-  #    command: |
-  #      bash -c "
-  #        if [ ! -f /etc/sawtooth/keys/validator.priv ]; then
-  #        sawadm keygen &&
-  #        sawtooth keygen my_key &&
-  #        sawset genesis -k /root/.sawtooth/keys/my_key.priv &&
-#        sawadm genesis config-genesis.batch
-#        fi;
-#        sawtooth-validator -vv \
-#          --endpoint tcp://validator:8800 \
-#          --bind component:tcp://eth0:4004 \
-#      --bind network:tcp://eth0:8800
-#               "
 
   validator-0:
     image: hyperledger/sawtooth-validator:1.1

@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-
+import sys
 from glob import glob
 import os
 import re
@@ -12,7 +12,7 @@ TOP_DIR = DIRNAME(DIRNAME(__file__))
 SRC_DIR = os.path.join(TOP_DIR, 'protos')
 
 
-def make_protobuf(path, pkg_name):
+def make_protobuf(path, pkg_name, proto_file='*.proto'):
     OUT_DIR = os.path.join(TOP_DIR, path, pkg_name)
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -28,7 +28,7 @@ def make_protobuf(path, pkg_name):
 
         cwd = os.getcwd()
         os.chdir(SRC_DIR)
-        proto_files = glob("*.proto")
+        proto_files = glob(proto_file)
         os.chdir(cwd)
 
         for proto in proto_files:
@@ -44,7 +44,7 @@ def make_protobuf(path, pkg_name):
                     __file__,
                     "-I=%s" % tmp_dir,
                     "--python_out=%s" % os.path.join(TOP_DIR, path),
-                ] + glob("%s/*.proto" % tmp_pkg_dir))
+                ] + glob("{}/{}".format(tmp_pkg_dir, proto_file)))
         print("Generated protobuf classes: {}".format(OUT_DIR))
 
 
@@ -63,5 +63,14 @@ def fix_import(contents, pkg, sub_dir=False):
     )
 
 
+def make_consent_protobuf():
+    make_protobuf(path='consent_common', pkg_name='protobuf', proto_file='consent_payload.proto')
+
+
+def make_base_protobuf():
+    make_protobuf(path='common', pkg_name='protobuf', proto_file='payload.proto')
+
+
 if __name__ == '__main__':
-    make_protobuf('common', 'protobuf')
+    # make_protobuf(path='common', pkg_name='protobuf', proto_file='payload.proto')
+    globals()[sys.argv[1] if len(sys.argv) > 1 else 'make_base_protobuf']()

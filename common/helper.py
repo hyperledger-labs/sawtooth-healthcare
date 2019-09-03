@@ -25,6 +25,7 @@ EVENT_ENTITY_CODE = '05'
 LAB_TEST_ENTITY_CODE = '06'
 PULSE_ENTITY_CODE = '07'
 
+
 def _hash(identifier):
     return hashlib.sha512(identifier.encode('utf-8')).hexdigest()
 

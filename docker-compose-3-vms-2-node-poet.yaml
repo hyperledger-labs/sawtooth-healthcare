@@ -30,6 +30,27 @@ services:
         tail -f /dev/null
       "
 
+  consent-processor-2:
+    build:
+      context: .
+      dockerfile: consent_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: consent-tp
+    container_name: consent-processor-2
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building consent-tp-2 by docker-compose---\n' &&
+        init-consent-tp.sh &&
+        consent-tp -v -C tcp://validator-2:4004 &&
+        tail -f /dev/null
+               "
+
   healthcare-cli:
     build:
       context: .
