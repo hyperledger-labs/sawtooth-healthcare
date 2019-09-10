@@ -20,8 +20,11 @@ import logging
 from sawtooth_rest_api.protobuf import client_state_pb2
 from sawtooth_rest_api.protobuf import validator_pb2
 
-from rest_api.common import helper
-from rest_api.common.protobuf import payload_pb2
+# from rest_api.common import helper
+from rest_api.consent_common import helper as consent_helper
+# from rest_api.consent_common.protobuf import consent_payload_pb2
+# from rest_api.common.protobuf import payload_pb2
+from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission
 from rest_api.workflow import messaging
 # from rest_api.workflow.errors import ApiBadRequest
 # from rest_api.workflow.errors import ApiInternalError
@@ -61,26 +64,22 @@ async def get_state_by_address(conn, address_suffix):
     #     raise ApiInternalError("Something went wrong. Try again later")
 
 
-def _validate_permission(expected_permission, current_permissions):
-    if payload_pb2.Permission(type=expected_permission) not in current_permissions:
-        raise ApiForbidden("Insufficient permission")
-
-
 async def add_clinic(conn, timeout, batches):
     await _send(conn, timeout, batches)
 
 
 async def get_clinics(conn, address_suffix, client_key):
-    client_address = helper.make_clinic_address(client_key)
+    client_address = consent_helper.make_client_address(client_key)
     LOGGER.debug('client_address: ' + str(client_address))
-    clinic_resources = await messaging.get_state_by_address(conn, client_address)
-    LOGGER.debug('clinic_resources: ' + str(clinic_resources))
-    for entity in clinic_resources.entries:
-        cl = payload_pb2.CreateClinic()
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        cl = Client()
         cl.ParseFromString(entity.data)
-        LOGGER.debug('clinic: ' + str(cl))
-        _validate_permission(payload_pb2.Permission.READ_CLINIC, cl.permissions)
-    return await messaging.get_state_by_address(conn, address_suffix)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.READ_CLINIC) in cl.permissions:
+            return await messaging.get_state_by_address(conn, address_suffix)
+    raise ApiForbidden("Insufficient permission")
 
 
 async def add_doctor(conn, timeout, batches):
@@ -88,16 +87,17 @@ async def add_doctor(conn, timeout, batches):
 
 
 async def get_doctors(conn, address_suffix, client_key):
-    client_address = helper.make_doctor_address(client_key)
+    client_address = consent_helper.make_client_address(client_key)
     LOGGER.debug('client_address: ' + str(client_address))
-    doctor_resources = await messaging.get_state_by_address(conn, client_address)
-    LOGGER.debug('doctor_resources: ' + str(doctor_resources))
-    for entity in doctor_resources.entries:
-        doc = payload_pb2.CreateDoctor()
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        doc = Client()
         doc.ParseFromString(entity.data)
-        LOGGER.debug('doctor: ' + str(doc))
-        _validate_permission(payload_pb2.Permission.READ_DOCTOR, doc.permissions)
-    return await messaging.get_state_by_address(conn, address_suffix)
+        LOGGER.debug('client: ' + str(doc))
+        if Permission(type=Permission.READ_DOCTOR) in doc.permissions:
+            return await messaging.get_state_by_address(conn, address_suffix)
+    raise ApiForbidden("Insufficient permission")
 
 
 async def add_patient(conn, timeout, batches):
@@ -105,13 +105,14 @@ async def add_patient(conn, timeout, batches):
 
 
 async def get_patients(conn, address_suffix, client_key):
-    client_address = helper.make_patient_address(client_key)
+    client_address = consent_helper.make_client_address(client_key)
     LOGGER.debug('client_address: ' + str(client_address))
-    patient_resources = await messaging.get_state_by_address(conn, client_address)
-    LOGGER.debug('patient_resources: ' + str(patient_resources))
-    for entity in patient_resources.entries:
-        pat = payload_pb2.CreatePatient()
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        pat = Client()
         pat.ParseFromString(entity.data)
-        LOGGER.debug('patient: ' + str(pat))
-        _validate_permission(payload_pb2.Permission.READ_PATIENT, pat.permissions)
-    return await messaging.get_state_by_address(conn, address_suffix)
+        LOGGER.debug('client: ' + str(pat))
+        if Permission(type=Permission.READ_PATIENT) in pat.permissions:
+            return await messaging.get_state_by_address(conn, address_suffix)
+    raise ApiForbidden("Insufficient permission")

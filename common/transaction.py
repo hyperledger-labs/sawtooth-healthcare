@@ -14,6 +14,45 @@ logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
 
+def _make_transaction(payload, inputs, outputs, txn_signer, batch_signer):
+    txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
+
+    txn = Transaction(
+        header=txn_header_bytes,
+        header_signature=signature,
+        payload=payload.SerializeToString()
+    )
+
+    return txn
+
+    # transactions = [txn]
+    #
+    # batch_header_bytes, signature = _batch_header(batch_signer, transactions)
+    #
+    # batch = Batch(
+    #     header=batch_header_bytes,
+    #     header_signature=signature,
+    #     transactions=transactions
+    # )
+    #
+    # # batch_list = BatchList(batches=[batch])
+    # # batch_id = batch_list.batches[0].header_signature
+    # # return batch_list, batch_id
+    # return batch, batch.header_signature
+
+
+def make_batch_and_id(transactions, batch_signer):
+    batch_header_bytes, signature = _batch_header(batch_signer, transactions)
+
+    batch = Batch(
+        header=batch_header_bytes,
+        header_signature=signature,
+        transactions=transactions
+    )
+
+    return batch, batch.header_signature
+
+
 def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
     txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
 
@@ -127,24 +166,15 @@ def create_patient(txn_signer, batch_signer, name, surname):
 
 
 def create_clinic(txn_signer, batch_signer, name):
-    """Create a CreateAccount txn and wrap it in a batch and list.
-    Args:
-        txn_signer (sawtooth_signing.Signer): The Txn signer key pair.
-        batch_signer (sawtooth_signing.Signer): The Batch signer key pair.
-        name (str): The name of the clinic.
-    Returns:
-        tuple: List of Batch, signature tuple
-    """
     clinic_pkey = txn_signer.get_public_key().as_hex()
     LOGGER.debug('clinic_pkey: ' + str(clinic_pkey))
     inputs = outputs = helper.make_clinic_address(clinic_pkey=clinic_pkey)
     LOGGER.debug('inputs: ' + str(inputs))
-    permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
-                   payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
+    # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
+    #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     clinic = payload_pb2.CreateClinic(
         # public_key=clinic_pkey,
-        name=name,
-        permissions=permissions)
+        name=name)
 
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
@@ -157,12 +187,43 @@ def create_clinic(txn_signer, batch_signer, name):
     #     payload_type=payload_pb2.TransactionPayload.CREATE_ACCOUNT,
     #     create_account=account)
 
-    return _make_header_and_batch(
+    return _make_transaction(
         payload=payload,
         inputs=[inputs],
         outputs=[outputs],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
+
+
+# def create_clinic(txn_signer, batch_signer, name):
+#     clinic_pkey = txn_signer.get_public_key().as_hex()
+#     LOGGER.debug('clinic_pkey: ' + str(clinic_pkey))
+#     inputs = outputs = helper.make_clinic_address(clinic_pkey=clinic_pkey)
+#     LOGGER.debug('inputs: ' + str(inputs))
+#     permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
+#                    payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
+#     clinic = payload_pb2.CreateClinic(
+#         # public_key=clinic_pkey,
+#         name=name,
+#         permissions=permissions)
+#
+#     payload = payload_pb2.TransactionPayload(
+#         payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
+#         create_clinic=clinic)
+#
+#     # account = payload_pb2.CreateAccount(
+#     #     label=label,
+#     #     description=description)
+#     # payload = payload_pb2.TransactionPayload(
+#     #     payload_type=payload_pb2.TransactionPayload.CREATE_ACCOUNT,
+#     #     create_account=account)
+#
+#     return _make_header_and_batch(
+#         payload=payload,
+#         inputs=[inputs],
+#         outputs=[outputs],
+#         txn_signer=txn_signer,
+#         batch_signer=batch_signer)
 
 
 def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, albumin, alkaline_phosphatase, appearance,
@@ -202,7 +263,7 @@ def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, al
 def add_pulse(txn_signer, batch_signer, pulse, timestamp):
     patient_pkey = txn_signer.get_public_key().as_hex()
 
-    pulse_hex = helper.make_pulse_address(public_key=patient_pkey, timestamp=str(timestamp))
+    pulse_hex = helper.make_pulse_address(patient_pkey=patient_pkey, timestamp=str(timestamp))
 
     pulse_payload = payload_pb2.AddPulse(
         public_key=patient_pkey,

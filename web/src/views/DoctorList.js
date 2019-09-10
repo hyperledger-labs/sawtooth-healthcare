@@ -8,7 +8,7 @@ module.exports = {
         },
     view: function() {
         return m(".user-list", Doctor.list.map(function(doctor) {
-            return m("a.user-list-item", doctor.name + " " +  doctor.permissions)
+            return m("a.user-list-item", doctor.name) // + " " +  doctor.permissions)
         }),
         m("label.error", Doctor.error))
     }

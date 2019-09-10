@@ -27,7 +27,7 @@ class ConsentState(object):
         return self._load_access_by_doctor(doctor_pkey=doctor_pkey)
 
     def _load_access(self, doctor_pkey, patient_pkey):
-        access_hex = [helper.make_consent_address(doctor_pkey=doctor_pkey, patient_pkey=patient_pkey)]
+        access_hex = [helper.make_consent_address(dest_pkey=doctor_pkey, src_pkey=patient_pkey)]
         state_entries = self._context.get_state(
             access_hex,
             timeout=self.TIMEOUT)
@@ -38,7 +38,7 @@ class ConsentState(object):
         return None
 
     def _load_access_by_doctor(self, doctor_pkey):
-        access_hex = [helper.make_consent_list_address_by_doctor(doctor_pkey=doctor_pkey)]
+        access_hex = [helper.make_consent_list_address_by_destination_client(dest_pkey=doctor_pkey)]
         state_entries = self._context.get_state(
             access_hex,
             timeout=self.TIMEOUT)
@@ -49,7 +49,7 @@ class ConsentState(object):
         return None
 
     def _store_access(self, doctor_key, patient_pkey):
-        address = helper.make_consent_address(doctor_pkey=doctor_key, patient_pkey=patient_pkey)
+        address = helper.make_consent_address(dest_pkey=doctor_key, src_pkey=patient_pkey)
 
         access = consent_payload_pb2.ActionOnAccess()
         access.doctor_pkey = doctor_key
@@ -61,8 +61,20 @@ class ConsentState(object):
             timeout=self.TIMEOUT)
 
     def _revoke_access(self, doctor_key, patient_pkey):
-        address = helper.make_consent_address(doctor_pkey=doctor_key, patient_pkey=patient_pkey)
+        address = helper.make_consent_address(dest_pkey=doctor_key, src_pkey=patient_pkey)
 
         self._context.delete_state(
             [address],
+            timeout=self.TIMEOUT)
+
+    def create_client(self, client):
+        address = helper.make_client_address(public_key=client.public_key)
+
+        # access = consent_payload_pb2.ActionOnAccess()
+        # access.doctor_pkey = doctor_key
+        # access.patient_pkey = patient_pkey
+
+        state_data = client.SerializeToString()
+        self._context.set_state(
+            {address: state_data},
             timeout=self.TIMEOUT)

@@ -17,6 +17,8 @@ from sanic import response
 
 from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
+# from rest_api.consent_common import helper as consent_helper
+from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 
@@ -37,10 +39,10 @@ async def get_all_clinics(request):
         # dec_cl = base64.b64decode(entity.data)
         cl = payload_pb2.CreateClinic()
         cl.ParseFromString(entity.data)
-        permissions = []
-        for perm in cl.permissions:
-            permissions.append(perm)
-        clinics.append({'name': cl.name, 'permissions': str(permissions)})
+        # permissions = []
+        # for perm in cl.permissions:
+        #     permissions.append(perm)
+        clinics.append({'name': cl.name})
 
     # import json
     # result = json.dumps(clinics)
@@ -64,10 +66,20 @@ async def register_new_clinic(request):
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     clinic_signer = request.app.config.SIGNER_CLINIC  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.create_clinic(
+    clinic_txn = consent_transaction.create_clinic_client(
+        txn_signer=clinic_signer,
+        batch_signer=clinic_signer
+    )
+    client_txn = transaction.create_clinic(
         txn_signer=clinic_signer,
         batch_signer=clinic_signer,
-        name=name)
+        name=name
+    )
+    batch, batch_id = transaction.make_batch_and_id([client_txn, clinic_txn], clinic_signer)
+    # batch, batch_id = transaction.create_clinic(
+    #     txn_signer=clinic_signer,
+    #     batch_signer=clinic_signer,
+    #     name=name)
 
     await security_messaging.add_clinic(
         request.app.config.VAL_CONN,
@@ -84,4 +96,3 @@ async def register_new_clinic(request):
 
     return response.json(body={'status': general.DONE},
                          headers=general.get_response_headers(general.get_request_origin(request)))
-

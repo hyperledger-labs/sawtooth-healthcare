@@ -45,10 +45,11 @@ async def get_all_doctors(request):
         # dec_cl = base64.b64decode(entity.data)
         doc = payload_pb2.CreateDoctor()
         doc.ParseFromString(entity.data)
-        permissions = []
-        for perm in doc.permissions:
-            permissions.append(perm)
-        doctors.append({'name': doc.name, 'surname': doc.surname, 'permissions': str(permissions)})
+        # permissions = []
+        # for perm in doc.permissions:
+        #     permissions.append(perm)
+        # doctors.append({'name': doc.name, 'surname': doc.surname, 'permissions': str(permissions)})
+        doctors.append({'name': doc.name, 'surname': doc.surname})
 
     # import json
     # result = json.dumps(clinics)

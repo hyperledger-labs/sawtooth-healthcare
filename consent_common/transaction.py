@@ -1,12 +1,55 @@
 import hashlib
 import random
 import time
+import logging
 
 from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
 from . import helper as helper
 from .protobuf import consent_payload_pb2
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
+
+
+def _make_transaction(payload, inputs, outputs, txn_signer, batch_signer):
+    txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
+
+    txn = Transaction(
+        header=txn_header_bytes,
+        header_signature=signature,
+        payload=payload.SerializeToString()
+    )
+
+    return txn
+
+    # transactions = [txn]
+    #
+    # batch_header_bytes, signature = _batch_header(batch_signer, transactions)
+    #
+    # batch = Batch(
+    #     header=batch_header_bytes,
+    #     header_signature=signature,
+    #     transactions=transactions
+    # )
+    #
+    # # batch_list = BatchList(batches=[batch])
+    # # batch_id = batch_list.batches[0].header_signature
+    # # return batch_list, batch_id
+    # return batch, batch.header_signature
+
+
+def _make_batch_and_id(transactions, batch_signer):
+    batch_header_bytes, signature = _batch_header(batch_signer, transactions)
+
+    batch = Batch(
+        header=batch_header_bytes,
+        header_signature=signature,
+        transactions=transactions
+    )
+
+    return batch, batch.header_signature
 
 
 def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
@@ -70,9 +113,36 @@ def _batch_header(batch_signer, transactions):
     return batch_header_bytes, signature
 
 
+def create_clinic_client(txn_signer, batch_signer):
+    permissions = [consent_payload_pb2.Permission(type=consent_payload_pb2.Permission.READ_CLINIC),
+                   consent_payload_pb2.Permission(type=consent_payload_pb2.Permission.READ_OWN_CLINIC)]
+    return create_client(txn_signer, batch_signer, permissions)
+
+
+def create_client(txn_signer, batch_signer, permissions):
+    client_pkey = txn_signer.get_public_key().as_hex()
+    LOGGER.debug('client_pkey: ' + str(client_pkey))
+    inputs = outputs = helper.make_client_address(public_key=client_pkey)
+    LOGGER.debug('inputs: ' + str(inputs))
+    client = consent_payload_pb2.Client(
+        public_key=client_pkey,
+        permissions=permissions)
+
+    payload = consent_payload_pb2.ConsentTransactionPayload(
+        payload_type=consent_payload_pb2.ConsentTransactionPayload.ADD_CLIENT,
+        create_client=client)
+
+    return _make_transaction(
+        payload=payload,
+        inputs=[inputs],
+        outputs=[outputs],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
+
 def grant_access(txn_signer, batch_signer, doctor_pkey):
     patient_pkey = txn_signer.get_public_key().as_hex()
-    consent_hex = helper.make_consent_address(doctor_pkey=doctor_pkey, patient_pkey=patient_pkey)
+    consent_hex = helper.make_consent_address(dest_pkey=doctor_pkey, src_pkey=patient_pkey)
 
     access = consent_payload_pb2.ActionOnAccess(
         doctor_pkey=doctor_pkey,
@@ -93,7 +163,7 @@ def grant_access(txn_signer, batch_signer, doctor_pkey):
 
 def revoke_access(txn_signer, batch_signer, doctor_pkey):
     patient_pkey = txn_signer.get_public_key().as_hex()
-    consent_hex = helper.make_consent_address(doctor_pkey=doctor_pkey, patient_pkey=patient_pkey)
+    consent_hex = helper.make_consent_address(dest_pkey=doctor_pkey, src_pkey=patient_pkey)
 
     access = consent_payload_pb2.ActionOnAccess(
         doctor_pkey=doctor_pkey,
@@ -110,4 +180,3 @@ def revoke_access(txn_signer, batch_signer, doctor_pkey):
         outputs=[consent_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
-
