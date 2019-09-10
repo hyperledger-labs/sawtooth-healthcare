@@ -1,7 +1,7 @@
 import hashlib
 import random
 import time
-
+import logging
 from sawtooth_sdk.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
@@ -9,6 +9,9 @@ from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 # from common.protobuf import payload_pb2
 from . import helper as helper
 from .protobuf import payload_pb2
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 
 def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
@@ -73,16 +76,22 @@ def _batch_header(batch_signer, transactions):
 
 
 def create_doctor(txn_signer, batch_signer, name, surname):
+    doctor_pkey = txn_signer.get_public_key().as_hex()
+    LOGGER.debug('doctor_pkey: ' + str(doctor_pkey))
+    doctor_hex = helper.make_doctor_address(doctor_pkey=doctor_pkey)
+    LOGGER.debug('doctor_hex: ' + str(doctor_hex))
+    permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_DOCTOR),
+                   payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_DOCTOR)]
+
     doctor = payload_pb2.CreateDoctor(
-        public_key=txn_signer.get_public_key().as_hex(),
+        # public_key=txn_signer.get_public_key().as_hex(),
         name=name,
-        surname=surname)
+        surname=surname,
+        permissions=permissions)
 
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.CREATE_DOCTOR,
         create_doctor=doctor)
-
-    doctor_hex = helper.make_doctor_address(doctor_pkey=txn_signer.get_public_key().as_hex())
 
     return _make_header_and_batch(
         payload=payload,
@@ -93,16 +102,21 @@ def create_doctor(txn_signer, batch_signer, name, surname):
 
 
 def create_patient(txn_signer, batch_signer, name, surname):
+    patient_pkey = txn_signer.get_public_key().as_hex()
+    LOGGER.debug('patient_pkey: ' + str(patient_pkey))
+    patient_hex = helper.make_patient_address(patient_pkey=patient_pkey)
+    LOGGER.debug('patient_hex: ' + str(patient_hex))
+    permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_PATIENT),
+                   payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_PATIENT)]
     patient = payload_pb2.CreatePatient(
-        public_key=txn_signer.get_public_key().as_hex(),
+        # public_key=txn_signer.get_public_key().as_hex(),
         name=name,
-        surname=surname)
+        surname=surname,
+        permissions=permissions)
 
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
         create_patient=patient)
-
-    patient_hex = helper.make_patient_address(patient_pkey=txn_signer.get_public_key().as_hex())
 
     return _make_header_and_batch(
         payload=payload,
@@ -122,11 +136,15 @@ def create_clinic(txn_signer, batch_signer, name):
         tuple: List of Batch, signature tuple
     """
     clinic_pkey = txn_signer.get_public_key().as_hex()
+    LOGGER.debug('clinic_pkey: ' + str(clinic_pkey))
     inputs = outputs = helper.make_clinic_address(clinic_pkey=clinic_pkey)
-
+    LOGGER.debug('inputs: ' + str(inputs))
+    permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
+                   payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     clinic = payload_pb2.CreateClinic(
-        public_key=clinic_pkey,
-        name=name)
+        # public_key=clinic_pkey,
+        name=name,
+        permissions=permissions)
 
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.CREATE_CLINIC,
@@ -389,4 +407,3 @@ def next_visit(txn_signer, batch_signer, claim_id, description, event_time):
         outputs=[event_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
-

@@ -35,6 +35,7 @@ class HealthCareTransactionHandler(TransactionHandler):
 
             header = transaction.header
             signer = header.signer_public_key
+            LOGGER.debug("signer_public_key: " + str(signer))
             LOGGER.debug("transaction payload: " + str(transaction.payload))
             healthcare_payload = HealthCarePayload(payload=transaction.payload)
 
@@ -43,30 +44,30 @@ class HealthCareTransactionHandler(TransactionHandler):
             if healthcare_payload.is_create_clinic():
                 clinic = healthcare_payload.create_clinic()
 
-                cl = healthcare_state.get_clinic(clinic.public_key)
+                cl = healthcare_state.get_clinic(signer)
                 if cl is not None:
                     raise InvalidTransaction(
                         'Invalid action: Clinic already exists: ' + clinic.name)
 
-                healthcare_state.create_clinic(clinic.public_key, clinic.name)
+                healthcare_state.create_clinic(signer, clinic)
             elif healthcare_payload.is_create_doctor():
                 doctor = healthcare_payload.create_doctor()
 
-                do = healthcare_state.get_doctor(doctor.public_key)
+                do = healthcare_state.get_doctor(signer)
                 if do is not None:
                     raise InvalidTransaction(
                         'Invalid action: Doctor already exists: ' + doctor.name)
 
-                healthcare_state.create_doctor(doctor.public_key, doctor.name, doctor.surname)
+                healthcare_state.create_doctor(signer, doctor)
             elif healthcare_payload.is_create_patient():
                 patient = healthcare_payload.create_patient()
 
-                pat = healthcare_state.get_patient(patient.public_key)
+                pat = healthcare_state.get_patient(signer)
                 if pat is not None:
                     raise InvalidTransaction(
                         'Invalid action: Patient already exists: ' + patient.name)
 
-                healthcare_state.create_patient(patient.public_key, patient.name, patient.surname)
+                healthcare_state.create_patient(signer, patient)
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()

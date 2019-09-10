@@ -25,7 +25,7 @@ from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
 # from db import auth_query
 # from protobuf import payload_pb2 as rule_pb2
-from rest_api.workflow.errors import ApiBadRequest
+from rest_api.workflow.errors import ApiBadRequest, ApiForbidden
 from rest_api.common.exceptions import HealthCareException
 from rest_api.common.protobuf import payload_pb2 as rule_pb2
 
@@ -43,15 +43,10 @@ def get_request_origin(request):
     return request.headers['Origin'] if ('Origin' in request.headers) else None
 
 
-def validate_fields(required_fields, request_json):
-    try:
-        for field in required_fields:
-            if request_json.get(field) is None:
-                raise ApiBadRequest("{} is required".format(field))
-    except (ValueError, AttributeError):
-        raise ApiBadRequest("Improper JSON format")
-
-
+def get_request_key_header(request):
+    if 'ClientKey' not in request.headers:
+        raise ApiForbidden('Client key not specified')
+    return request.headers['ClientKey']
 # def validate_input_params(required_fields, request_params):
 #     try:
 #         for field in required_fields:
@@ -61,16 +56,19 @@ def validate_fields(required_fields, request_json):
 #         raise ApiBadRequest("Improper URL params")
 
 
+def validate_fields(required_fields, request_json):
+    try:
+        for field in required_fields:
+            if request_json.get(field) is None:
+                raise ApiBadRequest("{} is required".format(field))
+    except (ValueError, AttributeError):
+        raise ApiBadRequest("Improper JSON format")
+
+
 def encrypt_private_key(aes_key, public_key, private_key):
     init_vector = bytes.fromhex(public_key[:32])
     cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
     return cipher.encrypt(private_key)
-
-
-def decrypt_private_key(aes_key, public_key, encrypted_private_key):
-    init_vector = bytes.fromhex(public_key[:32])
-    cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
-    return cipher.decrypt(encrypted_private_key)
 
 
 # async def get_signer(request):
@@ -84,6 +82,12 @@ def decrypt_private_key(aes_key, public_key, encrypted_private_key):
 #         auth_info.get('encrypted_private_key'))
 #     private_key = Secp256k1PrivateKey.from_hex(private_key_hex)
 #     return CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
+
+
+def decrypt_private_key(aes_key, public_key, encrypted_private_key):
+    init_vector = bytes.fromhex(public_key[:32])
+    cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
+    return cipher.decrypt(encrypted_private_key)
 
 
 def generate_auth_token(secret_key, email, public_key):

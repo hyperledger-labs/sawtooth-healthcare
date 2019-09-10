@@ -14,23 +14,23 @@ class HealthCareState(object):
 
         self._context = context
 
-    def create_clinic(self, public_key, name):
+    def create_clinic(self, public_key, clinic):
         op = self._load_clinic(public_key=public_key)
 
         if op is None:
-            self._store_clinic(public_key, name)
+            self._store_clinic(public_key, clinic)
 
-    def create_doctor(self, public_key, name, surname):
+    def create_doctor(self, public_key, doctor):
         op = self._load_doctor(public_key=public_key)
 
         if op is None:
-            self._store_doctor(public_key, name, surname)
+            self._store_doctor(public_key, doctor)
 
-    def create_patient(self, public_key, name, surname):
+    def create_patient(self, public_key, patient):
         op = self._load_patient(public_key=public_key)
 
         if op is None:
-            self._store_patient(public_key, name, surname)
+            self._store_patient(public_key, patient)
 
     def create_claim(self, claim_id, clinic_pkey, patient_pkey):
         od = self._load_claim(clinic_pkey=clinic_pkey, claim_id=claim_id)
@@ -202,38 +202,38 @@ class HealthCareState(object):
             pulse.ParseFromString(state_entries[0].data)
         return pulse
 
-    def _store_clinic(self, public_key, name):
+    def _store_clinic(self, public_key, clinic):
         address = helper.make_clinic_address(public_key)
 
-        clinic = payload_pb2.CreateClinic()
-        clinic.public_key = public_key
-        clinic.name = name
+        # clinic = payload_pb2.CreateClinic()
+        # clinic.public_key = public_key
+        # clinic.name = name
 
         state_data = clinic.SerializeToString()
         self._context.set_state(
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_doctor(self, public_key, name, surname):
+    def _store_doctor(self, public_key, doctor):
         address = helper.make_doctor_address(public_key)
 
-        doctor = payload_pb2.CreateDoctor()
-        doctor.public_key = public_key
-        doctor.name = name
-        doctor.surname = surname
+        # doctor = payload_pb2.CreateDoctor()
+        # doctor.public_key = public_key
+        # doctor.name = name
+        # doctor.surname = surname
 
         state_data = doctor.SerializeToString()
         self._context.set_state(
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_patient(self, public_key, name, surname):
+    def _store_patient(self, public_key, patient):
         address = helper.make_patient_address(public_key)
 
-        patient = payload_pb2.CreatePatient()
-        patient.public_key = public_key
-        patient.name = name
-        patient.surname = surname
+        # patient = payload_pb2.CreatePatient()
+        # patient.public_key = public_key
+        # patient.name = name
+        # patient.surname = surname
 
         state_data = patient.SerializeToString()
         self._context.set_state(

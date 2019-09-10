@@ -68,8 +68,8 @@ services:
     container_name: healthcare-processor
     volumes:
       - ./:/project/sawtooth_healthcare
-    depends_on:
-      - healthcare-cli
+#    depends_on:
+#      - healthcare-cli
     command: |
       bash -c "
         sleep 1 &&
@@ -101,27 +101,27 @@ services:
         tail -f /dev/null
                "
 
-  healthcare-cli:
-    build:
-      context: .
-      dockerfile: cli/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: healthcare-cli
-    container_name: healthcare-client
-    depends_on:
-      - healthcare-cli-hk
-    volumes:
-      - ./:/project/sawtooth_healthcare
-    command: |
-      bash -c "
-        sleep 1 &&
-        echo '--- Building healthcare-cli by docker-compose---\n' &&
-        init-healthcare-cli.sh &&
-        tail -f /dev/null
-      "
+#  healthcare-cli:
+#    build:
+#      context: .
+#      dockerfile: cli/Dockerfile
+#      args:
+#        - http_proxy
+#        - https_proxy
+#        - no_proxy
+#    image: healthcare-cli
+#    container_name: healthcare-client
+#    depends_on:
+#      - healthcare-cli-hk
+#    volumes:
+#      - ./:/project/sawtooth_healthcare
+#    command: |
+#      bash -c "
+#        sleep 1 &&
+#        echo '--- Building healthcare-cli by docker-compose---\n' &&
+#        init-healthcare-cli.sh &&
+#        tail -f /dev/null
+#      "
 
   healthcare-cli-hk:
     build:
@@ -159,7 +159,7 @@ services:
       - '8040:8000'
     depends_on:
       - validator
-      - healthcare-processor
+#      - healthcare-processor
     command: |
       bash -c "
         sleep 3 &&
@@ -256,8 +256,8 @@ services:
       - 8080
     ports:
       - '8041:8080'
-    depends_on:
-      - healthcare-rest-api
+#    depends_on:
+#      - healthcare-rest-api
     command: |
       sh -c "
         echo '--- Starting healthcare-web-app by docker-compose---' &&

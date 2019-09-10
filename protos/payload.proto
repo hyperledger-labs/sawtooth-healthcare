@@ -34,21 +34,61 @@ message TransactionPayload {
     AddPulse pulse = 13;
 }
 
+message Permission {
+    enum PermissionType {
+      PERMISSION_TYPE_UNSET = 0;
+
+      READ_CLINIC = 100;
+      READ_OWN_CLINIC = 101;
+
+      READ_DOCTOR = 200;
+      READ_OWN_DOCTOR = 201;
+
+      READ_PATIENT = 300;
+      READ_OWN_PATIENT = 301;
+
+      READ_LAB = 800;
+      READ_OWN_LAB = 801;
+
+      READ_LAB_TEST = 600;
+      READ_OWN_LAB_TEST = 601;
+      WRITE_LAB_TEST = 602;
+
+      READ_PULSE = 700;
+      READ_OWN_PULSE = 701;
+      WRITE_PULSE = 702;
+
+      RED_CLAIM = 400;
+      READ_OWN_CLAIM = 401;
+      WRITE_OWN_CLAIM = 402;
+
+    }
+
+    PermissionType type = 1;
+}
+
 message CreateClinic {
-    string public_key = 1;
-    string name = 2;
+//    string public_key = 1;
+    string name = 1;
+    repeated Permission permissions = 2;
 }
 
 message CreateDoctor {
-    string public_key = 1;
-    string name = 2;
-    string surname = 3;
+//    string public_key = 1;
+    string name = 1;
+    string surname = 2;
+    repeated Permission permissions = 3;
 }
 
 message CreatePatient {
-    string public_key = 1;
-    string name = 2;
-    string surname = 3;
+    string name = 1;
+    string surname = 2;
+    repeated Permission permissions = 3;
+}
+
+message CreateLab {
+    string name = 1;
+    repeated Permission permissions = 2;
 }
 
 message AddLabTest {
@@ -66,9 +106,9 @@ message AddLabTest {
 }
 
 message AddPulse {
-    string public_key=1;
-    string pulse=2;
-    string timestamp=3;
+//    string public_key=1;
+    string pulse=1;
+    string timestamp=2;
 }
 
 message CreateClaim {

@@ -3,10 +3,13 @@ var m = require("mithril")
 var Doctor = {
     list: [],
     error: "",
-    loadList: function() {
+    loadList: function(clientKey) {
         return m.request({
             method: "GET",
             url: "/api/doctors",
+            headers: {
+                'ClientKey': clientKey
+            }
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -16,6 +19,7 @@ var Doctor = {
         .catch(function(e) {
             console.log(e)
             Doctor.error = e.message
+            Doctor.list = []
         })
     },
 

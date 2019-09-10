@@ -25,75 +25,19 @@ from sanic import response
 # from rest_api.workflow.authorization import authorized
 from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
-from rest_api.workflow import general, messaging
+from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 
-# from rest_api.workflow.errors import ApiBadRequest
-# from rest_api.workflow.errors import ApiInternalError
-# from db import accounts_query
-# from db import auth_query
-# import pandas as pd
-# from google.protobuf.json_format import MessageToJson
-# from google.protobuf.json_format import MessageToDict
-
-# from marketplace_transaction import transaction_creation
-
-
 DOCTORS_BP = Blueprint('doctors')
-
-
-# @CLINICS_BP.post('accounts')
-# async def create_account(request):
-#     """Creates a new Account and corresponding authorization token"""
-#     required_fields = ['email', 'password']
-#     common.validate_fields(required_fields, request.json)
-#
-#     private_key = request.app.config.CONTEXT.new_random_private_key()
-#     signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
-#     public_key = signer.get_public_key().as_hex()
-#
-#     auth_entry = _create_auth_dict(
-#         request, public_key, pr ivate_key.as_hex())
-#     await auth_query.create_auth_entry(request.app.config.DB_CONN, auth_entry)
-#
-#     account = _create_account_dict(request.json, public_key)
-#
-#     batches, batch_id = transaction_creation.create_account(
-#         txn_key=signer,
-#         batch_key=request.app.config.SIGNER,
-#         label=account.get('label'),
-#         description=account.get('description'))
-#
-#     await messaging.send(
-#         request.app.config.VAL_CONN,
-#         request.app.config.TIMEOUT,
-#         batches)
-#
-#     try:
-#         await messaging.check_batch_status(
-#             request.app.config.VAL_CONN, batch_id)
-#     except (ApiBadRequest, ApiInternalError) as err:
-#         await auth_query.remove_auth_entry(
-#             request.app.config.DB_CONN, request.json.get('email'))
-#         raise err
-#
-#     token = common.generate_auth_token(
-#         request.app.config.SECRET_KEY,
-#         account.get('email'),
-#         public_key)
-#
-#     return response.json(
-#         {
-#             'authorization': token,
-#             'account': account
-#         })
 
 
 @DOCTORS_BP.get('doctors')
 async def get_all_doctors(request):
     """Fetches complete details of all Accounts in state"""
+    client_key = general.get_request_key_header(request)
     list_doctors_address = helper.make_doctor_list_address()
-    doctor_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_doctors_address)
+    doctor_resources = await security_messaging.get_doctors(request.app.config.VAL_CONN,
+                                                            list_doctors_address, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     doctors = []
@@ -101,7 +45,10 @@ async def get_all_doctors(request):
         # dec_cl = base64.b64decode(entity.data)
         doc = payload_pb2.CreateDoctor()
         doc.ParseFromString(entity.data)
-        doctors.append({'public_key': doc.public_key, 'name': doc.name, 'surname': doc.surname})
+        permissions = []
+        for perm in doc.permissions:
+            permissions.append(perm)
+        doctors.append({'name': doc.name, 'surname': doc.surname, 'permissions': str(permissions)})
 
     # import json
     # result = json.dumps(clinics)
@@ -122,21 +69,25 @@ async def register_new_doctor(request):
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
-    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+    doctor_signer = request.app.config.SIGNER_DOCTOR  # .get_public_key().as_hex()
 
     batch, batch_id = transaction.create_doctor(
-        txn_signer=clinic_signer,
-        batch_signer=clinic_signer,
+        txn_signer=doctor_signer,
+        batch_signer=doctor_signer,
         name=name,
         surname=surname)
 
-    await messaging.send(
+    # await messaging.send(
+    #     request.app.config.VAL_CONN,
+    #     request.app.config.TIMEOUT,
+    #     [batch])
+    await security_messaging.add_doctor(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
         [batch])
 
     try:
-        await messaging.check_batch_status(
+        await security_messaging.check_batch_status(
             request.app.config.VAL_CONN, [batch_id])
     except (ApiBadRequest, ApiInternalError) as err:
         # await auth_query.remove_auth_entry(
