@@ -7,7 +7,7 @@ from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
 from . import helper as helper
-from .protobuf import consent_payload_pb2
+from .protobuf.consent_payload_pb2 import Permission, ConsentTransactionPayload, Client, ActionOnAccess
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -114,8 +114,36 @@ def _batch_header(batch_signer, transactions):
 
 
 def create_clinic_client(txn_signer, batch_signer):
-    permissions = [consent_payload_pb2.Permission(type=consent_payload_pb2.Permission.READ_CLINIC),
-                   consent_payload_pb2.Permission(type=consent_payload_pb2.Permission.READ_OWN_CLINIC)]
+    permissions = [Permission(type=Permission.READ_CLINIC),
+                   Permission(type=Permission.READ_OWN_CLINIC)]
+    return create_client(txn_signer, batch_signer, permissions)
+
+
+def create_doctor_client(txn_signer, batch_signer):
+    permissions = [Permission(type=Permission.READ_DOCTOR),
+                   Permission(type=Permission.READ_OWN_DOCTOR),
+                   Permission(type=Permission.READ_LAB),
+                   Permission(type=Permission.READ_LAB_TEST),
+                   Permission(type=Permission.READ_CLAIM)]
+    return create_client(txn_signer, batch_signer, permissions)
+
+
+def create_patient_client(txn_signer, batch_signer):
+    permissions = [Permission(type=Permission.READ_PATIENT),
+                   Permission(type=Permission.READ_OWN_PATIENT),
+                   Permission(type=Permission.READ_OWN_LAB_TEST),
+                   Permission(type=Permission.READ_OWN_PULSE),
+                   Permission(type=Permission.READ_OWN_CLAIM),
+                   Permission(type=Permission.WRITE_LAB_TEST),
+                   Permission(type=Permission.WRITE_PULSE),
+                   Permission(type=Permission.WRITE_CLAIM),]
+    return create_client(txn_signer, batch_signer, permissions)
+
+
+def create_lab_client(txn_signer, batch_signer):
+    permissions = [Permission(type=Permission.READ_LAB),
+                   Permission(type=Permission.READ_OWN_LAB),
+                   Permission(type=Permission.READ_LAB_TEST)]
     return create_client(txn_signer, batch_signer, permissions)
 
 
@@ -124,12 +152,12 @@ def create_client(txn_signer, batch_signer, permissions):
     LOGGER.debug('client_pkey: ' + str(client_pkey))
     inputs = outputs = helper.make_client_address(public_key=client_pkey)
     LOGGER.debug('inputs: ' + str(inputs))
-    client = consent_payload_pb2.Client(
+    client = Client(
         public_key=client_pkey,
         permissions=permissions)
 
-    payload = consent_payload_pb2.ConsentTransactionPayload(
-        payload_type=consent_payload_pb2.ConsentTransactionPayload.ADD_CLIENT,
+    payload = ConsentTransactionPayload(
+        payload_type=ConsentTransactionPayload.ADD_CLIENT,
         create_client=client)
 
     return _make_transaction(
@@ -144,13 +172,13 @@ def grant_access(txn_signer, batch_signer, doctor_pkey):
     patient_pkey = txn_signer.get_public_key().as_hex()
     consent_hex = helper.make_consent_address(dest_pkey=doctor_pkey, src_pkey=patient_pkey)
 
-    access = consent_payload_pb2.ActionOnAccess(
+    access = ActionOnAccess(
         doctor_pkey=doctor_pkey,
         patient_pkey=patient_pkey
     )
 
-    payload = payload_pb2.TransactionPayload(
-        payload_type=consent_payload_pb2.TransactionPayload.GRANT_ACCESS,
+    payload = ConsentTransactionPayload(
+        payload_type=ConsentTransactionPayload.GRANT_ACCESS,
         grant_access=access)
 
     return _make_header_and_batch(
@@ -165,13 +193,13 @@ def revoke_access(txn_signer, batch_signer, doctor_pkey):
     patient_pkey = txn_signer.get_public_key().as_hex()
     consent_hex = helper.make_consent_address(dest_pkey=doctor_pkey, src_pkey=patient_pkey)
 
-    access = consent_payload_pb2.ActionOnAccess(
+    access = ActionOnAccess(
         doctor_pkey=doctor_pkey,
         patient_pkey=patient_pkey
     )
 
-    payload = payload_pb2.TransactionPayload(
-        payload_type=consent_payload_pb2.TransactionPayload.REVOKE_ACCESS,
+    payload = ConsentTransactionPayload(
+        payload_type=ConsentTransactionPayload.REVOKE_ACCESS,
         revoke_access=access)
 
     return _make_header_and_batch(

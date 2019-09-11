@@ -17,6 +17,8 @@
 # import bcrypt
 #
 # from itsdangerous import BadSignature
+import time
+
 from sanic import Blueprint
 from sanic import response
 
@@ -25,7 +27,7 @@ from sanic import response
 # from rest_api.workflow.authorization import authorized
 from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
-from rest_api.workflow import general, messaging
+from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 
 # from rest_api.workflow.errors import ApiBadRequest
@@ -92,8 +94,10 @@ LAB_TESTS_BP = Blueprint('labtests')
 @LAB_TESTS_BP.get('labtests')
 async def get_all_lab_tests(request):
     """Fetches complete details of all Accounts in state"""
-    lab_tests_address = helper.make_lab_test_list_address()
-    lab_test_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, lab_tests_address)
+    client_key = general.get_request_key_header(request)
+    # lab_tests_address = helper.make_lab_test_list_address()
+    # lab_test_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, lab_tests_address)
+    lab_test_resources = await security_messaging.get_lab_tests(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     lab_tests = []
@@ -125,6 +129,7 @@ async def get_all_lab_tests(request):
 async def add_new_lab_test(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
+    client_key = general.get_request_key_header(request)
     required_fields = ['height', 'weight', 'gender', 'a_g_ratio', 'albumin', 'alkaline_phosphatase',
                        'appearance', 'bilirubin', 'casts', 'color']
     general.validate_fields(required_fields, request.json)
@@ -142,11 +147,23 @@ async def add_new_lab_test(request):
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
-    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+    # client_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+    if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_CLINIC
+    elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_PATIENT
+    elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_DOCTOR
+    elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_LAB
+    else:
+        client_signer = request.app.config.SIGNER_PATIENT
 
-    batch, batch_id = transaction.add_lab_test(
-        txn_signer=clinic_signer,
-        batch_signer=clinic_signer,
+    current_times_str = str(time.time())
+
+    lab_test_txn = transaction.add_lab_test(
+        txn_signer=client_signer,
+        batch_signer=client_signer,
         height=height,
         weight=weight,
         gender=gender,
@@ -156,15 +173,20 @@ async def add_new_lab_test(request):
         appearance=appearance,
         bilirubin=bilirubin,
         casts=casts,
-        color=color)
+        color=color,
+        id=current_times_str,
+        client_pkey=client_key
+    )
 
-    await messaging.send(
+    batch, batch_id = transaction.make_batch_and_id([lab_test_txn], client_signer)
+
+    await security_messaging.add_lab_test(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
-        [batch])
+        [batch], client_key)
 
     try:
-        await messaging.check_batch_status(
+        await security_messaging.check_batch_status(
             request.app.config.VAL_CONN, [batch_id])
     except (ApiBadRequest, ApiInternalError) as err:
         # await auth_query.remove_auth_entry(
@@ -173,79 +195,3 @@ async def add_new_lab_test(request):
 
     return response.json(body={'status': general.DONE},
                          headers=general.get_response_headers(general.get_request_origin(request)))
-
-# @ACCOUNTS_BP.get('accounts/<key>')
-# async def get_account(request, key):
-#     """Fetches the details of particular Account in state"""
-#     try:
-#         auth_key = common.deserialize_auth_token(
-#             request.app.config.SECRET_KEY,
-#             request.token).get('public_key')
-#     except (BadSignature, TypeError):
-#         auth_key = None
-#     account_resource = await accounts_query.fetch_account_resource(
-#         request.app.config.DB_CONN, key, auth_key)
-#     return response.json(account_resource)
-#
-
-# @ACCOUNTS_BP.patch('accounts')
-# @authorized()
-# async def update_account_info(request):
-#     """Updates auth information for the authorized account"""
-#     token = common.deserialize_auth_token(
-#         request.app.config.SECRET_KEY, request.token)
-#
-#     update = {}
-#     if request.json.get('password'):
-#         update['hashed_password'] = bcrypt.hashpw(
-#             bytes(request.json.get('password'), 'utf-8'), bcrypt.gensalt())
-#     if request.json.get('email'):
-#         update['email'] = request.json.get('email')
-#
-#     if update:
-#         updated_auth_info = await auth_query.update_auth_info(
-#             request.app.config.DB_CONN,
-#             token.get('email'),
-#             token.get('public_key'),
-#             update)
-#         new_token = common.generate_auth_token(
-#             request.app.config.SECRET_KEY,
-#             updated_auth_info.get('email'),
-#             updated_auth_info.get('publicKey'))
-#     else:
-#         updated_auth_info = await accounts_query.fetch_account_resource(
-#             request.app.config.DB_CONN,
-#             token.get('public_key'),
-#             token.get('public_key'))
-#         new_token = request.token
-#
-#     return response.json(
-#         {
-#             'authorization': new_token,
-#             'account': updated_auth_info
-#         })
-
-#
-# def _create_account_dict(body, public_key):
-#     keys = ['label', 'description', 'email']
-#
-#     account = {k: body[k] for k in keys if body.get(k) is not None}
-#
-#     account['publicKey'] = public_key
-#     account['holdings'] = []
-#
-#     return account
-
-
-# def _create_auth_dict(request, public_key, private_key):
-#     auth_entry = {
-#         'public_key': public_key,
-#         'email': request.json['email']
-#     }
-#
-#     auth_entry['encrypted_private_key'] = common.encrypt_private_key(
-#         request.app.config.AES_KEY, public_key, private_key)
-#     auth_entry['hashed_password'] = bcrypt.hashpw(
-#         bytes(request.json.get('password'), 'utf-8'), bcrypt.gensalt())
-#
-# return auth_entry

@@ -32,6 +32,12 @@ class HealthCareState(object):
         if op is None:
             self._store_patient(public_key, patient)
 
+    def create_lab(self, public_key, lab):
+        op = self._load_lab(public_key=public_key)
+
+        if op is None:
+            self._store_lab(public_key, lab)
+
     def create_claim(self, claim_id, clinic_pkey, patient_pkey):
         od = self._load_claim(clinic_pkey=clinic_pkey, claim_id=claim_id)
 
@@ -63,14 +69,8 @@ class HealthCareState(object):
         self._store_event(claim_id=claim_id, clinic_pkey=clinic_pkey, description=description,
                           event_time=event_time, event=payload_pb2.ActionOnClaim.NEXT_VISIT)
 
-    def add_lab_test(self, clinic_pkey, height, weight, gender,
-                     a_g_ratio, albumin, alkaline_phosphatase,
-                     appearance, bilirubin, casts,
-                     color, event_time):
-        self._store_lab_test(clinic_pkey=clinic_pkey, height=height, weight=weight, gender=gender,
-                             a_g_ratio=a_g_ratio, albumin=albumin, alkaline_phosphatase=alkaline_phosphatase,
-                             appearance=appearance, bilirubin=bilirubin, casts=casts, color=color,
-                             event_time=event_time)
+    def add_lab_test(self, client_pkey, lab_test):
+        self._store_lab_test(client_pkey=client_pkey, lab_test=lab_test)
 
     def add_patient(self, public_key, pulse, timestamp):
         self._store_pulse(public_key=public_key, pulse=pulse, timestamp=timestamp)
@@ -86,6 +86,10 @@ class HealthCareState(object):
     def get_patient(self, public_key):
         patient = self._load_patient(public_key=public_key)
         return patient
+
+    def get_lab(self, public_key):
+        lab = self._load_lab(public_key=public_key)
+        return lab
 
     def get_claim(self, claim_id, clinic_pkey):
         od = self._load_claim(claim_id=claim_id, clinic_pkey=clinic_pkey)
@@ -145,6 +149,17 @@ class HealthCareState(object):
             doctor.ParseFromString(state_entries[0].data)
         return doctor
 
+    def _load_lab(self, public_key=None):
+        lab = None
+        lab_hex = [] if public_key is None else [helper.make_lab_address(public_key)]
+        state_entries = self._context.get_state(
+            lab_hex,
+            timeout=self.TIMEOUT)
+        if state_entries:
+            lab = payload_pb2.CreateLab()
+            lab.ParseFromString(state_entries[0].data)
+        return lab
+
     def _load_patient(self, public_key=None):
         patient = None
         patient_hex = [] if public_key is None else [helper.make_patient_address(public_key)]
@@ -193,7 +208,7 @@ class HealthCareState(object):
     def _load_pulse(self, patient_pkey=None):
         pulse = None
         pulse_hex = [] if patient_pkey is None \
-            else [helper.make_pulse_list_by_patient_address(patient_pkey=patient_pkey)]
+            else [helper.make_pulse_list_by_patient_address(public_key=patient_pkey)]
         state_entries = self._context.get_state(
             pulse_hex,
             timeout=self.TIMEOUT)
@@ -240,6 +255,13 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
+    def _store_lab(self, public_key, lab):
+        address = helper.make_lab_address(public_key)
+        state_data = lab.SerializeToString()
+        self._context.set_state(
+            {address: state_data},
+            timeout=self.TIMEOUT)
+
     def _store_claim(self, claim_id, clinic_pkey, patient_pkey):
         claim_hex = helper.make_claim_address(claim_id, clinic_pkey)
         claim = payload_pb2.CreateClaim()
@@ -266,25 +288,33 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_lab_test(self, clinic_pkey, height, weight, gender, a_g_ratio, albumin, alkaline_phosphatase,
-                        appearance, bilirubin, casts, color, event_time):
-        address = helper.make_lab_test_address(clinic_pkey, event_time)
-        lt = payload_pb2.AddLabTest()
-        lt.height = height
-        lt.weight = weight
-        lt.gender = gender
-        lt.a_g_ratio = a_g_ratio
-        lt.albumin = albumin
-        lt.alkaline_phosphatase = alkaline_phosphatase
-        lt.appearance = appearance
-        lt.bilirubin = bilirubin
-        lt.casts = casts
-        lt.color = color
-        lt.event_time = event_time
+    def _store_lab_test(self, client_pkey, lab_test):
+        lab_test_address = helper.make_lab_test_address(lab_test.id)
+        lab_test_patient_relation_address = helper.make_lab_test_patient__relation_address(lab_test.id,
+                                                                                           lab_test.client_pkey)
+        patient_lab_test_relation_address = helper.make_patient_lab_test__relation_address(lab_test.client_pkey,
+                                                                                           lab_test.id)
+        # lt = payload_pb2.AddLabTest()
+        # lt.height = height
+        # lt.weight = weight
+        # lt.gender = gender
+        # lt.a_g_ratio = a_g_ratio
+        # lt.albumin = albumin
+        # lt.alkaline_phosphatase = alkaline_phosphatase
+        # lt.appearance = appearance
+        # lt.bilirubin = bilirubin
+        # lt.casts = casts
+        # lt.color = color
+        # lt.event_time = event_time
 
-        state_data = lt.SerializeToString()
+        lab_test_data = lab_test.SerializeToString()
         self._context.set_state(
-            {address: state_data},
+            {lab_test_address: lab_test_data
+             #    ,
+             # lab_test_patient_relation_address: lab_test.client_pkey
+             #    ,
+             # patient_lab_test_relation_address: lab_test.id
+             },
             timeout=self.TIMEOUT)
 
     def _store_pulse(self, public_key, pulse, timestamp):

@@ -15,7 +15,7 @@
 import getpass
 import os
 
-from Crypto.Cipher import AES
+# from Crypto.Cipher import AES
 
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
@@ -65,10 +65,10 @@ def validate_fields(required_fields, request_json):
         raise ApiBadRequest("Improper JSON format")
 
 
-def encrypt_private_key(aes_key, public_key, private_key):
-    init_vector = bytes.fromhex(public_key[:32])
-    cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
-    return cipher.encrypt(private_key)
+# def encrypt_private_key(aes_key, public_key, private_key):
+#     init_vector = bytes.fromhex(public_key[:32])
+#     cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
+#     return cipher.encrypt(private_key)
 
 
 # async def get_signer(request):

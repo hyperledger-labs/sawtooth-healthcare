@@ -21,6 +21,9 @@ var ClaimDetailsForm = require("./views/ClaimDetailsForm")
 var LabTestsList = require("./views/LabTestsList")
 var LabTestForm = require("./views/LabTestForm")
 
+var LabList = require("./views/LabList")
+var LabForm = require("./views/LabForm")
+
 var PulseList = require("./views/PulseList")
 var PulseForm = require("./views/PulseForm")
 
@@ -121,13 +124,13 @@ m.route(document.body, "/clinic", {
         }
     },
     "/lab_test_list": {
-        render: function() {
-            return m(Layout, m(LabTestsList))
+        render: function(vnode) {
+            return m(Layout, m(LabTestsList, vnode.attrs))
         }
     },
     "/lab_test_list/new/": {
-        render: function() {
-            return m(Layout, m(LabTestForm))
+        render: function(vnode) {
+            return m(Layout, m(LabTestForm, vnode.attrs))
         }
     },
     "/pulse_list": {
@@ -147,22 +150,32 @@ m.route(document.body, "/clinic", {
     },
     "/clinic": {
         render: function() {
-            return m(Layout, m(ClinicActionsList), m(PulseList))
+            return m(Layout, m(ClinicActionsList))
         }
     },
     "/doctor": {
         render: function() {
-            return m(Layout, m(DoctorActionsList), m(PulseForm))
+            return m(Layout, m(DoctorActionsList))
         }
     },
     "/patient": {
         render: function() {
-            return m(Layout, m(PatientActionsList), m(PatientDetailsForm))
+            return m(Layout, m(PatientActionsList))
         }
     },
     "/lab": {
         render: function() {
-            return m(Layout, m(LabActionsList), m(PatientDetailsForm))
+            return m(Layout, m(LabActionsList))
+        }
+    },
+    "/lab_list/": {
+        render: function(vnode) {
+            return m(Layout, m(LabList, vnode.attrs))
+        }
+    },
+    "/lab/new/": {
+        render: function() {
+            return m(Layout, m(LabForm))
         }
     },
 //    "/list": {

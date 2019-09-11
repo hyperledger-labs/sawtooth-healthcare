@@ -35,6 +35,7 @@ from rest_api.workflow.claims import CLAIMS_BP
 from rest_api.workflow.clinics import CLINICS_BP
 from rest_api.workflow.general import get_keyfile, get_signer_from_file
 from rest_api.workflow.doctors import DOCTORS_BP
+from rest_api.workflow.labs import LABS_BP
 from rest_api.workflow.patients import PATIENTS_BP
 from rest_api.workflow.clients import CLIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
@@ -242,6 +243,7 @@ def main():
     app.blueprint(LAB_TESTS_BP)
     app.blueprint(PULSE_BP)
     app.blueprint(CLIENTS_BP)
+    app.blueprint(LABS_BP)
     # app.blueprint(HOLDINGS_BP)
     # app.blueprint(OFFERS_BP)
 

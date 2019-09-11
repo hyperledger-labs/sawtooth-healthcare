@@ -25,6 +25,7 @@ from sanic import response
 # from rest_api.workflow.authorization import authorized
 from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
+from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
 
@@ -130,11 +131,18 @@ async def register_new_patient(request):
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     patient_signer = request.app.config.SIGNER_PATIENT  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.create_patient(
+    client_txn = consent_transaction.create_patient_client(
+        txn_signer=patient_signer,
+        batch_signer=patient_signer
+    )
+
+    patient_txn = transaction.create_patient(
         txn_signer=patient_signer,
         batch_signer=patient_signer,
         name=name,
         surname=surname)
+
+    batch, batch_id = transaction.make_batch_and_id([client_txn, patient_txn], patient_signer)
 
     await security_messaging.add_patient(
         request.app.config.VAL_CONN,

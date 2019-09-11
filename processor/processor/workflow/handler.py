@@ -68,6 +68,15 @@ class HealthCareTransactionHandler(TransactionHandler):
                         'Invalid action: Patient already exists: ' + patient.name)
 
                 healthcare_state.create_patient(signer, patient)
+            elif healthcare_payload.is_create_lab():
+                lab = healthcare_payload.create_lab()
+
+                lb = healthcare_state.get_lab(signer)
+                if lb is not None:
+                    raise InvalidTransaction(
+                        'Invalid action: Lab already exists: ' + lb.name)
+
+                healthcare_state.create_lab(signer, lab)
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()
@@ -182,15 +191,16 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_lab_test():
                 lab_test = healthcare_payload.lab_test()
 
-                clinic = healthcare_state.get_clinic(signer)
-                if clinic is None:
-                    raise InvalidTransaction(
-                        'Invalid action: Clinic does not exist: ' + signer)
+                # clinic = healthcare_state.get_clinic(signer)
+                # if clinic is None:
+                #     raise InvalidTransaction(
+                #         'Invalid action: Clinic does not exist: ' + signer)
 
-                healthcare_state.add_lab_test(signer, lab_test.height, lab_test.weight, lab_test.gender,
-                                              lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
-                                              lab_test.appearance, lab_test.bilirubin, lab_test.casts,
-                                              lab_test.color, lab_test.event_time)
+                # healthcare_state.add_lab_test(signer, lab_test.height, lab_test.weight, lab_test.gender,
+                #                               lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
+                #                               lab_test.appearance, lab_test.bilirubin, lab_test.casts,
+                #                               lab_test.color, lab_test.event_time)
+                healthcare_state.add_lab_test(signer, lab_test)
             elif healthcare_payload.is_pulse():
                 pulse = healthcare_payload.pulse()
 

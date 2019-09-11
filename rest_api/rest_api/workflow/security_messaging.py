@@ -20,7 +20,7 @@ import logging
 from sawtooth_rest_api.protobuf import client_state_pb2
 from sawtooth_rest_api.protobuf import validator_pb2
 
-# from rest_api.common import helper
+from rest_api.common import helper
 from rest_api.consent_common import helper as consent_helper
 # from rest_api.consent_common.protobuf import consent_payload_pb2
 # from rest_api.common.protobuf import payload_pb2
@@ -92,10 +92,10 @@ async def get_doctors(conn, address_suffix, client_key):
     client_resources = await messaging.get_state_by_address(conn, client_address)
     LOGGER.debug('client_resources: ' + str(client_resources))
     for entity in client_resources.entries:
-        doc = Client()
-        doc.ParseFromString(entity.data)
-        LOGGER.debug('client: ' + str(doc))
-        if Permission(type=Permission.READ_DOCTOR) in doc.permissions:
+        cl = Client()
+        cl.ParseFromString(entity.data)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.READ_DOCTOR) in cl.permissions:
             return await messaging.get_state_by_address(conn, address_suffix)
     raise ApiForbidden("Insufficient permission")
 
@@ -110,9 +110,63 @@ async def get_patients(conn, address_suffix, client_key):
     client_resources = await messaging.get_state_by_address(conn, client_address)
     LOGGER.debug('client_resources: ' + str(client_resources))
     for entity in client_resources.entries:
-        pat = Client()
-        pat.ParseFromString(entity.data)
-        LOGGER.debug('client: ' + str(pat))
-        if Permission(type=Permission.READ_PATIENT) in pat.permissions:
+        cl = Client()
+        cl.ParseFromString(entity.data)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.READ_PATIENT) in cl.permissions:
             return await messaging.get_state_by_address(conn, address_suffix)
+    raise ApiForbidden("Insufficient permission")
+
+
+async def add_lab(conn, timeout, batches):
+    await _send(conn, timeout, batches)
+
+
+async def add_lab_test(conn, timeout, batches, client_key):
+    client_address = consent_helper.make_client_address(client_key)
+    LOGGER.debug('client_address: ' + str(client_address))
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        cl = Client()
+        cl.ParseFromString(entity.data)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.WRITE_LAB_TEST) in cl.permissions:
+            LOGGER.debug('has permission: True')
+            await _send(conn, timeout, batches)
+        else:
+            LOGGER.debug('client_resources: False')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def get_labs(conn, address_suffix, client_key):
+    client_address = consent_helper.make_client_address(client_key)
+    LOGGER.debug('client_address: ' + str(client_address))
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        cl = Client()
+        cl.ParseFromString(entity.data)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.READ_LAB) in cl.permissions:
+            return await messaging.get_state_by_address(conn, address_suffix)
+    raise ApiForbidden("Insufficient permission")
+
+
+async def get_lab_tests(conn, client_key):
+    client_address = consent_helper.make_client_address(client_key)
+    LOGGER.debug('client_address: ' + str(client_address))
+    client_resources = await messaging.get_state_by_address(conn, client_address)
+    LOGGER.debug('client_resources: ' + str(client_resources))
+    for entity in client_resources.entries:
+        cl = Client()
+        cl.ParseFromString(entity.data)
+        LOGGER.debug('client: ' + str(cl))
+        if Permission(type=Permission.READ_LAB_TEST) in cl.permissions:
+            lab_tests_address = helper.make_lab_test_list_address()
+            return await messaging.get_state_by_address(conn, lab_tests_address)
+        elif Permission(type=Permission.READ_OWN_LAB_TEST) in cl.permissions:
+            lab_tests_address = helper.make_lab_test_list_by_patient_address(client_key)
+            return await messaging.get_state_by_address(conn, lab_tests_address)
+
     raise ApiForbidden("Insufficient permission")

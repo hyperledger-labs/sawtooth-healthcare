@@ -26,6 +26,9 @@ LAB_TEST_ENTITY_CODE = '06'
 PULSE_ENTITY_CODE = '07'
 LAB_ENTITY_CODE = '08'
 
+PATIENT_LAB_TEST__RELATION_CODE = "51"
+LAB_TEST_PATIENT__RELATION_CODE = "52"
+
 # permissions = {
 #     'read_clinic': '100',
 #     'read_own_clinic': '101',
@@ -111,6 +114,14 @@ def make_patient_list_address():
     return TP_PREFFIX_HEX6 + PATIENT_ENTITY_CODE
 
 
+def make_lab_address(lab_pkey):
+    return TP_PREFFIX_HEX6 + LAB_ENTITY_CODE + _hash(lab_pkey)[:62]
+
+
+def make_lab_list_address():
+    return TP_PREFFIX_HEX6 + LAB_ENTITY_CODE
+
+
 def make_claim_address(claim_id, clinic_pkey):
     return TP_PREFFIX_HEX6 + CLAIM_ENTITY_CODE + _hash(claim_id)[:16] + \
            CLINIC_ENTITY_CODE + _hash(clinic_pkey)[:44]
@@ -131,26 +142,45 @@ def make_event_list_address(claim_id, clinic_pkey):
            CLINIC_ENTITY_CODE + _hash(clinic_pkey)[:10]
 
 
-def make_lab_test_address(clinic_pkey, event_time):
-    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + _hash(clinic_pkey)[:12] + \
-           _hash(event_time)[:50]
-
-
-def make_lab_test_list_by_clinic_address(clinic_pkey):
-    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + _hash(clinic_pkey)[:12]
+# Lab Test entity
+def make_lab_test_address(lab_test_id):
+    return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:62]
 
 
 def make_lab_test_list_address():
     return TP_PREFFIX_HEX6 + LAB_TEST_ENTITY_CODE
 
 
-def make_pulse_address(patient_pkey, timestamp):
-    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(patient_pkey)[:12] + \
+# Lab Test <-> Patient relation
+def make_lab_test_patient__relation_address(lab_test_id, client_pkey):
+    return TP_PREFFIX_HEX6 + LAB_TEST_PATIENT__RELATION_CODE + \
+        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29] + \
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:29]
+
+
+def make_patient_list_by_lab_test_address(lab_test_id):
+    return TP_PREFFIX_HEX6 + LAB_TEST_PATIENT__RELATION_CODE + LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29]
+
+
+# Patient <-> Lab Test relation
+def make_patient_lab_test__relation_address(client_pkey, lab_test_id):
+    return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + \
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:29] + \
+        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29]
+
+
+def make_lab_test_list_by_patient_address(client_pkey):
+    return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:29]
+
+
+# Pulse
+def make_pulse_address(public_key, timestamp):
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(public_key)[:12] + \
            _hash(str(timestamp))[:50]
 
 
-def make_pulse_list_by_patient_address(patient_pkey):
-    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(patient_pkey)[:12]
+def make_pulse_list_by_patient_address(public_key):
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(public_key)[:12]
 
 
 def make_pulse_list_address():

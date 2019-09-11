@@ -2,7 +2,11 @@ var m = require("mithril")
 var LabTest = require("../models/LabTest")
 
 module.exports = {
-    oninit: LabTest.loadList,
+    oninit:
+        function(vnode){
+            LabTest.loadList(vnode.attrs.client_key)
+        },
+//    oninit: LabTest.loadList,
     view: function() {
         return m(".user-list", LabTest.list.map(function(lt) {
             return m("a.user-list-item", "HEIGHT (CM): " + lt.height + "; " +
@@ -16,6 +20,7 @@ module.exports = {
                                     "CASTS: " + lt.casts + "; " +
                                     "COLOR: " + lt.color + ";"
                                     ) // + user.publicKey
-        }))
+        }),
+        m("label.error", LabTest.error))
     }
 }

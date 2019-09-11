@@ -50,9 +50,9 @@ message Permission {
       READ_OWN_PULSE = 701;
       WRITE_PULSE = 702;
 
-      RED_CLAIM = 400;
+      READ_CLAIM = 400;
       READ_OWN_CLAIM = 401;
-      WRITE_OWN_CLAIM = 402;
+      WRITE_CLAIM = 402;
 
     }
 
