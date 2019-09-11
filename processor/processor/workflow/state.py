@@ -294,27 +294,14 @@ class HealthCareState(object):
                                                                                            lab_test.client_pkey)
         patient_lab_test_relation_address = helper.make_patient_lab_test__relation_address(lab_test.client_pkey,
                                                                                            lab_test.id)
-        # lt = payload_pb2.AddLabTest()
-        # lt.height = height
-        # lt.weight = weight
-        # lt.gender = gender
-        # lt.a_g_ratio = a_g_ratio
-        # lt.albumin = albumin
-        # lt.alkaline_phosphatase = alkaline_phosphatase
-        # lt.appearance = appearance
-        # lt.bilirubin = bilirubin
-        # lt.casts = casts
-        # lt.color = color
-        # lt.event_time = event_time
 
         lab_test_data = lab_test.SerializeToString()
         self._context.set_state(
-            {lab_test_address: lab_test_data
-             #    ,
-             # lab_test_patient_relation_address: lab_test.client_pkey
-             #    ,
-             # patient_lab_test_relation_address: lab_test.id
-             },
+            {
+                lab_test_address: lab_test_data,
+                lab_test_patient_relation_address: lab_test.client_pkey,
+                patient_lab_test_relation_address: lab_test.id
+            },
             timeout=self.TIMEOUT)
 
     def _store_pulse(self, public_key, pulse, timestamp):

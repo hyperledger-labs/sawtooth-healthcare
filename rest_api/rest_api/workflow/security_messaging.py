@@ -134,6 +134,7 @@ async def add_lab_test(conn, timeout, batches, client_key):
         if Permission(type=Permission.WRITE_LAB_TEST) in cl.permissions:
             LOGGER.debug('has permission: True')
             await _send(conn, timeout, batches)
+            return
         else:
             LOGGER.debug('client_resources: False')
     raise ApiForbidden("Insufficient permission")
@@ -164,9 +165,12 @@ async def get_lab_tests(conn, client_key):
         LOGGER.debug('client: ' + str(cl))
         if Permission(type=Permission.READ_LAB_TEST) in cl.permissions:
             lab_tests_address = helper.make_lab_test_list_address()
+            LOGGER.debug('has READ_LAB_TEST permission: ' + str(lab_tests_address))
             return await messaging.get_state_by_address(conn, lab_tests_address)
         elif Permission(type=Permission.READ_OWN_LAB_TEST) in cl.permissions:
             lab_tests_address = helper.make_lab_test_list_by_patient_address(client_key)
+            LOGGER.debug('has READ_OWN_LAB_TEST permission: ' + str(lab_tests_address))
             return await messaging.get_state_by_address(conn, lab_tests_address)
-
+        else:
+            LOGGER.debug('neither READ_OWN_LAB_TEST nor READ_LAB_TEST permissions')
     raise ApiForbidden("Insufficient permission")
