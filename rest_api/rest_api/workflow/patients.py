@@ -94,9 +94,8 @@ PATIENTS_BP = Blueprint('patients')
 async def get_all_patients(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
-    list_patient_address = helper.make_patient_list_address()
-    patient_resources = await security_messaging.get_patients(request.app.config.VAL_CONN,
-                                                              list_patient_address, client_key)
+    # list_patient_address = helper.make_patient_list_address()
+    patient_resources = await security_messaging.get_patients(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     patients = []

@@ -36,9 +36,8 @@ DOCTORS_BP = Blueprint('doctors')
 async def get_all_doctors(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
-    list_doctors_address = helper.make_doctor_list_address()
-    doctor_resources = await security_messaging.get_doctors(request.app.config.VAL_CONN,
-                                                            list_doctors_address, client_key)
+    # list_doctors_address = helper.make_doctor_list_address()
+    doctor_resources = await security_messaging.get_doctors(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     doctors = []

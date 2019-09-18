@@ -200,7 +200,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                 #                               lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
                 #                               lab_test.appearance, lab_test.bilirubin, lab_test.casts,
                 #                               lab_test.color, lab_test.event_time)
-                healthcare_state.add_lab_test(signer, lab_test)
+                healthcare_state.add_lab_test(lab_test)
             elif healthcare_payload.is_pulse():
                 pulse = healthcare_payload.pulse()
 

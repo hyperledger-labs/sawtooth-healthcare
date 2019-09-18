@@ -272,6 +272,8 @@ def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, al
         client_pkey=client_pkey
     )
 
+    LOGGER.debug('lab_test: ' + str(lab_test))
+
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.ADD_LAB_TEST,
         lab_test=lab_test)

@@ -29,9 +29,8 @@ LABS_BP = Blueprint('labs')
 async def get_all_labs(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
-    list_lab_address = helper.make_lab_list_address()
-    lab_resources = await security_messaging.get_labs(request.app.config.VAL_CONN,
-                                                      list_lab_address, client_key)
+    # list_lab_address = helper.make_lab_list_address()
+    lab_resources = await security_messaging.get_labs(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     labs = []

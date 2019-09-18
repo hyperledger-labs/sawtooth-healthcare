@@ -1,6 +1,9 @@
 from processor.common import helper
 from processor.common.protobuf import payload_pb2
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 class HealthCareState(object):
     TIMEOUT = 3
@@ -69,8 +72,8 @@ class HealthCareState(object):
         self._store_event(claim_id=claim_id, clinic_pkey=clinic_pkey, description=description,
                           event_time=event_time, event=payload_pb2.ActionOnClaim.NEXT_VISIT)
 
-    def add_lab_test(self, client_pkey, lab_test):
-        self._store_lab_test(client_pkey=client_pkey, lab_test=lab_test)
+    def add_lab_test(self, lab_test):
+        self._store_lab_test(lab_test=lab_test)
 
     def add_patient(self, public_key, pulse, timestamp):
         self._store_pulse(public_key=public_key, pulse=pulse, timestamp=timestamp)
@@ -288,7 +291,7 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_lab_test(self, client_pkey, lab_test):
+    def _store_lab_test(self, lab_test):
         lab_test_address = helper.make_lab_test_address(lab_test.id)
         lab_test_patient_relation_address = helper.make_lab_test_patient__relation_address(lab_test.id,
                                                                                            lab_test.client_pkey)
@@ -296,12 +299,14 @@ class HealthCareState(object):
                                                                                            lab_test.id)
 
         lab_test_data = lab_test.SerializeToString()
-        self._context.set_state(
-            {
+        states = {
                 lab_test_address: lab_test_data,
-                lab_test_patient_relation_address: lab_test.client_pkey,
-                patient_lab_test_relation_address: lab_test.id
-            },
+                lab_test_patient_relation_address: str.encode(lab_test.client_pkey),
+                patient_lab_test_relation_address: str.encode(lab_test.id)
+            }
+        LOGGER.debug("signer_public_key: " + str(states))
+        self._context.set_state(
+            states,
             timeout=self.TIMEOUT)
 
     def _store_pulse(self, public_key, pulse, timestamp):

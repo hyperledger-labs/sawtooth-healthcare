@@ -17,7 +17,7 @@
 # import bcrypt
 #
 # from itsdangerous import BadSignature
-import time
+# import logging
 
 from sanic import Blueprint
 from sanic import response
@@ -25,7 +25,7 @@ from sanic import response
 # from sawtooth_signing import CryptoFactory
 
 # from rest_api.workflow.authorization import authorized
-from rest_api.common.protobuf import payload_pb2
+# from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
@@ -39,8 +39,6 @@ from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
 # from google.protobuf.json_format import MessageToDict
 
 # from marketplace_transaction import transaction_creation
-
-
 LAB_TESTS_BP = Blueprint('labtests')
 
 
@@ -97,15 +95,16 @@ async def get_all_lab_tests(request):
     client_key = general.get_request_key_header(request)
     # lab_tests_address = helper.make_lab_test_list_address()
     # lab_test_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, lab_tests_address)
-    lab_test_resources = await security_messaging.get_lab_tests(request.app.config.VAL_CONN, client_key)
+    lab_tests = await security_messaging.get_lab_tests(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    lab_tests = []
-    for entity in lab_test_resources.entries:
+    lab_tests_json = []
+    # for entity in lab_test_resources.entries:
+    for address, lt in lab_tests.items():
         # dec_cl = base64.b64decode(entity.data)
-        lt = payload_pb2.AddLabTest()
-        lt.ParseFromString(entity.data)
-        lab_tests.append({
+        # lt = payload_pb2.AddLabTest()
+        # lt.ParseFromString(entity.data)
+        lab_tests_json.append({
             'height': lt.height,
             'weight': lt.weight,
             'gender': lt.gender,
@@ -121,7 +120,7 @@ async def get_all_lab_tests(request):
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': lab_tests},
+    return response.json(body={'data': lab_tests_json},
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 
@@ -159,7 +158,7 @@ async def add_new_lab_test(request):
     else:
         client_signer = request.app.config.SIGNER_PATIENT
 
-    current_times_str = str(time.time())
+    current_times_str = str(helper.get_current_timestamp())
 
     lab_test_txn = transaction.add_lab_test(
         txn_signer=client_signer,

@@ -1,4 +1,5 @@
 import hashlib
+import time
 
 DISTRIBUTION_NAME = 'sawtooth-healthcare'
 
@@ -154,23 +155,23 @@ def make_lab_test_list_address():
 # Lab Test <-> Patient relation
 def make_lab_test_patient__relation_address(lab_test_id, client_pkey):
     return TP_PREFFIX_HEX6 + LAB_TEST_PATIENT__RELATION_CODE + \
-        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29] + \
-        PATIENT_ENTITY_CODE + _hash(client_pkey)[:29]
+        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:30] + \
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:28]
 
 
 def make_patient_list_by_lab_test_address(lab_test_id):
-    return TP_PREFFIX_HEX6 + LAB_TEST_PATIENT__RELATION_CODE + LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29]
+    return TP_PREFFIX_HEX6 + LAB_TEST_PATIENT__RELATION_CODE + LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:30]
 
 
 # Patient <-> Lab Test relation
 def make_patient_lab_test__relation_address(client_pkey, lab_test_id):
     return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + \
-        PATIENT_ENTITY_CODE + _hash(client_pkey)[:29] + \
-        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:29]
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:30] + \
+        LAB_TEST_ENTITY_CODE + _hash(lab_test_id)[:28]
 
 
 def make_lab_test_list_by_patient_address(client_pkey):
-    return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:29]
+    return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:30]
 
 
 # Pulse
@@ -185,3 +186,7 @@ def make_pulse_list_by_patient_address(public_key):
 
 def make_pulse_list_address():
     return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE
+
+
+def get_current_timestamp():
+    return int(round(time.time() * 1000))
