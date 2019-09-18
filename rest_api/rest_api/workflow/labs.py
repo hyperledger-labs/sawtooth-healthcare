@@ -16,7 +16,7 @@ from sanic import Blueprint
 from sanic import response
 
 from rest_api.common.protobuf import payload_pb2
-from rest_api.common import helper, transaction
+from rest_api.common import transaction
 # from rest_api.consent_common import helper as consent_helper
 from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging

@@ -209,7 +209,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                 #     raise InvalidTransaction(
                 #         'Invalid action: Patient does not exist: ' + signer)
 
-                healthcare_state.add_patient(pulse.public_key, pulse.pulse, pulse.timestamp)
+                healthcare_state.add_pulse(pulse)
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(healthcare_payload.transaction_type()))
         except Exception as e:

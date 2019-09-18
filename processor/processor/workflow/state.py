@@ -5,6 +5,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
+
 class HealthCareState(object):
     TIMEOUT = 3
 
@@ -75,8 +76,8 @@ class HealthCareState(object):
     def add_lab_test(self, lab_test):
         self._store_lab_test(lab_test=lab_test)
 
-    def add_patient(self, public_key, pulse, timestamp):
-        self._store_pulse(public_key=public_key, pulse=pulse, timestamp=timestamp)
+    def add_pulse(self, pulse):
+        self._store_pulse(pulse=pulse)
 
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
@@ -98,37 +99,37 @@ class HealthCareState(object):
         od = self._load_claim(claim_id=claim_id, clinic_pkey=clinic_pkey)
         return od
 
-    def get_claim_hex(self, claim_hex):
-        claim_hex = self._load_claim_hex(claim_hex=claim_hex)
-        return claim_hex
+    # def get_claim_hex(self, claim_hex):
+    #     claim_hex = self._load_claim_hex(claim_hex=claim_hex)
+    #     return claim_hex
 
-    def get_clinics(self):
-        clinic = self._load_clinic()
-        return clinic
+    # def get_clinics(self):
+    #     clinic = self._load_clinic()
+    #     return clinic
 
-    def get_doctors(self):
-        doctors = self._load_doctor()
-        return doctors
+    # def get_doctors(self):
+    #     doctors = self._load_doctor()
+    #     return doctors
 
-    def get_patients(self):
-        patient = self._load_patient()
-        return patient
+    # def get_patients(self):
+    #     patient = self._load_patient()
+    #     return patient
 
-    def get_lab_tests(self):
-        lab_tests = self._load_lab_tests()
-        return lab_tests
+    # def get_lab_tests(self):
+    #     lab_tests = self._load_lab_tests()
+    #     return lab_tests
 
-    def get_lab_tests_by_clinic(self, clinic_pkey):
-        lab_tests = self._load_lab_tests(clinic_pkey=clinic_pkey)
-        return lab_tests
+    # def get_lab_tests_by_clinic(self, clinic_pkey):
+    #     lab_tests = self._load_lab_tests(clinic_pkey=clinic_pkey)
+    #     return lab_tests
 
-    def get_pulse(self):
-        pulse_list = self._load_pulse()
-        return pulse_list
+    # def get_pulse(self):
+    #     pulse_list = self._load_pulse()
+    #     return pulse_list
 
-    def get_pulse_by_patient(self, patient_pkey):
-        pulse_list = self._load_pulse(patient_pkey=patient_pkey)
-        return pulse_list
+    # def get_pulse_by_patient(self, patient_pkey):
+    #     pulse_list = self._load_pulse(patient_pkey=patient_pkey)
+    #     return pulse_list
 
     def _load_clinic(self, public_key=None):
         clinic = None
@@ -174,15 +175,15 @@ class HealthCareState(object):
             patient.ParseFromString(state_entries[0].data)
         return patient
 
-    def _load_claim_hex(self, claim_hex):
-        claim = None
-        state_entries = self._context.get_state(
-            [claim_hex],
-            timeout=self.TIMEOUT)
-        if state_entries:
-            claim = payload_pb2.CreateClaim()
-            claim.ParseFromString(state_entries[0].data)
-        return claim
+    # def _load_claim_hex(self, claim_hex):
+    #     claim = None
+    #     state_entries = self._context.get_state(
+    #         [claim_hex],
+    #         timeout=self.TIMEOUT)
+    #     if state_entries:
+    #         claim = payload_pb2.CreateClaim()
+    #         claim.ParseFromString(state_entries[0].data)
+    #     return claim
 
     def _load_claim(self, claim_id, clinic_pkey):
         claim = None
@@ -196,29 +197,30 @@ class HealthCareState(object):
             claim.ParseFromString(state_entries[0].data)
         return claim
 
-    def _load_lab_tests(self, clinic_pkey=None):
-        lab_test = None
-        lab_test_hex = [] if clinic_pkey is None \
-            else [helper.make_lab_test_list_by_clinic_address(clinic_pkey=clinic_pkey)]
-        state_entries = self._context.get_state(
-            lab_test_hex,
-            timeout=self.TIMEOUT)
-        if state_entries:
-            lab_test = payload_pb2.AddLabTest()
-            lab_test.ParseFromString(state_entries[0].data)
-        return lab_test
+    # def _load_lab_tests(self):
+    #     lab_test = None
+    #     lab_test_hex = []
+    #     # lab_test_hex = [] if clinic_pkey is None \
+    #     #     else [helper.make_lab_test_list_by_clinic_address(clinic_pkey=clinic_pkey)]
+    #     state_entries = self._context.get_state(
+    #         lab_test_hex,
+    #         timeout=self.TIMEOUT)
+    #     if state_entries:
+    #         lab_test = payload_pb2.AddLabTest()
+    #         lab_test.ParseFromString(state_entries[0].data)
+    #     return lab_test
 
-    def _load_pulse(self, patient_pkey=None):
-        pulse = None
-        pulse_hex = [] if patient_pkey is None \
-            else [helper.make_pulse_list_by_patient_address(public_key=patient_pkey)]
-        state_entries = self._context.get_state(
-            pulse_hex,
-            timeout=self.TIMEOUT)
-        if state_entries:
-            pulse = payload_pb2.AddPulse()
-            pulse.ParseFromString(state_entries[0].data)
-        return pulse
+    # def _load_pulse(self, patient_pkey=None):
+    #     pulse = None
+    #     pulse_hex = [] if patient_pkey is None \
+    #         else [helper.make_pulse_list_by_patient_address(public_key=patient_pkey)]
+    #     state_entries = self._context.get_state(
+    #         pulse_hex,
+    #         timeout=self.TIMEOUT)
+    #     if state_entries:
+    #         pulse = payload_pb2.AddPulse()
+    #         pulse.ParseFromString(state_entries[0].data)
+    #     return pulse
 
     def _store_clinic(self, public_key, clinic):
         address = helper.make_clinic_address(public_key)
@@ -300,23 +302,34 @@ class HealthCareState(object):
 
         lab_test_data = lab_test.SerializeToString()
         states = {
-                lab_test_address: lab_test_data,
-                lab_test_patient_relation_address: str.encode(lab_test.client_pkey),
-                patient_lab_test_relation_address: str.encode(lab_test.id)
-            }
-        LOGGER.debug("signer_public_key: " + str(states))
+            lab_test_address: lab_test_data,
+            lab_test_patient_relation_address: str.encode(lab_test.client_pkey),
+            patient_lab_test_relation_address: str.encode(lab_test.id)
+        }
+        LOGGER.debug("_store_lab_test: " + str(states))
         self._context.set_state(
             states,
             timeout=self.TIMEOUT)
 
-    def _store_pulse(self, public_key, pulse, timestamp):
-        address = helper.make_pulse_address(public_key=public_key, timestamp=timestamp)
-        p = payload_pb2.AddPulse()
-        p.public_key = public_key
-        p.pulse = pulse
-        p.timestamp = timestamp
+    def _store_pulse(self, pulse):
+        pulse_address = helper.make_pulse_address(pulse.id)
+        pulse_patient_relation_address = helper.make_pulse_patient__relation_address(pulse.id,
+                                                                                     pulse.client_pkey)
+        patient_pulse_relation_address = helper.make_patient_pulse__relation_address(pulse.client_pkey,
+                                                                                     pulse.id)
 
-        state_data = p.SerializeToString()
+        pulse_data = pulse.SerializeToString()
+        # p = payload_pb2.AddPulse()
+        # p.public_key = public_key
+        # p.pulse = pulse
+        # p.timestamp = timestamp
+        states = {
+            pulse_address: pulse_data,
+            pulse_patient_relation_address: str.encode(pulse.client_pkey),
+            patient_pulse_relation_address: str.encode(pulse.id)
+        }
+        LOGGER.debug("_store_pulse: " + str(states))
+        # state_data = p.SerializeToString()
         self._context.set_state(
-            {address: state_data},
+            states,
             timeout=self.TIMEOUT)

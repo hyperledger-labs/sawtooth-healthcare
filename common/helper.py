@@ -30,6 +30,9 @@ LAB_ENTITY_CODE = '08'
 PATIENT_LAB_TEST__RELATION_CODE = "51"
 LAB_TEST_PATIENT__RELATION_CODE = "52"
 
+PATIENT_PULSE__RELATION_CODE = "61"
+PULSE_PATIENT__RELATION_CODE = "62"
+
 # permissions = {
 #     'read_clinic': '100',
 #     'read_own_clinic': '101',
@@ -174,19 +177,54 @@ def make_lab_test_list_by_patient_address(client_pkey):
     return TP_PREFFIX_HEX6 + PATIENT_LAB_TEST__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:30]
 
 
-# Pulse
-def make_pulse_address(public_key, timestamp):
-    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(public_key)[:12] + \
-           _hash(str(timestamp))[:50]
+# Pulse entity
+def make_pulse_address(pulse_id):
+    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(pulse_id)[:62]
 
-
-def make_pulse_list_by_patient_address(public_key):
-    return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(public_key)[:12]
+# def make_pulse_address(public_key, timestamp):
+#     return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE + _hash(public_key)[:12] + \
+#            _hash(str(timestamp))[:50]
 
 
 def make_pulse_list_address():
     return TP_PREFFIX_HEX6 + PULSE_ENTITY_CODE
 
 
+# Pulse <-> Patient relation
+def make_pulse_patient__relation_address(pulse_id, client_pkey):
+    return TP_PREFFIX_HEX6 + PULSE_PATIENT__RELATION_CODE + \
+        PULSE_ENTITY_CODE + _hash(pulse_id)[:30] + \
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:28]
+
+
+def make_patient_list_by_pulse_address(pulse_id):
+    return TP_PREFFIX_HEX6 + PULSE_PATIENT__RELATION_CODE + PULSE_ENTITY_CODE + _hash(pulse_id)[:30]
+
+
+# Patient <-> Pulse relation
+def make_patient_pulse__relation_address(client_pkey, pulse_id):
+    return TP_PREFFIX_HEX6 + PATIENT_PULSE__RELATION_CODE + \
+        PATIENT_ENTITY_CODE + _hash(client_pkey)[:30] + \
+        PULSE_ENTITY_CODE + _hash(pulse_id)[:28]
+
+
+def make_pulse_list_by_patient_address(client_pkey):
+    return TP_PREFFIX_HEX6 + PATIENT_PULSE__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:30]
+
+
 def get_current_timestamp():
     return int(round(time.time() * 1000))
+
+
+def get_signer(request, client_key):
+    if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_CLINIC
+    elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_PATIENT
+    elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_DOCTOR
+    elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_LAB
+    else:
+        client_signer = request.app.config.SIGNER_PATIENT
+    return client_signer

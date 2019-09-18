@@ -147,17 +147,17 @@ async def add_new_lab_test(request):
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     # client_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
-    if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_CLINIC
-    elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_PATIENT
-    elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_DOCTOR
-    elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_LAB
-    else:
-        client_signer = request.app.config.SIGNER_PATIENT
-
+    # if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
+    #     client_signer = request.app.config.SIGNER_CLINIC
+    # elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
+    #     client_signer = request.app.config.SIGNER_PATIENT
+    # elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
+    #     client_signer = request.app.config.SIGNER_DOCTOR
+    # elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
+    #     client_signer = request.app.config.SIGNER_LAB
+    # else:
+    #     client_signer = request.app.config.SIGNER_PATIENT
+    client_signer = helper.get_signer(request, client_key)
     current_times_str = str(helper.get_current_timestamp())
 
     lab_test_txn = transaction.add_lab_test(
@@ -173,7 +173,7 @@ async def add_new_lab_test(request):
         bilirubin=bilirubin,
         casts=casts,
         color=color,
-        id=current_times_str,
+        uid=current_times_str,
         client_pkey=client_key
     )
 

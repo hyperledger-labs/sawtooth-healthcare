@@ -134,13 +134,13 @@ m.route(document.body, "/clinic", {
         }
     },
     "/pulse_list": {
-        render: function() {
-            return m(Layout, m(PulseList))
+        render: function(vnode) {
+            return m(Layout, m(PulseList, vnode.attrs))
         }
     },
     "/pulse_list/new/": {
-        render: function() {
-            return m(Layout, m(PulseForm))
+        render: function(vnode) {
+            return m(Layout, m(PulseForm, vnode.attrs))
         }
     },
     "/patient/:patient_pkey": {

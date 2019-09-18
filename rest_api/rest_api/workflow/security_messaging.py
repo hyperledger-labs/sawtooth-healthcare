@@ -20,12 +20,13 @@ import logging
 from sawtooth_rest_api.protobuf import client_state_pb2
 from sawtooth_rest_api.protobuf import validator_pb2
 
+# from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
-from rest_api.common.protobuf import payload_pb2
+from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse
 from rest_api.consent_common import helper as consent_helper
+from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission
 # from rest_api.consent_common.protobuf import consent_payload_pb2
 # from rest_api.common.protobuf import payload_pb2
-from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission
 from rest_api.workflow import messaging
 # from rest_api.workflow.errors import ApiBadRequest
 # from rest_api.workflow.errors import ApiInternalError
@@ -160,6 +161,17 @@ async def add_lab_test(conn, timeout, batches, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
+async def add_pulse(conn, timeout, batches, client_key):
+    client = await get_client(conn, client_key)
+    if Permission(type=Permission.WRITE_PULSE) in client.permissions:
+        LOGGER.debug('has permission: True')
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
 async def get_labs(conn, client_key):
     # client_address = consent_helper.make_client_address(client_key)
     # LOGGER.debug('client_address: ' + str(client_address))
@@ -202,7 +214,7 @@ async def get_lab_tests(conn, client_key):
         LOGGER.debug('has READ_LAB_TEST permission: ' + str(lab_tests_address))
         lab_test_resources = await messaging.get_state_by_address(conn, lab_tests_address)
         for entity in lab_test_resources.entries:
-            lt = payload_pb2.AddLabTest()
+            lt = AddLabTest()
             lt.ParseFromString(entity.data)
             lab_tests[entity.address] = lt
         return lab_tests
@@ -217,10 +229,42 @@ async def get_lab_tests(conn, client_key):
             lab_test_resources = await messaging.get_state_by_address(conn, lab_test_address)
             for entity2 in lab_test_resources.entries:
                 LOGGER.debug('get lab test entity2: ' + str(entity2.address))
-                lt = payload_pb2.AddLabTest()
+                lt = AddLabTest()
                 lt.ParseFromString(entity2.data)
                 lab_tests[entity2.address] = lt
         return lab_tests
     else:
         LOGGER.debug('neither READ_OWN_LAB_TEST nor READ_LAB_TEST permissions')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def get_pulse_list(conn, client_key):
+    client = await get_client(conn, client_key)
+    pulse_list = {}
+    if Permission(type=Permission.READ_PULSE) in client.permissions:
+        pulse_list_address = helper.make_pulse_list_address()
+        LOGGER.debug('has READ_PULSE permission: ' + str(pulse_list_address))
+        pulse_list_resources = await messaging.get_state_by_address(conn, pulse_list_address)
+        for entity in pulse_list_resources.entries:
+            pl = AddPulse()
+            pl.ParseFromString(entity.data)
+            pulse_list[entity.address] = pl
+        return pulse_list
+    elif Permission(type=Permission.READ_OWN_PULSE) in client.permissions:
+        pulse_list_ids_address = helper.make_pulse_list_by_patient_address(client_key)
+        LOGGER.debug('has READ_OWN_PULSE permission: ' + str(pulse_list_ids_address))
+        pulse_list_ids = await messaging.get_state_by_address(conn, pulse_list_ids_address)
+        for entity in pulse_list_ids.entries:
+            pulse_id = entity.data.decode()
+            pulse_address = helper.make_pulse_address(pulse_id)
+            LOGGER.debug('get pulse: ' + str(pulse_address))
+            pulse_resources = await messaging.get_state_by_address(conn, pulse_address)
+            for entity2 in pulse_resources.entries:
+                LOGGER.debug('get pulse entity2: ' + str(entity2.address))
+                pl = AddPulse()
+                pl.ParseFromString(entity2.data)
+                pulse_list[entity2.address] = pl
+        return pulse_list
+    else:
+        LOGGER.debug('neither READ_OWN_PULSE nor READ_PULSE permissions')
     raise ApiForbidden("Insufficient permission")

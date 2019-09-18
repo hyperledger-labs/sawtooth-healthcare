@@ -247,12 +247,12 @@ def create_lab(txn_signer, batch_signer, name):
 
 
 def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, albumin, alkaline_phosphatase, appearance,
-                 bilirubin, casts, color, id, client_pkey):
+                 bilirubin, casts, color, uid, client_pkey):
     # client_pkey = txn_signer.get_public_key().as_hex()
     # patient_hex = helper.make_patient_address(patient_pkey=client_pkey)
-    lab_test_hex = helper.make_lab_test_address(lab_test_id=id)
-    lab_test_patient_rel_hex = helper.make_lab_test_patient__relation_address(id, client_pkey)
-    patient_lab_test_rel_hex = helper.make_patient_lab_test__relation_address(client_pkey, id)
+    lab_test_hex = helper.make_lab_test_address(lab_test_id=uid)
+    lab_test_patient_rel_hex = helper.make_lab_test_patient__relation_address(uid, client_pkey)
+    patient_lab_test_rel_hex = helper.make_patient_lab_test__relation_address(client_pkey, uid)
     current_times_str = str(time.time())
     # clinic_hex = helper.make_clinic_address(clinic_pkey=clinic_pkey)
 
@@ -268,7 +268,7 @@ def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, al
         casts=casts,
         color=color,
         event_time=current_times_str,
-        id=id,
+        id=uid,
         client_pkey=client_pkey
     )
 
@@ -286,15 +286,19 @@ def add_lab_test(txn_signer, batch_signer, height, weight, gender, a_g_ratio, al
         batch_signer=batch_signer)
 
 
-def add_pulse(txn_signer, batch_signer, pulse, timestamp):
-    patient_pkey = txn_signer.get_public_key().as_hex()
+def add_pulse(txn_signer, batch_signer, pulse, uid, timestamp, client_pkey):
+    # patient_pkey = txn_signer.get_public_key().as_hex()
 
-    pulse_hex = helper.make_pulse_address(public_key=patient_pkey, timestamp=str(timestamp))
+    pulse_hex = helper.make_pulse_address(uid)
+    pulse_patient_rel_hex = helper.make_pulse_patient__relation_address(uid, client_pkey)
+    patient_pulse_rel_hex = helper.make_patient_pulse__relation_address(client_pkey, uid)
 
     pulse_payload = payload_pb2.AddPulse(
-        public_key=patient_pkey,
+        # public_key=patient_pkey,
+        id=uid,
         pulse=str(pulse),
-        timestamp=str(timestamp)
+        timestamp=timestamp,
+        client_pkey=client_pkey
     )
 
     payload = payload_pb2.TransactionPayload(
@@ -303,8 +307,8 @@ def add_pulse(txn_signer, batch_signer, pulse, timestamp):
 
     return _make_header_and_batch(
         payload=payload,
-        inputs=[pulse_hex],
-        outputs=[pulse_hex],
+        inputs=[pulse_hex, pulse_patient_rel_hex, patient_pulse_rel_hex],
+        outputs=[pulse_hex, pulse_patient_rel_hex, patient_pulse_rel_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
 
