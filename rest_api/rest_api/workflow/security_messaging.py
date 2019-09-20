@@ -22,7 +22,7 @@ from sawtooth_rest_api.protobuf import validator_pb2
 
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
-from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse
+from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse, CreateDoctor
 from rest_api.consent_common import helper as consent_helper
 from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission
 # from rest_api.consent_common.protobuf import consent_payload_pb2
@@ -92,21 +92,23 @@ async def add_doctor(conn, timeout, batches):
     await _send(conn, timeout, batches)
 
 
+# async def get_doctors(conn, client_key):
+#     client = await get_client(conn, client_key)
+#     if Permission(type=Permission.READ_DOCTOR) in client.permissions:
+#         list_doctors_address = helper.make_doctor_list_address()
+#         return await messaging.get_state_by_address(conn, list_doctors_address)
+#     raise ApiForbidden("Insufficient permission")
 async def get_doctors(conn, client_key):
     client = await get_client(conn, client_key)
+    doctors = {}
     if Permission(type=Permission.READ_DOCTOR) in client.permissions:
         list_doctors_address = helper.make_doctor_list_address()
-        return await messaging.get_state_by_address(conn, list_doctors_address)
-    # client_address = consent_helper.make_client_address(client_key)
-    # LOGGER.debug('client_address: ' + str(client_address))
-    # client_resources = await messaging.get_state_by_address(conn, client_address)
-    # LOGGER.debug('client_resources: ' + str(client_resources))
-    # for entity in client_resources.entries:
-    #     cl = Client()
-    #     cl.ParseFromString(entity.data)
-    #     LOGGER.debug('client: ' + str(cl))
-    #     if Permission(type=Permission.READ_DOCTOR) in cl.permissions:
-    #         return await messaging.get_state_by_address(conn, address_suffix)
+        doctor_resources = await messaging.get_state_by_address(conn, list_doctors_address)
+        for entity in doctor_resources.entries:
+            doc = CreateDoctor()
+            doc.ParseFromString(entity.data)
+            doctors[entity.address] = doc
+        return doctors
     raise ApiForbidden("Insufficient permission")
 
 

@@ -24,11 +24,11 @@ class HealthCareState(object):
         if op is None:
             self._store_clinic(public_key, clinic)
 
-    def create_doctor(self, public_key, doctor):
-        op = self._load_doctor(public_key=public_key)
+    def create_doctor(self, doctor):
+        op = self._load_doctor(public_key=doctor.public_key)
 
         if op is None:
-            self._store_doctor(public_key, doctor)
+            self._store_doctor(doctor)
 
     def create_patient(self, public_key, patient):
         op = self._load_patient(public_key=public_key)
@@ -234,8 +234,8 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_doctor(self, public_key, doctor):
-        address = helper.make_doctor_address(public_key)
+    def _store_doctor(self, doctor):
+        address = helper.make_doctor_address(doctor.public_key)
 
         # doctor = payload_pb2.CreateDoctor()
         # doctor.public_key = public_key

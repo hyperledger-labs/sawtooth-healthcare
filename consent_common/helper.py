@@ -34,8 +34,8 @@ def make_client_address(public_key):
 
 def make_consent_address(dest_pkey, src_pkey):
     return TP_PREFFIX_HEX6 + CONSENT_ENTITY_CODE \
-           + CLIENT_ENTITY_CODE + _hash(dest_pkey)[:29] \
-           + CLIENT_ENTITY_CODE + _hash(src_pkey)[:29]
+           + CLIENT_ENTITY_CODE + _hash(dest_pkey)[:30] \
+           + CLIENT_ENTITY_CODE + _hash(src_pkey)[:28]
 
 
 def make_consent_list_address():
@@ -44,5 +44,5 @@ def make_consent_list_address():
 
 def make_consent_list_address_by_destination_client(dest_pkey):
     return TP_PREFFIX_HEX6 + CONSENT_ENTITY_CODE \
-           + CLIENT_ENTITY_CODE + _hash(dest_pkey)[:29]
+           + CLIENT_ENTITY_CODE + _hash(dest_pkey)[:30]
 

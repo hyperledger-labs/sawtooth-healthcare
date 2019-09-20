@@ -130,6 +130,7 @@ def create_doctor_client(txn_signer, batch_signer):
 
 def create_patient_client(txn_signer, batch_signer):
     permissions = [Permission(type=Permission.READ_PATIENT),
+                   Permission(type=Permission.READ_DOCTOR),
                    Permission(type=Permission.READ_OWN_PATIENT),
                    Permission(type=Permission.READ_OWN_LAB_TEST),
                    Permission(type=Permission.READ_OWN_PULSE),
@@ -159,6 +160,8 @@ def create_client(txn_signer, batch_signer, permissions):
     payload = ConsentTransactionPayload(
         payload_type=ConsentTransactionPayload.ADD_CLIENT,
         create_client=client)
+
+    LOGGER.debug('payload: ' + str(payload))
 
     return _make_transaction(
         payload=payload,

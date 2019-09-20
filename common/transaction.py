@@ -123,7 +123,7 @@ def create_doctor(txn_signer, batch_signer, name, surname):
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_DOCTOR)]
 
     doctor = payload_pb2.CreateDoctor(
-        # public_key=txn_signer.get_public_key().as_hex(),
+        public_key=doctor_pkey,
         name=name,
         surname=surname)
 
@@ -154,6 +154,8 @@ def create_patient(txn_signer, batch_signer, name, surname):
     payload = payload_pb2.TransactionPayload(
         payload_type=payload_pb2.TransactionPayload.CREATE_PATIENT,
         create_patient=patient)
+
+    LOGGER.debug('payload: ' + str(payload))
 
     return _make_transaction(
         payload=payload,

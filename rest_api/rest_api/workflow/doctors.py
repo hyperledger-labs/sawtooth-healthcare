@@ -37,24 +37,24 @@ async def get_all_doctors(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
     # list_doctors_address = helper.make_doctor_list_address()
-    doctor_resources = await security_messaging.get_doctors(request.app.config.VAL_CONN, client_key)
+    doctors = await security_messaging.get_doctors(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
-    doctors = []
-    for entity in doctor_resources.entries:
+    doctors_json = []
+    for address, doc in doctors.items():
         # dec_cl = base64.b64decode(entity.data)
-        doc = payload_pb2.CreateDoctor()
-        doc.ParseFromString(entity.data)
+        # doc = payload_pb2.CreateDoctor()
+        # doc.ParseFromString(entity.data)
         # permissions = []
         # for perm in doc.permissions:
         #     permissions.append(perm)
         # doctors.append({'name': doc.name, 'surname': doc.surname, 'permissions': str(permissions)})
-        doctors.append({'name': doc.name, 'surname': doc.surname})
+        doctors_json.append({'public_key': doc.public_key, 'name': doc.name, 'surname': doc.surname})
 
     # import json
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': doctors},
+    return response.json(body={'data': doctors_json},
                          headers=general.get_response_headers(general.get_request_origin(request)))
 
 

@@ -43,9 +43,9 @@ message CreateClinic {
 }
 
 message CreateDoctor {
-//    string public_key = 1;
-    string name = 1;
-    string surname = 2;
+    string public_key = 1;
+    string name = 2;
+    string surname = 3;
 //    repeated Permission permissions = 3;
 }
 

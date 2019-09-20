@@ -53,12 +53,12 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_create_doctor():
                 doctor = healthcare_payload.create_doctor()
 
-                do = healthcare_state.get_doctor(signer)
+                do = healthcare_state.get_doctor(doctor.public_key)
                 if do is not None:
                     raise InvalidTransaction(
                         'Invalid action: Doctor already exists: ' + doctor.name)
 
-                healthcare_state.create_doctor(signer, doctor)
+                healthcare_state.create_doctor(doctor)
             elif healthcare_payload.is_create_patient():
                 patient = healthcare_payload.create_patient()
 
@@ -215,7 +215,7 @@ class HealthCareTransactionHandler(TransactionHandler):
         except Exception as e:
             print("Error: {}".format(e))
             logging.exception(e)
-            raise e
+            raise InvalidTransaction(e)
 
 
 def _display(msg):
