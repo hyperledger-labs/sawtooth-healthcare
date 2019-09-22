@@ -3,11 +3,11 @@ var Pulse = require("../models/Pulse")
 
 module.exports = {
 //    oninit: function(vnode) {User.load(vnode.attrs.id)},
-    view: function() {
+    view: function(vnode) {
         return m("form", {
                 onsubmit: function(e) {
                     e.preventDefault()
-                    Pulse.add()
+                    Pulse.add(vnode.attrs.client_key)
                 }
             }, [
             m("label.label", "PULSE"),

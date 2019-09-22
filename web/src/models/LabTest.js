@@ -3,10 +3,13 @@ var m = require("mithril")
 var LabTest = {
     list: [],
     error: "",
-    loadList: function() {
+    loadList: function(clientKey) {
         return m.request({
             method: "GET",
             url: "/api/labtests",
+            headers: {
+                'ClientKey': clientKey
+            }
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -16,6 +19,7 @@ var LabTest = {
         .catch(function(e) {
             console.log(e)
             LabTest.error = e.message
+            LabTest.list = []
         })
     },
 
@@ -31,11 +35,14 @@ var LabTest = {
         })
     },
 
-    add: function() {
+    add: function(clientKey) {
         return m.request({
             method: "POST",
             url: "/api/labtests",
             data: LabTest.current,
+            headers: {
+                'ClientKey': clientKey
+            },
             useBody: true,
 //            withCredentials: true,
         })

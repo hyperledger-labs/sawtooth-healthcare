@@ -21,3 +21,9 @@ class ConsentPayload(object):
 
     def transaction_type(self):
         return self._transaction.payload_type
+
+    def is_create_client(self):
+        return self._transaction.payload_type == consent_payload_pb2.ConsentTransactionPayload.ADD_CLIENT
+
+    def create_client(self):
+        return self._transaction.create_client

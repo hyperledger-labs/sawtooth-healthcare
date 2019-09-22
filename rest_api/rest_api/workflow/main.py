@@ -35,7 +35,9 @@ from rest_api.workflow.claims import CLAIMS_BP
 from rest_api.workflow.clinics import CLINICS_BP
 from rest_api.workflow.general import get_keyfile, get_signer_from_file
 from rest_api.workflow.doctors import DOCTORS_BP
+from rest_api.workflow.labs import LABS_BP
 from rest_api.workflow.patients import PATIENTS_BP
+from rest_api.workflow.clients import CLIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
 from rest_api.workflow.pulse import PULSE_BP
@@ -61,7 +63,10 @@ DEFAULT_CONFIG = {
     'SECRET_KEY': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890',
     'AES_KEY': 'ffffffffffffffffffffffffffffffff',
     'BATCHER_PRIVATE_KEY': '1111111111111111111111111111111111111111111111111111111111111111',
-    'BATCHER_PRIVATE_KEY_FILE_NAME': None
+    'BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC': None,
+    'BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT': None,
+    'BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR': None,
+    'BATCHER_PRIVATE_KEY_FILE_NAME_LAB': None
 }
 
 
@@ -111,8 +116,15 @@ def parse_args(args):
                         help='The AES key used for private key encryption')
     parser.add_argument('--batcher-private-key',
                         help='The sawtooth key used for transaction signing')
-    parser.add_argument('--batcher-private-key-file-name',
-                        help='The sawtooth key used for batch signing')
+    parser.add_argument('--batcher-private-key-file-name-clinic',
+                        help='The sawtooth key used for batch signing having clinic role')
+    parser.add_argument('--batcher-private-key-file-name-doctor',
+                        help='The sawtooth key used for batch signing having doctor role')
+    parser.add_argument('--batcher-private-key-file-name-patient',
+                        help='The sawtooth key used for batch signing having patient role')
+    parser.add_argument('--batcher-private-key-file-name-lab',
+                        help='The sawtooth key used for batch signing having lab role')
+
     return parser.parse_args(args)
 
 
@@ -166,23 +178,53 @@ def load_config(app):  # pylint: disable=too-many-branches
         LOGGER.exception("Batcher private key was not provided")
         sys.exit(1)
 
-    if opts.batcher_private_key_file_name is not None:
-        app.config.BATCHER_PRIVATE_KEY_FILE_NAME = opts.batcher_private_key_file_name
-    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME is None:
-        LOGGER.exception("Batcher private key file name was not provided")
+    if opts.batcher_private_key_file_name_clinic is not None:
+        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC = opts.batcher_private_key_file_name_clinic
+    if opts.batcher_private_key_file_name_doctor is not None:
+        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR = opts.batcher_private_key_file_name_doctor
+    if opts.batcher_private_key_file_name_patient is not None:
+        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT = opts.batcher_private_key_file_name_patient
+    if opts.batcher_private_key_file_name_lab is not None:
+        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB = opts.batcher_private_key_file_name_lab
+
+    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC is None:
+        LOGGER.exception("Batcher private key file name for Clinic entity was not provided")
+        sys.exit(1)
+    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR is None:
+        LOGGER.exception("Batcher private key file name for Doctor entity was not provided")
+        sys.exit(1)
+    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT is None:
+        LOGGER.exception("Batcher private key file name for Patient entity was not provided")
+        sys.exit(1)
+    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB is None:
+        LOGGER.exception("Batcher private key file name for Lab entity was not provided")
         sys.exit(1)
 
     try:
-        private_key_file_name = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME)
-        private_key = get_signer_from_file(private_key_file_name)
+        private_key_file_name_clinic = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC)
+        clinic_private_key = get_signer_from_file(private_key_file_name_clinic)
+        private_key_file_name_doctor = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR)
+        doctor_private_key = get_signer_from_file(private_key_file_name_doctor)
+        private_key_file_name_patient = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT)
+        patient_private_key = get_signer_from_file(private_key_file_name_patient)
+        private_key_file_name_lab = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB)
+        lab_private_key = get_signer_from_file(private_key_file_name_lab)
+
+
         # private_key = Secp256k1PrivateKey.from_hex(
         #     app.config.BATCHER_PRIVATE_KEY)
     except ParseError as err:
         LOGGER.exception('Unable to load private key: %s', str(err))
         sys.exit(1)
     app.config.CONTEXT = create_context('secp256k1')
-    app.config.SIGNER = CryptoFactory(
-        app.config.CONTEXT).new_signer(private_key)
+    app.config.SIGNER_CLINIC = CryptoFactory(
+        app.config.CONTEXT).new_signer(clinic_private_key)
+    app.config.SIGNER_DOCTOR = CryptoFactory(
+        app.config.CONTEXT).new_signer(doctor_private_key)
+    app.config.SIGNER_PATIENT = CryptoFactory(
+        app.config.CONTEXT).new_signer(patient_private_key)
+    app.config.SIGNER_LAB = CryptoFactory(
+        app.config.CONTEXT).new_signer(lab_private_key)
 
 
 app = Sanic(__name__)
@@ -200,6 +242,8 @@ def main():
     app.blueprint(CLAIM_DETAILS_BP)
     app.blueprint(LAB_TESTS_BP)
     app.blueprint(PULSE_BP)
+    app.blueprint(CLIENTS_BP)
+    app.blueprint(LABS_BP)
     # app.blueprint(HOLDINGS_BP)
     # app.blueprint(OFFERS_BP)
 

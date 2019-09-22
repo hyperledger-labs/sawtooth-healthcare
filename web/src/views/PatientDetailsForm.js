@@ -15,7 +15,7 @@ module.exports = {
             m("label.label", "Patient public key"),
             m("input.input[type=text][placeholder=Patient public key][disabled=false]", {
 //                oninput: m.withAttr("value", function(value) {User.current.firstName = value}),
-                value: vnode.attrs.patient_pkey
+//                value: vnode.attrs.patient_pkey
             }),
             m("label.label", "Doctor public key"),
             m("input.input[type=text][placeholder=Doctor public key]", {

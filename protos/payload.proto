@@ -16,6 +16,7 @@ message TransactionPayload {
         NEXT_VISIT = 10;
         ADD_LAB_TEST = 11;
         ADD_PULSE = 12;
+        CREATE_LAB = 13;
     }
 
     PayloadType payload_type = 1;
@@ -32,23 +33,31 @@ message TransactionPayload {
     ActionOnClaim next_visit = 11;
     AddLabTest lab_test = 12;
     AddPulse pulse = 13;
+    CreateLab create_lab = 14;
 }
 
 message CreateClinic {
-    string public_key = 1;
-    string name = 2;
+//    string public_key = 1;
+    string name = 1;
+//    repeated Permission permissions = 2;
 }
 
 message CreateDoctor {
     string public_key = 1;
     string name = 2;
     string surname = 3;
+//    repeated Permission permissions = 3;
 }
 
 message CreatePatient {
-    string public_key = 1;
-    string name = 2;
-    string surname = 3;
+    string name = 1;
+    string surname = 2;
+//    repeated Permission permissions = 3;
+}
+
+message CreateLab {
+    string name = 1;
+//    repeated Permission permissions = 2;
 }
 
 message AddLabTest {
@@ -63,12 +72,44 @@ message AddLabTest {
     string casts=9;
     string color=10;
     string event_time=11;
+    string id=12;
+    string client_pkey=13;
+}
+
+message AddLabTestWithUser {
+    string height=1;
+    string weight=2;
+    string gender=3;
+    string a_g_ratio=4;
+    string albumin=5;
+    string alkaline_phosphatase=6;
+    string appearance=7;
+    string bilirubin=8;
+    string casts=9;
+    string color=10;
+    string event_time=11;
+    string id=12;
+    string client_pkey=13;
+    string name=14;
+    string surname=15;
 }
 
 message AddPulse {
-    string public_key=1;
+//    string public_key=1;
+    string id=1;
     string pulse=2;
     string timestamp=3;
+    string client_pkey=4;
+}
+
+message AddPulseWithUser {
+//    string public_key=1;
+    string id=1;
+    string pulse=2;
+    string timestamp=3;
+    string client_pkey=4;
+    string name=5;
+    string surname=6;
 }
 
 message CreateClaim {

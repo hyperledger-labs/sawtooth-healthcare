@@ -3,10 +3,13 @@ var m = require("mithril")
 var Clinic = {
     list: [],
     error: "",
-    loadList: function() {
+    loadList: function(clientKey) {
         return m.request({
             method: "GET",
             url: "/api/clinics",
+            headers: {
+                'ClientKey': clientKey
+            }
 //            url: "https://rem-rest-api.herokuapp.com/api/users",
 //               url: "http://localhost:8008/state?address=3d804901bbfeb7",
 //            withCredentials: true,
@@ -21,6 +24,7 @@ var Clinic = {
         .catch(function(e) {
             console.log(e)
             Clinic.error = e.message
+            Clinic.list = []
         })
     },
 
