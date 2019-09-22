@@ -22,7 +22,8 @@ from sawtooth_rest_api.protobuf import validator_pb2
 
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
-from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse, AddPulseWithUser, CreateDoctor, CreatePatient
+from rest_api.common.protobuf.payload_pb2 import AddPulseWithUser, CreateDoctor, CreatePatient, \
+    AddLabTestWithUser
 from rest_api.consent_common import helper as consent_helper
 from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission, ActionOnAccess
 # from rest_api.consent_common.protobuf import consent_payload_pb2
@@ -249,12 +250,31 @@ async def get_lab_tests(conn, client_key):
     lab_tests = {}
     if Permission(type=Permission.READ_LAB_TEST) in client.permissions:
         lab_tests_address = helper.make_lab_test_list_address()
-        LOGGER.debug('has READ_LAB_TEST permission: ' + str(lab_tests_address))
+        LOGGER.debug('has READ_LAB_TEST permission: ' + str(client_key))
+        #
+        consent = await get_consent(conn, client_key)
+        patient_list = {}
+        for address, pt in consent.items():
+            LOGGER.debug('patient consent: ' + str(pt))
+            patient = await get_patient(conn, pt.patient_pkey)
+            patient_list[pt.patient_pkey] = patient
+        #
         lab_test_resources = await messaging.get_state_by_address(conn, lab_tests_address)
         for entity in lab_test_resources.entries:
-            lt = AddLabTest()
+            lt = AddLabTestWithUser()
             lt.ParseFromString(entity.data)
             lab_tests[entity.address] = lt
+            LOGGER.debug('lab_test: ' + str(lt))
+        for patient_address, pt in patient_list.items():
+            LOGGER.debug('patient: ' + str(pt))
+            for pulse_address, lt in lab_tests.items():
+                LOGGER.debug('lab_test: ' + str(lt))
+                if patient_address == lt.client_pkey:
+                    LOGGER.debug('match!')
+                    pt_local = patient_list[patient_address]
+                    lt.name = pt_local.name
+                    lt.surname = pt_local.surname
+                    lab_tests[pulse_address] = lt
         return lab_tests
     elif Permission(type=Permission.READ_OWN_LAB_TEST) in client.permissions:
         lab_test_ids_address = helper.make_lab_test_list_by_patient_address(client_key)
@@ -267,7 +287,7 @@ async def get_lab_tests(conn, client_key):
             lab_test_resources = await messaging.get_state_by_address(conn, lab_test_address)
             for entity2 in lab_test_resources.entries:
                 LOGGER.debug('get lab test entity2: ' + str(entity2.address))
-                lt = AddLabTest()
+                lt = AddLabTestWithUser()
                 lt.ParseFromString(entity2.data)
                 lab_tests[entity2.address] = lt
         return lab_tests

@@ -114,7 +114,9 @@ async def get_all_lab_tests(request):
             'appearance': lt.appearance,
             'bilirubin': lt.bilirubin,
             'casts': lt.casts,
-            'color': lt.color
+            'color': lt.color,
+            'name': lt.name,
+            'surname': lt.surname
         })
 
     # import json

@@ -9,7 +9,9 @@ module.exports = {
 //    oninit: LabTest.loadList,
     view: function() {
         return m(".user-list", LabTest.list.map(function(lt) {
-            return m("a.user-list-item", "HEIGHT (CM): " + lt.height + "; " +
+            return m("a.user-list-item", "NAME: " + lt.name + "; " +
+                                    "SURNAME: " + lt.surname + "; " +
+                                    "HEIGHT (CM): " + lt.height + "; " +
                                     "WEIGHT (KG): " + lt.weight + "; " +
                                     "GENDER (MALE OR FEMALE): " + lt.gender + "; " +
                                     "A/G RATIO: " + lt.a_g_ratio + "; " +
