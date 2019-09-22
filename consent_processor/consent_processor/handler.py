@@ -48,12 +48,16 @@ class ConsentTransactionHandler(TransactionHandler):
                 LOGGER.debug("Grant Access")
                 access = consent_payload.grant_access()
                 consent_state.grant_access(doctor_pkey=access.doctor_pkey, patient_pkey=access.patient_pkey)
+            elif consent_payload.is_create_client():
+                LOGGER.debug("Create Client")
+                client = consent_payload.create_client()
+                consent_state.create_client(client)
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(consent_payload.transaction_type()))
         except Exception as e:
             print("Error: {}".format(e))
             logging.exception(e)
-            raise e
+            raise InvalidTransaction(repr(e))
 
 
 def _display(msg):

@@ -35,6 +35,7 @@ class HealthCareTransactionHandler(TransactionHandler):
 
             header = transaction.header
             signer = header.signer_public_key
+            LOGGER.debug("signer_public_key: " + str(signer))
             LOGGER.debug("transaction payload: " + str(transaction.payload))
             healthcare_payload = HealthCarePayload(payload=transaction.payload)
 
@@ -43,12 +44,12 @@ class HealthCareTransactionHandler(TransactionHandler):
             if healthcare_payload.is_create_clinic():
                 clinic = healthcare_payload.create_clinic()
 
-                cl = healthcare_state.get_clinic(clinic.public_key)
+                cl = healthcare_state.get_clinic(signer)
                 if cl is not None:
                     raise InvalidTransaction(
                         'Invalid action: Clinic already exists: ' + clinic.name)
 
-                healthcare_state.create_clinic(clinic.public_key, clinic.name)
+                healthcare_state.create_clinic(signer, clinic)
             elif healthcare_payload.is_create_doctor():
                 doctor = healthcare_payload.create_doctor()
 
@@ -57,16 +58,25 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Doctor already exists: ' + doctor.name)
 
-                healthcare_state.create_doctor(doctor.public_key, doctor.name, doctor.surname)
+                healthcare_state.create_doctor(doctor)
             elif healthcare_payload.is_create_patient():
                 patient = healthcare_payload.create_patient()
 
-                pat = healthcare_state.get_patient(patient.public_key)
+                pat = healthcare_state.get_patient(signer)
                 if pat is not None:
                     raise InvalidTransaction(
                         'Invalid action: Patient already exists: ' + patient.name)
 
-                healthcare_state.create_patient(patient.public_key, patient.name, patient.surname)
+                healthcare_state.create_patient(signer, patient)
+            elif healthcare_payload.is_create_lab():
+                lab = healthcare_payload.create_lab()
+
+                lb = healthcare_state.get_lab(signer)
+                if lb is not None:
+                    raise InvalidTransaction(
+                        'Invalid action: Lab already exists: ' + lb.name)
+
+                healthcare_state.create_lab(signer, lab)
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()
@@ -181,15 +191,16 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_lab_test():
                 lab_test = healthcare_payload.lab_test()
 
-                clinic = healthcare_state.get_clinic(signer)
-                if clinic is None:
-                    raise InvalidTransaction(
-                        'Invalid action: Clinic does not exist: ' + signer)
+                # clinic = healthcare_state.get_clinic(signer)
+                # if clinic is None:
+                #     raise InvalidTransaction(
+                #         'Invalid action: Clinic does not exist: ' + signer)
 
-                healthcare_state.add_lab_test(signer, lab_test.height, lab_test.weight, lab_test.gender,
-                                              lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
-                                              lab_test.appearance, lab_test.bilirubin, lab_test.casts,
-                                              lab_test.color, lab_test.event_time)
+                # healthcare_state.add_lab_test(signer, lab_test.height, lab_test.weight, lab_test.gender,
+                #                               lab_test.a_g_ratio, lab_test.albumin, lab_test.alkaline_phosphatase,
+                #                               lab_test.appearance, lab_test.bilirubin, lab_test.casts,
+                #                               lab_test.color, lab_test.event_time)
+                healthcare_state.add_lab_test(lab_test)
             elif healthcare_payload.is_pulse():
                 pulse = healthcare_payload.pulse()
 
@@ -198,13 +209,13 @@ class HealthCareTransactionHandler(TransactionHandler):
                 #     raise InvalidTransaction(
                 #         'Invalid action: Patient does not exist: ' + signer)
 
-                healthcare_state.add_patient(pulse.public_key, pulse.pulse, pulse.timestamp)
+                healthcare_state.add_pulse(pulse)
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(healthcare_payload.transaction_type()))
         except Exception as e:
             print("Error: {}".format(e))
             logging.exception(e)
-            raise e
+            raise InvalidTransaction(repr(e))
 
 
 def _display(msg):

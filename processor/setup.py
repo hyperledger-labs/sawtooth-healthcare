@@ -62,7 +62,7 @@ setup(
         # 'aiohttp',
         'colorlog',
         'protobuf',
-        'sawtooth-sdk',
+        'sawtooth-sdk'
         # 'sawtooth-signing',
         # 'PyYAML',
     ],

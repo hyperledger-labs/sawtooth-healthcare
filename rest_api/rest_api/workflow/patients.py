@@ -25,7 +25,8 @@ from sanic import response
 # from rest_api.workflow.authorization import authorized
 from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper, transaction
-from rest_api.workflow import general, messaging
+from rest_api.consent_common import transaction as consent_transaction
+from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
 
 # from workflow.errors import ApiBadRequest
@@ -92,8 +93,9 @@ PATIENTS_BP = Blueprint('patients')
 @PATIENTS_BP.get('patients')
 async def get_all_patients(request):
     """Fetches complete details of all Accounts in state"""
-    list_patient_address = helper.make_patient_list_address()
-    patient_resources = await messaging.get_state_by_address(request.app.config.VAL_CONN, list_patient_address)
+    client_key = general.get_request_key_header(request)
+    # list_patient_address = helper.make_patient_list_address()
+    patient_resources = await security_messaging.get_patients(request.app.config.VAL_CONN, client_key)
     # account_resources2 = MessageToJson(account_resources)
     # account_resources3 = MessageToDict(account_resources)
     patients = []
@@ -101,7 +103,11 @@ async def get_all_patients(request):
         # dec_cl = base64.b64decode(entity.data)
         pat = payload_pb2.CreatePatient()
         pat.ParseFromString(entity.data)
-        patients.append({'public_key': pat.public_key, 'name': pat.name, 'surname': pat.surname})
+        # permissions = []
+        # for perm in pat.permissions:
+        #     permissions.append(perm)
+        # patients.append({'name': pat.name, 'surname': pat.surname, 'permissions': str(permissions)})
+        patients.append({'name': pat.name, 'surname': pat.surname})
 
     # import json
     # result = json.dumps(clinics)
@@ -122,21 +128,86 @@ async def register_new_patient(request):
 
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
-    clinic_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
+    patient_signer = request.app.config.SIGNER_PATIENT  # .get_public_key().as_hex()
 
-    batch, batch_id = transaction.create_patient(
-        txn_signer=clinic_signer,
-        batch_signer=clinic_signer,
+    client_txn = consent_transaction.create_patient_client(
+        txn_signer=patient_signer,
+        batch_signer=patient_signer
+    )
+
+    patient_txn = transaction.create_patient(
+        txn_signer=patient_signer,
+        batch_signer=patient_signer,
         name=name,
         surname=surname)
 
-    await messaging.send(
+    batch, batch_id = transaction.make_batch_and_id([client_txn, patient_txn], patient_signer)
+
+    await security_messaging.add_patient(
         request.app.config.VAL_CONN,
         request.app.config.TIMEOUT,
         [batch])
 
     try:
-        await messaging.check_batch_status(
+        await security_messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
+
+
+@PATIENTS_BP.get('patients/revoke/<doctor_pkey>')
+async def revoke_access(request, doctor_pkey):
+    """Updates auth information for the authorized account"""
+    client_key = general.get_request_key_header(request)
+    client_signer = helper.get_signer(request, client_key)
+    revoke_access_txn = consent_transaction.revoke_access(
+        txn_signer=client_signer,
+        batch_signer=client_signer,
+        doctor_pkey=doctor_pkey)
+
+    batch, batch_id = transaction.make_batch_and_id([revoke_access_txn], client_signer)
+
+    await security_messaging.revoke_access(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch], client_key)
+
+    try:
+        await security_messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers(general.get_request_origin(request)))
+
+
+@PATIENTS_BP.get('patients/grant/<doctor_pkey>')
+async def grant_access(request, doctor_pkey):
+    """Updates auth information for the authorized account"""
+    client_key = general.get_request_key_header(request)
+    client_signer = helper.get_signer(request, client_key)
+    grant_access_txn = consent_transaction.grant_access(
+        txn_signer=client_signer,
+        batch_signer=client_signer,
+        doctor_pkey=doctor_pkey)
+
+    batch, batch_id = transaction.make_batch_and_id([grant_access_txn], client_signer)
+
+    await security_messaging.grant_access(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch], client_key)
+
+    try:
+        await security_messaging.check_batch_status(
             request.app.config.VAL_CONN, [batch_id])
     except (ApiBadRequest, ApiInternalError) as err:
         # await auth_query.remove_auth_entry(

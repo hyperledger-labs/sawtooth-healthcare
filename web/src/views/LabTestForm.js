@@ -3,11 +3,11 @@ var LabTest = require("../models/LabTest")
 
 module.exports = {
 //    oninit: function(vnode) {User.load(vnode.attrs.id)},
-    view: function() {
+    view: function(vnode) {
         return m("form", {
                 onsubmit: function(e) {
                     e.preventDefault()
-                    LabTest.add()
+                    LabTest.add(vnode.attrs.client_key)
                 }
             }, [
             m("label.label", "HEIGHT (CM)"),

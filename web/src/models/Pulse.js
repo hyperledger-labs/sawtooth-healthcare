@@ -3,10 +3,13 @@ var m = require("mithril")
 var Pulse = {
     list: [],
     error: "",
-    loadList: function() {
+    loadList: function(clientKey) {
         return m.request({
             method: "GET",
             url: "/api/pulse",
+            headers: {
+                'ClientKey': clientKey
+            }
 //            withCredentials: true,
         })
         .then(function(result) {
@@ -16,6 +19,7 @@ var Pulse = {
         .catch(function(e) {
             console.log(e)
             Pulse.error = e.message
+            Pulse.list = []
         })
     },
 
@@ -31,11 +35,14 @@ var Pulse = {
         })
     },
 
-    add: function() {
+    add: function(clientKey) {
         return m.request({
             method: "POST",
             url: "/api/pulse",
             data: Pulse.current,
+            headers: {
+                'ClientKey': clientKey
+            },
             useBody: true,
 //            withCredentials: true,
         })

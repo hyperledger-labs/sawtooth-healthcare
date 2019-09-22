@@ -6,90 +6,57 @@ message ConsentTransactionPayload {
         TYPE_UNSET = 0;
         GRANT_ACCESS = 1;
         REVOKE_ACCESS = 2;
-//        CREATE_PATIENT = 3;
-//        CREATE_CLAIM = 4;
-//        ASSIGN_DOCTOR = 5;
-//        FIRST_VISIT = 6;
-//        PASS_TESTS = 7;
-//        ATTEND_PROCEDURES = 8;
-//        EAT_PILLS = 9;
-//        NEXT_VISIT = 10;
-//        ADD_LAB_TEST = 11;
-//        ADD_PULSE = 12;
+        ADD_CLIENT = 3;
     }
 
     PayloadType payload_type = 1;
 
     ActionOnAccess grant_access = 2;
     ActionOnAccess revoke_access = 3;
-//    CreatePatient create_patient = 4;
-//    CreateClaim create_claim = 5;
-//    ActionOnClaim assign_doctor = 6;
-//    ActionOnClaim first_visit = 7;
-//    ActionOnClaim pass_tests = 8;
-//    ActionOnClaim attend_procedures = 9;
-//    ActionOnClaim eat_pills = 10;
-//    ActionOnClaim next_visit = 11;
-//    AddLabTest lab_test = 12;
-//    AddPulse pulse = 13;
+    Client create_client = 4;
 }
 
-//message CreateClinic {
-//    string public_key = 1;
-//    string name = 2;
-//}
-//
-//message CreateDoctor {
-//    string public_key = 1;
-//    string name = 2;
-//    string surname = 3;
-//}
-//
-//message CreatePatient {
-//    string public_key = 1;
-//    string name = 2;
-//    string surname = 3;
-//}
-//
-//message AddLabTest {
-//    string height=1;
-//    string weight=2;
-//    string gender=3;
-//    string a_g_ratio=4;
-//    string albumin=5;
-//    string alkaline_phosphatase=6;
-//    string appearance=7;
-//    string bilirubin=8;
-//    string casts=9;
-//    string color=10;
-//    string event_time=11;
-//}
-//
-//message AddPulse {
-//    string public_key=1;
-//    string pulse=2;
-//    string timestamp=3;
-//}
-//
-//message CreateClaim {
-//    string claim_id = 1;
-//    string clinic_pkey = 2;
-//    string patient_pkey = 3;
-//}
-
 message ActionOnAccess {
-//    enum Event {
-//        GRANT = 0;
-//        REVOKE = 1;
-////        PASS_TEST = 2;
-////        PASS_PROCEDURE = 3;
-////        EAT_PILLS = 4;
-////        NEXT_VISIT = 5;
-//    }
-
     string doctor_pkey = 1;
     string patient_pkey = 2;
-//    string description = 3;
-//    Event event = 3;
-//    string event_time = 5;
+}
+
+message Client {
+    string public_key = 1;
+    repeated Permission permissions = 2;
+}
+
+message Permission {
+    enum PermissionType {
+      PERMISSION_TYPE_UNSET = 0;
+
+      READ_CLINIC = 100;
+      READ_OWN_CLINIC = 101;
+
+      READ_DOCTOR = 200;
+      READ_OWN_DOCTOR = 201;
+
+      READ_PATIENT = 300;
+      READ_OWN_PATIENT = 301;
+
+      READ_LAB = 800;
+      READ_OWN_LAB = 801;
+
+      READ_LAB_TEST = 600;
+      READ_OWN_LAB_TEST = 601;
+      WRITE_LAB_TEST = 602;
+
+      READ_PULSE = 700;
+      READ_OWN_PULSE = 701;
+      WRITE_PULSE = 702;
+
+      READ_CLAIM = 400;
+      READ_OWN_CLAIM = 401;
+      WRITE_CLAIM = 402;
+
+      REVOKE_ACCESS = 500;
+      GRANT_ACCESS = 501;
+    }
+
+    PermissionType type = 1;
 }
