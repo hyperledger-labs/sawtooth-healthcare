@@ -124,6 +124,7 @@ def create_doctor_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_OWN_DOCTOR),
                    Permission(type=Permission.READ_LAB),
                    Permission(type=Permission.READ_LAB_TEST),
+                   Permission(type=Permission.READ_PULSE),
                    Permission(type=Permission.READ_CLAIM)]
     return create_client(txn_signer, batch_signer, permissions)
 
@@ -137,7 +138,10 @@ def create_patient_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_OWN_CLAIM),
                    Permission(type=Permission.WRITE_LAB_TEST),
                    Permission(type=Permission.WRITE_PULSE),
-                   Permission(type=Permission.WRITE_CLAIM),]
+                   Permission(type=Permission.WRITE_CLAIM),
+                   Permission(type=Permission.REVOKE_ACCESS),
+                   Permission(type=Permission.GRANT_ACCESS)
+                   ]
     return create_client(txn_signer, batch_signer, permissions)
 
 
@@ -184,7 +188,7 @@ def grant_access(txn_signer, batch_signer, doctor_pkey):
         payload_type=ConsentTransactionPayload.GRANT_ACCESS,
         grant_access=access)
 
-    return _make_header_and_batch(
+    return _make_transaction(
         payload=payload,
         inputs=[consent_hex],
         outputs=[consent_hex],
@@ -205,7 +209,7 @@ def revoke_access(txn_signer, batch_signer, doctor_pkey):
         payload_type=ConsentTransactionPayload.REVOKE_ACCESS,
         revoke_access=access)
 
-    return _make_header_and_batch(
+    return _make_transaction(
         payload=payload,
         inputs=[consent_hex],
         outputs=[consent_hex],

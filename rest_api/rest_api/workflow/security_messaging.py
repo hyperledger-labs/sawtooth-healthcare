@@ -22,15 +22,15 @@ from sawtooth_rest_api.protobuf import validator_pb2
 
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
-from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse, CreateDoctor
+from rest_api.common.protobuf.payload_pb2 import AddLabTest, AddPulse, AddPulseWithUser, CreateDoctor, CreatePatient
 from rest_api.consent_common import helper as consent_helper
-from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission
+from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission, ActionOnAccess
 # from rest_api.consent_common.protobuf import consent_payload_pb2
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.workflow import messaging
 # from rest_api.workflow.errors import ApiBadRequest
 # from rest_api.workflow.errors import ApiInternalError
-from rest_api.workflow.errors import ApiForbidden, ApiUnauthorized
+from rest_api.workflow.errors import ApiForbidden, ApiUnauthorized, ApiBadRequest
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -121,17 +121,17 @@ async def get_patients(conn, client_key):
     if Permission(type=Permission.READ_PATIENT) in client.permissions:
         list_patient_address = helper.make_patient_list_address()
         return await messaging.get_state_by_address(conn, list_patient_address)
-    # client_address = consent_helper.make_client_address(client_key)
-    # LOGGER.debug('client_address: ' + str(client_address))
-    # client_resources = await messaging.get_state_by_address(conn, client_address)
-    # LOGGER.debug('client_resources: ' + str(client_resources))
-    # for entity in client_resources.entries:
-    #     cl = Client()
-    #     cl.ParseFromString(entity.data)
-    #     LOGGER.debug('client: ' + str(cl))
-    #     if Permission(type=Permission.READ_PATIENT) in cl.permissions:
-    #         return await messaging.get_state_by_address(conn, address_suffix)
     raise ApiForbidden("Insufficient permission")
+
+
+async def get_patient(conn, patient_key):
+    list_patient_address = helper.make_patient_address(patient_key)
+    patient_resources = await messaging.get_state_by_address(conn, list_patient_address)
+    for entity in patient_resources.entries:
+        lt = CreatePatient()
+        lt.ParseFromString(entity.data)
+        return lt
+    raise ApiBadRequest("No such patient exist: " + str(patient_key))
 
 
 async def add_lab(conn, timeout, batches):
@@ -174,6 +174,28 @@ async def add_pulse(conn, timeout, batches, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
+async def revoke_access(conn, timeout, batches, client_key):
+    client = await get_client(conn, client_key)
+    if Permission(type=Permission.REVOKE_ACCESS) in client.permissions:
+        LOGGER.debug('has permission: True')
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def grant_access(conn, timeout, batches, client_key):
+    client = await get_client(conn, client_key)
+    if Permission(type=Permission.GRANT_ACCESS) in client.permissions:
+        LOGGER.debug('has permission: True')
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
 async def get_labs(conn, client_key):
     # client_address = consent_helper.make_client_address(client_key)
     # LOGGER.debug('client_address: ' + str(client_address))
@@ -206,6 +228,20 @@ async def get_client(conn, client_key):
         LOGGER.debug('client: ' + str(cl))
         return cl
     raise ApiUnauthorized("No such client registered")
+
+
+async def get_consent(conn, client_key):
+    consent_address = consent_helper.make_consent_list_address_by_destination_client(client_key)
+    LOGGER.debug('consent_address: ' + str(consent_address))
+    consent_resources = await messaging.get_state_by_address(conn, consent_address)
+    LOGGER.debug('consent_resources: ' + str(consent_resources))
+    consent_list = {}
+    for entity in consent_resources.entries:
+        aoa = ActionOnAccess()
+        aoa.ParseFromString(entity.data)
+        consent_list[entity.address] = aoa
+        LOGGER.debug('consent: ' + str(aoa))
+    return consent_list
 
 
 async def get_lab_tests(conn, client_key):
@@ -245,12 +281,29 @@ async def get_pulse_list(conn, client_key):
     pulse_list = {}
     if Permission(type=Permission.READ_PULSE) in client.permissions:
         pulse_list_address = helper.make_pulse_list_address()
-        LOGGER.debug('has READ_PULSE permission: ' + str(pulse_list_address))
+        LOGGER.debug('has READ_PULSE permission: ' + str(client_key))
+        consent = await get_consent(conn, client_key)
+        patient_list = {}
+        for address, pt in consent.items():
+            LOGGER.debug('patient consent: ' + str(pt))
+            patient = await get_patient(conn, pt.patient_pkey)
+            patient_list[pt.patient_pkey] = patient
         pulse_list_resources = await messaging.get_state_by_address(conn, pulse_list_address)
         for entity in pulse_list_resources.entries:
-            pl = AddPulse()
+            pl = AddPulseWithUser()
             pl.ParseFromString(entity.data)
             pulse_list[entity.address] = pl
+            LOGGER.debug('pulse: ' + str(pl))
+        for patient_address, pt in patient_list.items():
+            LOGGER.debug('patient: ' + str(pt))
+            for pulse_address, pl in pulse_list.items():
+                LOGGER.debug('pulse: ' + str(pl))
+                if patient_address == pl.client_pkey:
+                    LOGGER.debug('match!')
+                    pt_local = patient_list[patient_address]
+                    pl.name = pt_local.name
+                    pl.surname = pt_local.surname
+                    pulse_list[pulse_address] = pl
         return pulse_list
     elif Permission(type=Permission.READ_OWN_PULSE) in client.permissions:
         pulse_list_ids_address = helper.make_pulse_list_by_patient_address(client_key)
@@ -263,7 +316,7 @@ async def get_pulse_list(conn, client_key):
             pulse_resources = await messaging.get_state_by_address(conn, pulse_address)
             for entity2 in pulse_resources.entries:
                 LOGGER.debug('get pulse entity2: ' + str(entity2.address))
-                pl = AddPulse()
+                pl = AddPulseWithUser()
                 pl.ParseFromString(entity2.data)
                 pulse_list[entity2.address] = pl
         return pulse_list

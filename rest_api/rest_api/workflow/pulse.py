@@ -47,9 +47,11 @@ async def get_all_pulse_items(request):
         # pl = payload_pb2.AddPulse()
         # pl.ParseFromString(entity.data)
         pulse_list_json.append({
-            # 'public_key': pl.public_key,
+            'client_pkey': pl.client_pkey,
             'pulse': pl.pulse,
-            'timestamp': pl.timestamp
+            'timestamp': pl.timestamp,
+            'name': pl.name,
+            'surname': pl.surname
         })
 
     return response.json(body={'data': pulse_list_json},

@@ -51,6 +51,48 @@ var Doctor = {
             console.log(e)
             Doctor.error = e.message
         })
+    },
+
+    grant: function(doctorPKey, clientKey) {
+        return m.request({
+            method: "GET",
+            url: "/api/patients/grant/" + doctorPKey,
+            headers: {
+                'ClientKey': clientKey
+            }
+//            data: Doctor.current,
+//            useBody: true,
+//            withCredentials: true,
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            Doctor.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Doctor.error = e.message
+        })
+    },
+
+    revoke: function(doctorPKey, clientKey) {
+        return m.request({
+            method: "GET",
+            url: "/api/patients/revoke/" + doctorPKey,
+            headers: {
+                'ClientKey': clientKey
+            }
+//            data: Doctor.current,
+//            useBody: true,
+//            withCredentials: true,
+        })
+        .then(function(items) {
+//            Data.todos.list = items
+            Doctor.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Doctor.error = e.message
+        })
     }
 }
 

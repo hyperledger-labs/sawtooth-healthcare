@@ -57,7 +57,7 @@ class ConsentTransactionHandler(TransactionHandler):
         except Exception as e:
             print("Error: {}".format(e))
             logging.exception(e)
-            raise InvalidTransaction(e)
+            raise InvalidTransaction(repr(e))
 
 
 def _display(msg):

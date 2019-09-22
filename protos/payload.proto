@@ -84,6 +84,16 @@ message AddPulse {
     string client_pkey=4;
 }
 
+message AddPulseWithUser {
+//    string public_key=1;
+    string id=1;
+    string pulse=2;
+    string timestamp=3;
+    string client_pkey=4;
+    string name=5;
+    string surname=6;
+}
+
 message CreateClaim {
     string claim_id = 1;
     string clinic_pkey = 2;
