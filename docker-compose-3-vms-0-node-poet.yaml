@@ -20,7 +20,7 @@ services:
       - ./:/project/sawtooth_healthcare
       - /project/sawtooth_healthcare/build
     depends_on:
-      - healthcare-cli
+      - healthcare-cli-hk
     command: |
       bash -c "
         sleep 1 &&
@@ -50,29 +50,6 @@ services:
         consent-tp -v -C tcp://validator-0:4004 &&
         tail -f /dev/null
                "
-
-  healthcare-cli:
-    build:
-      context: .
-      dockerfile: cli/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: healthcare-cli
-    container_name: healthcare-client
-    volumes:
-      - ./:/project/sawtooth_healthcare
-      - /project/sawtooth_healthcare/build
-    depends_on:
-      - healthcare-cli-hk
-    command: |
-      bash -c "
-        sleep 1 &&
-        echo '--- Building healthcare-cli by docker-compose---\n' &&
-        init-healthcare-cli.sh &&
-        tail -f /dev/null
-      "
 
   healthcare-cli-hk:
     build:
