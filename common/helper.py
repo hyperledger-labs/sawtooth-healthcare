@@ -216,15 +216,15 @@ def get_current_timestamp():
     return int(round(time.time() * 1000))
 
 
-def get_signer(request, client_key):
-    if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_CLINIC
-    elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_PATIENT
-    elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_DOCTOR
-    elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
-        client_signer = request.app.config.SIGNER_LAB
-    else:
-        client_signer = request.app.config.SIGNER_PATIENT
-    return client_signer
+# def get_signer(request, client_key):
+#     if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
+#         client_signer = request.app.config.SIGNER_CLINIC
+#     elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
+#         client_signer = request.app.config.SIGNER_PATIENT
+#     elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
+#         client_signer = request.app.config.SIGNER_DOCTOR
+#     elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
+#         client_signer = request.app.config.SIGNER_LAB
+#     else:
+#         client_signer = request.app.config.SIGNER_PATIENT
+#     return client_signer

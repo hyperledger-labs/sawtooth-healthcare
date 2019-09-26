@@ -25,7 +25,6 @@ services:
         tail -f /dev/null
                "
 
-
   consent-processor:
     build:
       context: .
@@ -44,6 +43,27 @@ services:
         echo '--- Building consent-tp by docker-compose---\n' &&
         init-consent-tp.sh &&
         consent-tp -v -C tcp://validator:4004 &&
+        tail -f /dev/null
+               "
+
+  insurance-processor:
+    build:
+      context: .
+      dockerfile: insurance_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: insurance-tp
+    container_name: insurance-processor
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building insurance-tp by docker-compose---\n' &&
+        init-insurance-tp.sh &&
+        insurance-tp -v -C tcp://validator:4004 &&
         tail -f /dev/null
                "
 

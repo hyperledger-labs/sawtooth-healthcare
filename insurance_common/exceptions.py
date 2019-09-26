@@ -1,0 +1,2 @@
+class InsuranceException(Exception):
+    pass

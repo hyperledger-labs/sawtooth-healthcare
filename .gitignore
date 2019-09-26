@@ -112,10 +112,12 @@ venv.bak/
 #/common/protobuf/payload_pb2.py
 common/protobuf/
 consent_common/protobuf/
+insurance_common/protobuf/
 
 cli/cli/common
 cli_hk/cli/common
 processor/processor/common
 consent_processor/consent_processor/consent_common
+/insurance_processor/processor/insurance_common/
 rest_api/rest_api/common
 rest_api/rest_api/consent_common

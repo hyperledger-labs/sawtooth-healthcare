@@ -55,7 +55,7 @@ async def get_all_doctors(request):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': doctors_json},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @DOCTORS_BP.post('doctors')
@@ -103,7 +103,7 @@ async def register_new_doctor(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 # @ACCOUNTS_BP.get('accounts/<key>')
 # async def get_account(request, key):

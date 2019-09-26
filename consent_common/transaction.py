@@ -152,6 +152,16 @@ def create_lab_client(txn_signer, batch_signer):
     return create_client(txn_signer, batch_signer, permissions)
 
 
+def create_insurance_client(txn_signer, batch_signer):
+    permissions = [Permission(type=Permission.READ_INSURANCE_COMPANY),
+                   Permission(type=Permission.READ_OWN_INSURANCE_COMPANY),
+                   Permission(type=Permission.READ_CONTRACT),
+                   Permission(type=Permission.READ_OWN_CONTRACT),
+                   Permission(type=Permission.WRITE_CONTRACT)
+                   ]
+    return create_client(txn_signer, batch_signer, permissions)
+
+
 def create_client(txn_signer, batch_signer, permissions):
     client_pkey = txn_signer.get_public_key().as_hex()
     LOGGER.debug('client_pkey: ' + str(client_pkey))

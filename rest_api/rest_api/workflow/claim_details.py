@@ -116,7 +116,7 @@ async def get_all_claim_details(request, clinic_pkey, claim_id):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': claim_details},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/assign')
@@ -203,7 +203,7 @@ async def assign_doctor(request):
     #     })
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/first_visit')
@@ -238,7 +238,7 @@ async def doctor_visit(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/pass_tests')
@@ -271,7 +271,7 @@ async def pass_tests(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/attend_procedures')
@@ -304,7 +304,7 @@ async def attend_procedures(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/eat_pills')
@@ -337,7 +337,7 @@ async def eat_pills(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @CLAIM_DETAILS_BP.post('claim/next_visit')
@@ -373,7 +373,7 @@ async def next_visit(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 # @CLAIMS_BP.post('claims')
 # async def register_new_claim(request):

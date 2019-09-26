@@ -24,7 +24,7 @@ from sanic import response
 
 # from rest_api.workflow.authorization import authorized
 from rest_api.common.protobuf import payload_pb2
-from rest_api.common import helper, transaction
+from rest_api.common import transaction
 from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
@@ -113,7 +113,7 @@ async def get_all_patients(request):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': patients},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @PATIENTS_BP.post('patients')
@@ -157,14 +157,14 @@ async def register_new_patient(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @PATIENTS_BP.get('patients/revoke/<doctor_pkey>')
 async def revoke_access(request, doctor_pkey):
     """Updates auth information for the authorized account"""
     client_key = general.get_request_key_header(request)
-    client_signer = helper.get_signer(request, client_key)
+    client_signer = general.get_signer(request, client_key)
     revoke_access_txn = consent_transaction.revoke_access(
         txn_signer=client_signer,
         batch_signer=client_signer,
@@ -186,14 +186,14 @@ async def revoke_access(request, doctor_pkey):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @PATIENTS_BP.get('patients/grant/<doctor_pkey>')
 async def grant_access(request, doctor_pkey):
     """Updates auth information for the authorized account"""
     client_key = general.get_request_key_header(request)
-    client_signer = helper.get_signer(request, client_key)
+    client_signer = general.get_signer(request, client_key)
     grant_access_txn = consent_transaction.grant_access(
         txn_signer=client_signer,
         batch_signer=client_signer,
@@ -215,7 +215,7 @@ async def grant_access(request, doctor_pkey):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 # @ACCOUNTS_BP.get('accounts/<key>')
 # async def get_account(request, key):

@@ -106,7 +106,7 @@ async def get_all_claims(request):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': claims},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 # @ACCOUNTS_BP.get('accounts/<key>')
@@ -157,4 +157,4 @@ async def register_new_claim(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())

@@ -67,6 +67,10 @@ def make_consent_protobuf():
     make_protobuf(path='consent_common', pkg_name='protobuf', proto_file='consent_payload.proto')
 
 
+def make_insurance_protobuf():
+    make_protobuf(path='insurance_common', pkg_name='protobuf', proto_file='insurance_payload.proto')
+
+
 def make_base_protobuf():
     make_protobuf(path='common', pkg_name='protobuf', proto_file='payload.proto')
 

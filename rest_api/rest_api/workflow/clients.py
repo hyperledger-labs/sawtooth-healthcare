@@ -76,5 +76,5 @@ async def get_all_clients(request):
     lab_pkey = request.app.config.SIGNER_LAB.get_public_key().as_hex()
     clients = {'clinic': clinic_pkey, 'doctor': doctor_pkey, 'patient': patient_pkey, 'lab': lab_pkey}
     return response.json(body={'data': clients},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
     # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)

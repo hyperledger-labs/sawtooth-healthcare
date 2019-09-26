@@ -123,7 +123,7 @@ async def get_all_lab_tests(request):
     # result = json.dumps(clinics)
     # clinics_json = MessageToJson(account_resources)
     return response.json(body={'data': lab_tests_json},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 @LAB_TESTS_BP.post('labtests')
@@ -159,7 +159,7 @@ async def add_new_lab_test(request):
     #     client_signer = request.app.config.SIGNER_LAB
     # else:
     #     client_signer = request.app.config.SIGNER_PATIENT
-    client_signer = helper.get_signer(request, client_key)
+    client_signer = general.get_signer(request, client_key)
     current_times_str = str(helper.get_current_timestamp())
 
     lab_test_txn = transaction.add_lab_test(
@@ -195,4 +195,4 @@ async def add_new_lab_test(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
