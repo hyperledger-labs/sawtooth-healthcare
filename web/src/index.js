@@ -14,6 +14,9 @@ var PatientDetailsForm = require("./views/PatientDetailsForm")
 var ClinicList = require("./views/ClinicList")
 var ClinicForm = require("./views/ClinicForm")
 
+var InsuranceList = require("./views/InsuranceList")
+var InsuranceForm = require("./views/InsuranceForm")
+
 var ClaimList = require("./views/ClaimList")
 var ClaimNewForm = require("./views/ClaimNewForm")
 var ClaimDetailsForm = require("./views/ClaimDetailsForm")
@@ -38,6 +41,7 @@ var DoctorActionsList = require("./views/DoctorActionsList")
 var ClinicActionsList = require("./views/ClinicActionsList")
 var PatientActionsList = require("./views/PatientActionsList")
 var LabActionsList = require("./views/LabActionsList")
+var InsuranceActionsList = require("./views/InsuranceActionsList")
 var Layout = require("./views/Layout")
 
 m.route(document.body, "/clinic", {
@@ -76,6 +80,16 @@ m.route(document.body, "/clinic", {
     "/clinic/new/": {
         render: function() {
             return m(Layout, m(ClinicForm))
+        }
+    },
+    "/insurance_list/": {
+        render: function(vnode) {
+            return m(Layout, m(InsuranceList, vnode.attrs))
+        }
+    },
+    "/insurance/new/": {
+        render: function() {
+            return m(Layout, m(InsuranceForm))
         }
     },
     "/claim_list": {
@@ -166,6 +180,11 @@ m.route(document.body, "/clinic", {
     "/lab": {
         render: function() {
             return m(Layout, m(LabActionsList))
+        }
+    },
+    "/insurance": {
+        render: function() {
+            return m(Layout, m(InsuranceActionsList))
         }
     },
     "/lab_list/": {

@@ -1,14 +1,14 @@
 import hashlib
 import random
-import time
+# import time
 import logging
-from sawtooth_sdk.protobuf.batch_pb2 import BatchList, BatchHeader, Batch
+from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
 from sawtooth_sdk.protobuf.transaction_pb2 import Transaction, TransactionHeader
 
 # import common.helper as helper
 # from common.protobuf import payload_pb2
 from . import helper as helper
-from .protobuf import payload_pb2
+from .protobuf.insurance_payload_pb2 import Insurance, InsuranceTransactionPayload, Contract
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -118,14 +118,14 @@ def create_insurance(txn_signer, batch_signer, name):
     insurance_pkey = txn_signer.get_public_key().as_hex()
     LOGGER.debug('insurance_pkey: ' + str(insurance_pkey))
     insurance_hex = helper.make_insurance_address(insurance_pkey=insurance_pkey)
-    LOGGER.debug('insurance_pkey: ' + str(insurance_hex))
+    LOGGER.debug('insurance_hex: ' + str(insurance_hex))
 
-    insurance = payload_pb2.Insurance(
+    insurance = Insurance(
         public_key=insurance_pkey,
         name=name)
 
-    payload = payload_pb2.TransactionPayload(
-        payload_type=payload_pb2.TransactionPayload.CREATE_INSURANCE,
+    payload = InsuranceTransactionPayload(
+        payload_type=InsuranceTransactionPayload.CREATE_INSURANCE,
         create_insurance=insurance)
 
     return _make_transaction(
@@ -136,19 +136,19 @@ def create_insurance(txn_signer, batch_signer, name):
         batch_signer=batch_signer)
 
 
-def add_contract(txn_signer, batch_signer, uid, insurance_pkey, client_pkey):
-
+def add_contract(txn_signer, batch_signer, uid, client_pkey):
+    insurance_pkey = txn_signer.get_public_key().as_hex()
     contract_hex = helper.make_contract_address(uid)
     contract_insurance_rel_hex = helper.make_contract_insurance__relation_address(uid, insurance_pkey)
     insurance_contract_rel_hex = helper.make_insurance_contract__relation_address(insurance_pkey, uid)
 
-    contract_payload = payload_pb2.Contract(
+    contract_payload = Contract(
         id=uid,
         client_pkey=client_pkey
     )
 
-    payload = payload_pb2.TransactionPayload(
-        payload_type=payload_pb2.TransactionPayload.ADD_CONTRACT,
+    payload = InsuranceTransactionPayload(
+        payload_type=InsuranceTransactionPayload.ADD_CONTRACT,
         contract=contract_payload)
 
     return _make_header_and_batch(

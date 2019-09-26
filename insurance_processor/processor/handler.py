@@ -42,8 +42,8 @@ class InsuranceTransactionHandler(TransactionHandler):
 
             if payload.is_create_insurance():
                 insurance = payload.create_insurance()
-
-                ins = state.get_insurance(insurance.public_key)
+                LOGGER.debug("insurance: " + str(insurance))
+                ins = state.get_insurance(signer)
                 if ins is not None:
                     raise InvalidTransaction(
                         'Invalid action: Insurance already exists: ' + ins.name)
@@ -52,7 +52,7 @@ class InsuranceTransactionHandler(TransactionHandler):
             elif payload.is_add_contract():
                 contract = payload.add_contract()
 
-                con = state.get_contract(contract.client_pkey)
+                con = state.get_contract(contract.id)
                 if con is not None:
                     raise InvalidTransaction(
                         'Invalid action: Contract already exists: ' + con.id)

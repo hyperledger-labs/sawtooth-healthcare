@@ -4,7 +4,7 @@ from processor.insurance_common.protobuf import insurance_payload_pb2 as payload
 class InsurancePayload(object):
 
     def __init__(self, payload):
-        self._transaction = payload_pb2.TransactionPayload()
+        self._transaction = payload_pb2.InsuranceTransactionPayload()
         self._transaction.ParseFromString(payload)
 
     def create_insurance(self):
@@ -47,10 +47,10 @@ class InsurancePayload(object):
     #     return self._transaction.pulse
 
     def is_create_insurance(self):
-        return self._transaction.payload_type == payload_pb2.TransactionPayload.CREATE_INSURANCE
+        return self._transaction.payload_type == payload_pb2.InsuranceTransactionPayload.CREATE_INSURANCE
 
     def is_add_contract(self):
-        return self._transaction.payload_type == payload_pb2.TransactionPayload.ADD_CONTRACT
+        return self._transaction.payload_type == payload_pb2.InsuranceTransactionPayload.ADD_CONTRACT
 
     # def is_create_patient(self):
     #     return self._transaction.payload_type == payload_pb2.TransactionPayload.CREATE_PATIENT

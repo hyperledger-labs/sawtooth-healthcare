@@ -18,6 +18,7 @@ module.exports = {
             m("a.user-list-item", {href: "/doctor/new/", oncreate: m.route.link}, "New Doctor"),
             m("a.user-list-item", {href: "/doctor_list/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Doctors List"),
             m("a.user-list-item", {href: "/patient_list/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Patients List"),
+            m("a.user-list-item", {href: "/insurance_list/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Insurance List"),
             m("a.user-list-item", {href: "/lab_list/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Labs List"),
             m("a.user-list-item", {href: "/lab_test_list/new/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Add Lab Test"),
             m("a.user-list-item", {href: "/lab_test_list/?client_key=" + Client.list['doctor'], oncreate: m.route.link}, "Lab Test List"),

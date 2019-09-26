@@ -37,6 +37,7 @@ from rest_api.workflow.general import get_keyfile, get_signer_from_file
 from rest_api.workflow.doctors import DOCTORS_BP
 from rest_api.workflow.labs import LABS_BP
 from rest_api.workflow.patients import PATIENTS_BP
+from rest_api.workflow.insurances import INSURANCES_BP
 from rest_api.workflow.clients import CLIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
@@ -66,11 +67,12 @@ DEFAULT_CONFIG = {
     'BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC': None,
     'BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT': None,
     'BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR': None,
-    'BATCHER_PRIVATE_KEY_FILE_NAME_LAB': None
+    'BATCHER_PRIVATE_KEY_FILE_NAME_LAB': None,
+    'BATCHER_PRIVATE_KEY_FILE_NAME_INSURANCE': None
 }
 
 
-async def open_connections(app):
+async def open_connections(appl):
     # LOGGER.warning('opening database connection')
     # r.set_loop_type('asyncio')
     # app.config.DB_CONN = await r.connect(
@@ -78,18 +80,18 @@ async def open_connections(app):
     #     port=app.config.DB_PORT,
     #     db=app.config.DB_NAME)
 
-    app.config.VAL_CONN = Connection(app.config.VALIDATOR_URL)
+    appl.config.VAL_CONN = Connection(appl.config.VALIDATOR_URL)
 
-    LOGGER.warning('opening validator connection: ' + str(app.config.VALIDATOR_URL))
-    app.config.VAL_CONN.open()
+    LOGGER.warning('opening validator connection: ' + str(appl.config.VALIDATOR_URL))
+    appl.config.VAL_CONN.open()
 
 
-def close_connections(app):
+def close_connections(appl):
     # LOGGER.warning('closing database connection')
     # app.config.DB_CONN.close()
 
     LOGGER.warning('closing validator connection')
-    app.config.VAL_CONN.close()
+    appl.config.VAL_CONN.close()
 
 
 def parse_args(args):
@@ -124,17 +126,19 @@ def parse_args(args):
                         help='The sawtooth key used for batch signing having patient role')
     parser.add_argument('--batcher-private-key-file-name-lab',
                         help='The sawtooth key used for batch signing having lab role')
+    parser.add_argument('--batcher-private-key-file-name-insurance',
+                        help='The sawtooth key used for batch signing having insurance role')
 
     return parser.parse_args(args)
 
 
-def load_config(app):  # pylint: disable=too-many-branches
-    app.config.update(DEFAULT_CONFIG)
+def load_config(appl):  # pylint: disable=too-many-branches
+    appl.config.update(DEFAULT_CONFIG)
     config_file_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
         'config.py')
     try:
-        app.config.from_pyfile(config_file_path)
+        appl.config.from_pyfile(config_file_path)
     except FileNotFoundError:
         LOGGER.warning("No config file provided")
 
@@ -142,14 +146,14 @@ def load_config(app):  # pylint: disable=too-many-branches
     opts = parse_args(sys.argv[1:])
 
     if opts.host is not None:
-        app.config.HOST = opts.host
+        appl.config.HOST = opts.host
     if opts.port is not None:
-        app.config.PORT = opts.port
+        appl.config.PORT = opts.port
     if opts.timeout is not None:
-        app.config.TIMEOUT = opts.timeout
+        appl.config.TIMEOUT = opts.timeout
 
     if opts.validator is not None:
-        app.config.VALIDATOR_URL = opts.validator
+        appl.config.VALIDATOR_URL = opts.validator
     # if opts.db_host is not None:
     #     app.config.DB_HOST = opts.db_host
     # if opts.db_port is not None:
@@ -158,73 +162,81 @@ def load_config(app):  # pylint: disable=too-many-branches
     #     app.config.DB_NAME = opts.db_name
 
     if opts.debug is not None:
-        app.config.DEBUG = opts.debug
+        appl.config.DEBUG = opts.debug
 
     if opts.secret_key is not None:
-        app.config.SECRET_KEY = opts.secret_key
-    if app.config.SECRET_KEY is None:
+        appl.config.SECRET_KEY = opts.secret_key
+    if appl.config.SECRET_KEY is None:
         LOGGER.exception("API secret key was not provided")
         sys.exit(1)
 
     if opts.aes_key is not None:
-        app.config.AES_KEY = opts.aes_key
-    if app.config.AES_KEY is None:
+        appl.config.AES_KEY = opts.aes_key
+    if appl.config.AES_KEY is None:
         LOGGER.exception("AES key was not provided")
         sys.exit(1)
 
     if opts.batcher_private_key is not None:
-        app.config.BATCHER_PRIVATE_KEY = opts.batcher_private_key
-    if app.config.BATCHER_PRIVATE_KEY is None:
+        appl.config.BATCHER_PRIVATE_KEY = opts.batcher_private_key
+    if appl.config.BATCHER_PRIVATE_KEY is None:
         LOGGER.exception("Batcher private key was not provided")
         sys.exit(1)
 
     if opts.batcher_private_key_file_name_clinic is not None:
-        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC = opts.batcher_private_key_file_name_clinic
+        appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC = opts.batcher_private_key_file_name_clinic
     if opts.batcher_private_key_file_name_doctor is not None:
-        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR = opts.batcher_private_key_file_name_doctor
+        appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR = opts.batcher_private_key_file_name_doctor
     if opts.batcher_private_key_file_name_patient is not None:
-        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT = opts.batcher_private_key_file_name_patient
+        appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT = opts.batcher_private_key_file_name_patient
     if opts.batcher_private_key_file_name_lab is not None:
-        app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB = opts.batcher_private_key_file_name_lab
+        appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB = opts.batcher_private_key_file_name_lab
+    if opts.batcher_private_key_file_name_insurance is not None:
+        appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_INSURANCE = opts.batcher_private_key_file_name_insurance
 
-    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC is None:
+    if appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC is None:
         LOGGER.exception("Batcher private key file name for Clinic entity was not provided")
         sys.exit(1)
-    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR is None:
+    if appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR is None:
         LOGGER.exception("Batcher private key file name for Doctor entity was not provided")
         sys.exit(1)
-    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT is None:
+    if appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT is None:
         LOGGER.exception("Batcher private key file name for Patient entity was not provided")
         sys.exit(1)
-    if app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB is None:
+    if appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB is None:
         LOGGER.exception("Batcher private key file name for Lab entity was not provided")
+        sys.exit(1)
+    if appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_INSURANCE is None:
+        LOGGER.exception("Batcher private key file name for Insurance entity was not provided")
         sys.exit(1)
 
     try:
-        private_key_file_name_clinic = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC)
+        private_key_file_name_clinic = get_keyfile(appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_CLINIC)
         clinic_private_key = get_signer_from_file(private_key_file_name_clinic)
-        private_key_file_name_doctor = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR)
+        private_key_file_name_doctor = get_keyfile(appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_DOCTOR)
         doctor_private_key = get_signer_from_file(private_key_file_name_doctor)
-        private_key_file_name_patient = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT)
+        private_key_file_name_patient = get_keyfile(appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_PATIENT)
         patient_private_key = get_signer_from_file(private_key_file_name_patient)
-        private_key_file_name_lab = get_keyfile(app.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB)
+        private_key_file_name_lab = get_keyfile(appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_LAB)
         lab_private_key = get_signer_from_file(private_key_file_name_lab)
-
+        private_key_file_name_insurance = get_keyfile(appl.config.BATCHER_PRIVATE_KEY_FILE_NAME_INSURANCE)
+        insurance_private_key = get_signer_from_file(private_key_file_name_insurance)
 
         # private_key = Secp256k1PrivateKey.from_hex(
         #     app.config.BATCHER_PRIVATE_KEY)
     except ParseError as err:
         LOGGER.exception('Unable to load private key: %s', str(err))
         sys.exit(1)
-    app.config.CONTEXT = create_context('secp256k1')
-    app.config.SIGNER_CLINIC = CryptoFactory(
-        app.config.CONTEXT).new_signer(clinic_private_key)
-    app.config.SIGNER_DOCTOR = CryptoFactory(
-        app.config.CONTEXT).new_signer(doctor_private_key)
-    app.config.SIGNER_PATIENT = CryptoFactory(
-        app.config.CONTEXT).new_signer(patient_private_key)
-    app.config.SIGNER_LAB = CryptoFactory(
-        app.config.CONTEXT).new_signer(lab_private_key)
+    appl.config.CONTEXT = create_context('secp256k1')
+    appl.config.SIGNER_CLINIC = CryptoFactory(
+        appl.config.CONTEXT).new_signer(clinic_private_key)
+    appl.config.SIGNER_DOCTOR = CryptoFactory(
+        appl.config.CONTEXT).new_signer(doctor_private_key)
+    appl.config.SIGNER_PATIENT = CryptoFactory(
+        appl.config.CONTEXT).new_signer(patient_private_key)
+    appl.config.SIGNER_LAB = CryptoFactory(
+        appl.config.CONTEXT).new_signer(lab_private_key)
+    appl.config.SIGNER_INSURANCE = CryptoFactory(
+        appl.config.CONTEXT).new_signer(insurance_private_key)
 
 
 app = Sanic(__name__)
@@ -244,7 +256,7 @@ def main():
     app.blueprint(PULSE_BP)
     app.blueprint(CLIENTS_BP)
     app.blueprint(LABS_BP)
-    # app.blueprint(HOLDINGS_BP)
+    app.blueprint(INSURANCES_BP)
     # app.blueprint(OFFERS_BP)
 
     load_config(app)
