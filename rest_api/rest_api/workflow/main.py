@@ -42,6 +42,7 @@ from rest_api.workflow.insurances import INSURANCES_BP
 from rest_api.workflow.clients import CLIENTS_BP
 from rest_api.workflow.claim_details import CLAIM_DETAILS_BP
 from rest_api.workflow.lab_tests import LAB_TESTS_BP
+from rest_api.workflow.payment import PAYMENT_BP
 from rest_api.workflow.pulse import PULSE_BP
 from sawtooth_rest_api.messaging import Connection
 
@@ -259,6 +260,7 @@ def main():
     app.blueprint(LABS_BP)
     app.blueprint(INSURANCES_BP)
     app.blueprint(CONTRACT_BP)
+    app.blueprint(PAYMENT_BP)
     # app.blueprint(OFFERS_BP)
 
     load_config(app)

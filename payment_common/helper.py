@@ -1,4 +1,5 @@
 import hashlib
+import time
 
 DISTRIBUTION_NAME = 'sawtooth-payment'
 
@@ -27,3 +28,11 @@ def make_payment_address(payer_pkey, uid):
 def make_payment_list_by_payer_address(payer_pkey):
     return TP_PREFFIX_HEX6 + PAYMENT_ENTITY_CODE \
             + PAYER_ENTITY_CODE + _hash(payer_pkey)[:40]
+
+
+def make_payment_list_address():
+    return TP_PREFFIX_HEX6 + PAYMENT_ENTITY_CODE
+
+
+def get_current_timestamp():
+    return int(round(time.time() * 1000))

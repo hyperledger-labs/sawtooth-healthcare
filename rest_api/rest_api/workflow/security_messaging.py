@@ -24,16 +24,21 @@ from sawtooth_rest_api.protobuf import validator_pb2
 from rest_api.common import helper
 from rest_api.common.protobuf.payload_pb2 import AddPulseWithUser, CreateDoctor, CreatePatient, \
     AddLabTestWithUser
-from rest_api.consent_common import helper as consent_helper
+
 from rest_api.insurance_common import helper as insurance_helper
+from rest_api.insurance_common.protobuf.insurance_payload_pb2 import Insurance, ContractWithUser
+
+from rest_api.payment_common import helper as payment_helper
+from rest_api.payment_common.protobuf.payment_payload_pb2 import Payment
+
+from rest_api.consent_common import helper as consent_helper
 from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission, ActionOnAccess
 # from rest_api.consent_common.protobuf import consent_payload_pb2
 # from rest_api.common.protobuf import payload_pb2
-from rest_api.insurance_common.protobuf.insurance_payload_pb2 import Insurance, ContractWithUser
 from rest_api.workflow import messaging
+from rest_api.workflow.errors import ApiForbidden, ApiUnauthorized, ApiBadRequest
 # from rest_api.workflow.errors import ApiBadRequest
 # from rest_api.workflow.errors import ApiInternalError
-from rest_api.workflow.errors import ApiForbidden, ApiUnauthorized, ApiBadRequest
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -164,6 +169,17 @@ async def add_lab_test(conn, timeout, batches, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
+async def create_payment(conn, timeout, batches, client_key):
+    client = await get_client(conn, client_key)
+    if Permission(type=Permission.WRITE_PAYMENT) in client.permissions:
+        LOGGER.debug('has permission: True')
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
 async def add_pulse(conn, timeout, batches, client_key):
     client = await get_client(conn, client_key)
     if Permission(type=Permission.WRITE_PULSE) in client.permissions:
@@ -176,6 +192,8 @@ async def add_pulse(conn, timeout, batches, client_key):
 
 
 async def add_contract(conn, timeout, batches, client_key):
+    # LOGGER.debug('add_contract')
+    # await _send(conn, timeout, batches)
     client = await get_client(conn, client_key)
     if Permission(type=Permission.WRITE_CONTRACT) in client.permissions:
         LOGGER.debug('has permission: True')
@@ -377,4 +395,23 @@ async def get_contracts(conn, client_key):
         return contract_list
     else:
         LOGGER.debug('neither READ_CONTRACT or READ_OWN_CONTRACT permissions')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def get_payment_list(conn, client_key):
+    client = await get_client(conn, client_key)
+    payment_list = {}
+    if Permission(type=Permission.READ_PAYMENT) in client.permissions or \
+            Permission(type=Permission.READ_OWN_PAYMENT) in client.permissions:
+        payment_list_address = payment_helper.make_payment_list_address()
+        LOGGER.debug('has READ_PAYMENT or READ_OWN_PAYMENT permission: ' + str(client_key))
+        payment_resources = await messaging.get_state_by_address(conn, payment_list_address)
+        for entity in payment_resources.entries:
+            LOGGER.debug('get payment entity: ' + str(entity.address))
+            pay = Payment()
+            pay.ParseFromString(entity.data)
+            payment_list[entity.address] = pay
+        return payment_list
+    else:
+        LOGGER.debug('neither READ_PAYMENT or READ_OWN_PAYMENT permissions')
     raise ApiForbidden("Insufficient permission")
