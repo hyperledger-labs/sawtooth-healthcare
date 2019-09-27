@@ -33,6 +33,7 @@ from sawtooth_signing import CryptoFactory
 from zmq.asyncio import ZMQEventLoop
 from rest_api.workflow.claims import CLAIMS_BP
 from rest_api.workflow.clinics import CLINICS_BP
+from rest_api.workflow.contract import CONTRACT_BP
 from rest_api.workflow.general import get_keyfile, get_signer_from_file
 from rest_api.workflow.doctors import DOCTORS_BP
 from rest_api.workflow.labs import LABS_BP
@@ -257,6 +258,7 @@ def main():
     app.blueprint(CLIENTS_BP)
     app.blueprint(LABS_BP)
     app.blueprint(INSURANCES_BP)
+    app.blueprint(CONTRACT_BP)
     # app.blueprint(OFFERS_BP)
 
     load_config(app)

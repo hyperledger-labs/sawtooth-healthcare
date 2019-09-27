@@ -15,9 +15,10 @@
 from sanic import Blueprint
 from sanic import response
 
-from rest_api.common.protobuf import payload_pb2
-from rest_api.common import helper, transaction
+# from rest_api.common.protobuf import payload_pb2
+from rest_api.common import transaction
 # from rest_api.consent_common import helper as consent_helper
+from rest_api.common.protobuf.payload_pb2 import CreateClinic
 from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
@@ -36,7 +37,7 @@ async def get_all_clinics(request):
     clinics = []
     for entity in account_resources.entries:
         # dec_cl = base64.b64decode(entity.data)
-        cl = payload_pb2.CreateClinic()
+        cl = CreateClinic()
         cl.ParseFromString(entity.data)
         # permissions = []
         # for perm in cl.permissions:

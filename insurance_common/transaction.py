@@ -149,7 +149,7 @@ def add_contract(txn_signer, batch_signer, uid, client_pkey):
 
     payload = InsuranceTransactionPayload(
         payload_type=InsuranceTransactionPayload.ADD_CONTRACT,
-        contract=contract_payload)
+        add_contract=contract_payload)
 
     return _make_header_and_batch(
         payload=payload,

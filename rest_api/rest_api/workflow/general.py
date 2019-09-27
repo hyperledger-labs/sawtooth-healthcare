@@ -167,5 +167,6 @@ def get_signer(request, client_key):
     elif request.app.config.SIGNER_INSURANCE.get_public_key().as_hex() == client_key:
         client_signer = request.app.config.SIGNER_INSURANCE
     else:
-        client_signer = request.app.config.SIGNER_PATIENT
+        raise HealthCareException(
+            'Unable to load private key for client_key: {}'.format(str(client_key)))
     return client_signer

@@ -30,7 +30,7 @@ LOGGER = logging.getLogger(__name__)
 @CONTRACT_BP.get('contract')
 async def get_all_contacts(request):
     """Fetches complete details of all Accounts in state"""
-    LOGGER.debug("Call 'pulse' request")
+    LOGGER.debug("Call 'contract' request")
     client_key = general.get_request_key_header(request)
     contract_list = await security_messaging.get_contracts(request.app.config.VAL_CONN, client_key)
     contract_list_json = []

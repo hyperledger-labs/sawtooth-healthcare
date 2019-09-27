@@ -30,6 +30,9 @@ var LabForm = require("./views/LabForm")
 var PulseList = require("./views/PulseList")
 var PulseForm = require("./views/PulseForm")
 
+var ContractList = require("./views/ContractList")
+var ContractForm = require("./views/ContractForm")
+
 var DoctorAssignForm = require("./views/DoctorAssignForm")
 var FirstVisitForm = require("./views/FirstVisitForm")
 var EatPillsForm = require("./views/EatPillsForm")
@@ -155,6 +158,16 @@ m.route(document.body, "/clinic", {
     "/pulse_list/new/": {
         render: function(vnode) {
             return m(Layout, m(PulseForm, vnode.attrs))
+        }
+    },
+    "/contract_list": {
+        render: function(vnode) {
+            return m(Layout, m(ContractList, vnode.attrs))
+        }
+    },
+    "/contract_list/new/": {
+        render: function(vnode) {
+            return m(Layout, m(ContractForm, vnode.attrs))
         }
     },
     "/patient/:patient_pkey": {
