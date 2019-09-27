@@ -46,6 +46,27 @@ services:
         tail -f /dev/null
                "
 
+  payment-processor:
+    build:
+      context: .
+      dockerfile: payment_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: payment-tp
+    container_name: payment-processor
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building payment-tp by docker-compose---\n' &&
+        init-payment-tp.sh &&
+        payment-tp -v -C tcp://validator:4004 &&
+        tail -f /dev/null
+               "
+
   insurance-processor:
     build:
       context: .

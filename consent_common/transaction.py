@@ -125,7 +125,9 @@ def create_doctor_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_LAB),
                    Permission(type=Permission.READ_LAB_TEST),
                    Permission(type=Permission.READ_PULSE),
-                   Permission(type=Permission.READ_CLAIM)]
+                   Permission(type=Permission.READ_CLAIM),
+                   Permission(type=Permission.WRITE_PAYMENT)
+                   ]
     return create_client(txn_signer, batch_signer, permissions)
 
 
@@ -140,7 +142,8 @@ def create_patient_client(txn_signer, batch_signer):
                    Permission(type=Permission.WRITE_PULSE),
                    Permission(type=Permission.WRITE_CLAIM),
                    Permission(type=Permission.REVOKE_ACCESS),
-                   Permission(type=Permission.GRANT_ACCESS)
+                   Permission(type=Permission.GRANT_ACCESS),
+                   Permission(type=Permission.READ_OWN_PAYMENT)
                    ]
     return create_client(txn_signer, batch_signer, permissions)
 
@@ -157,7 +160,8 @@ def create_insurance_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_OWN_INSURANCE_COMPANY),
                    Permission(type=Permission.READ_CONTRACT),
                    Permission(type=Permission.READ_OWN_CONTRACT),
-                   Permission(type=Permission.WRITE_CONTRACT)
+                   Permission(type=Permission.WRITE_CONTRACT),
+                   Permission(type=Permission.READ_OWN_PAYMENT)
                    ]
     return create_client(txn_signer, batch_signer, permissions)
 

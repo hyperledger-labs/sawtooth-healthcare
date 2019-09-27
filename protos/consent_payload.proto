@@ -64,6 +64,8 @@ message Permission {
       READ_OWN_CONTRACT = 1001;
       WRITE_CONTRACT = 1002;
 
+      READ_OWN_PAYMENT = 1100;
+      WRITE_PAYMENT = 1101;
     }
 
     PermissionType type = 1;
