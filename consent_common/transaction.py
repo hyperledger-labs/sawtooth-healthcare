@@ -40,7 +40,7 @@ def _make_transaction(payload, inputs, outputs, txn_signer, batch_signer):
     # return batch, batch.header_signature
 
 
-def _make_batch_and_id(transactions, batch_signer):
+def make_batch_and_id(transactions, batch_signer):
     batch_header_bytes, signature = _batch_header(batch_signer, transactions)
 
     batch = Batch(
@@ -126,6 +126,7 @@ def create_doctor_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_LAB_TEST),
                    Permission(type=Permission.READ_PULSE),
                    Permission(type=Permission.READ_CLAIM),
+                   Permission(type=Permission.UPDATE_CLAIM),
                    Permission(type=Permission.WRITE_PAYMENT)
                    ]
     return create_client(txn_signer, batch_signer, permissions)
@@ -141,6 +142,8 @@ def create_patient_client(txn_signer, batch_signer):
                    Permission(type=Permission.WRITE_LAB_TEST),
                    Permission(type=Permission.WRITE_PULSE),
                    Permission(type=Permission.WRITE_CLAIM),
+                   Permission(type=Permission.READ_OWN_CONTRACT),
+                   # Permission(type=Permission.WRITE_CONTRACT),
                    Permission(type=Permission.REVOKE_ACCESS),
                    Permission(type=Permission.GRANT_ACCESS),
                    Permission(type=Permission.READ_OWN_PAYMENT)

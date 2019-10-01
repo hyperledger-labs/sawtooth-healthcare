@@ -58,12 +58,14 @@ async def add_new_contract(request):
 
     client_signer = general.get_signer(request, client_key)
 
-    batch, batch_id = transaction.add_contract(
+    contract_txn = transaction.add_contract(
         txn_signer=client_signer,
         batch_signer=client_signer,
         uid=uid,
         client_pkey=contractor_pkey
     )
+
+    batch, batch_id = transaction.make_batch_and_id([contract_txn], client_signer)
 
     await security_messaging.add_contract(
         request.app.config.VAL_CONN,

@@ -3,11 +3,13 @@ var m = require("mithril")
 var Claim = {
     list: [],
     error: "",
-    loadList: function() {
+    loadList: function(clientKey) {
         return m.request({
             method: "GET",
             url: "/api/claims",
-//            withCredentials: true,
+            headers: {
+                'ClientKey': clientKey
+            }
         })
         .then(function(result) {
             Claim.error = ""
@@ -16,6 +18,7 @@ var Claim = {
         .catch(function(e) {
             console.log(e)
             Claim.error = e.message
+            Claim.list = []
         })
     },
 
@@ -36,25 +39,36 @@ var Claim = {
         })
     },
 
-    register: function() {
+    close: function(clientKey) {
+        return m.request({
+            method: "POST",
+            url: "/api/claims/close",
+            data: Claim.current,
+            headers: {
+                'ClientKey': clientKey
+            },
+            useBody: true,
+        })
+        .then(function(items) {
+            Claim.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Claim.error = e.message
+        })
+    },
+
+    register: function(clientKey) {
         return m.request({
             method: "POST",
             url: "/api/claims",
             data: Claim.current,
+            headers: {
+                'ClientKey': clientKey
+            },
             useBody: true,
-//            headers: {
-//                    'Content-Type': 'text/plain',
-//                    'Access-Control-Allow-Origin': 'http://localhost:6334',
-//
-////            'Content-Type': 'application/json; charset=UTF-8',
-//                        'Access-Control-Request-Headers': 'Content-Type',
-//                        'Access-Control-Request-Method': 'POST,GET,OPTIONS',
-//                        'Access-Control-Allow-Headers': 'X-Requested-With,Content-Type'
-//            }
-//            withCredentials: true,
         })
         .then(function(items) {
-//            Data.todos.list = items
             Claim.error = ""
         })
         .catch(function(e) {

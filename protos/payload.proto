@@ -17,6 +17,7 @@ message TransactionPayload {
         ADD_LAB_TEST = 11;
         ADD_PULSE = 12;
         CREATE_LAB = 13;
+        CLOSE_CLAIM = 14;
     }
 
     PayloadType payload_type = 1;
@@ -24,7 +25,7 @@ message TransactionPayload {
     CreateClinic create_clinic = 2;
     CreateDoctor create_doctor = 3;
     CreatePatient create_patient = 4;
-    CreateClaim create_claim = 5;
+    Claim create_claim = 5;
     ActionOnClaim assign_doctor = 6;
     ActionOnClaim first_visit = 7;
     ActionOnClaim pass_tests = 8;
@@ -34,6 +35,7 @@ message TransactionPayload {
     AddLabTest lab_test = 12;
     AddPulse pulse = 13;
     CreateLab create_lab = 14;
+    Claim close_claim = 15;
 }
 
 message CreateClinic {
@@ -116,6 +118,20 @@ message CreateClaim {
     string claim_id = 1;
     string clinic_pkey = 2;
     string patient_pkey = 3;
+}
+
+message Claim {
+
+    enum State {
+        OPENED = 0;
+        CLOSED = 1;
+    }
+
+    string id = 1;
+    string client_pkey = 2;
+    string description = 3;
+    string provided_service = 4;
+    State state = 5;
 }
 
 message ActionOnClaim {

@@ -129,7 +129,7 @@ async def add_new_pulse(request):
     client_signer = general.get_signer(request, client_key)
     current_times_str = str(helper.get_current_timestamp())
 
-    batch, batch_id = transaction.add_pulse(
+    pulse_txn = transaction.add_pulse(
         txn_signer=client_signer,
         batch_signer=client_signer,
         pulse=pulse,
@@ -137,6 +137,8 @@ async def add_new_pulse(request):
         timestamp=timestamp,
         client_pkey=client_key
     )
+
+    batch, batch_id = transaction.make_batch_and_id([pulse_txn], client_signer)
 
     await security_messaging.add_pulse(
         request.app.config.VAL_CONN,

@@ -1,3 +1,5 @@
+import logging
+
 from sanic import Blueprint
 from sanic import response
 
@@ -7,6 +9,8 @@ from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
 
 INSURANCES_BP = Blueprint('insurances')
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 
 @INSURANCES_BP.get('insurances')
@@ -32,18 +36,22 @@ async def register_new_insurance(request):
     name = request.json.get('name')
 
     insurance_signer = request.app.config.SIGNER_INSURANCE
-
     client_txn = consent_transaction.create_insurance_client(
         txn_signer=insurance_signer,
         batch_signer=insurance_signer
     )
+
+    LOGGER.debug('client_txn: ' + str(client_txn))
 
     insurance_txn = insurance_transaction.create_insurance(
         txn_signer=insurance_signer,
         batch_signer=insurance_signer,
         name=name)
 
+    LOGGER.debug('insurance_txn: ' + str(insurance_txn))
+
     batch, batch_id = insurance_transaction.make_batch_and_id([client_txn, insurance_txn], insurance_signer)
+    # batch, batch_id = consent_transaction.make_batch_and_id([insurance_txn], insurance_signer)
 
     await security_messaging.add_insurance(
         request.app.config.VAL_CONN,

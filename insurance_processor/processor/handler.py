@@ -57,7 +57,7 @@ class InsuranceTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Contract already exists: ' + con.id)
 
-                state.add_contract(contract)
+                state.add_contract(signer, contract)
             else:
                 raise InvalidTransaction('Unhandled action: {}'.format(payload.transaction_type()))
         except Exception as e:

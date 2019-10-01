@@ -32,7 +32,7 @@ class InsuranceState(object):
         insurance = None
         insurance_hex = helper.make_insurance_address(public_key)
         state_entries = self._context.get_state(
-            insurance_hex,
+            [insurance_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             insurance = Insurance()
@@ -42,15 +42,15 @@ class InsuranceState(object):
     def _store_insurance(self, insurance):
         address = helper.make_insurance_address(insurance.public_key)
 
-        state_data = Insurance.SerializeToString()
+        state_data = insurance.SerializeToString()
         self._context.set_state(
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def add_contract(self, contract):
+    def add_contract(self, signer, contract):
         con = self._load_contract(contract.id)
         if con is None:
-            self._store_contract(contract=contract)
+            self._store_contract(signer=signer, contract=contract)
 
     def get_contract(self, uid):
         return self._load_contract(uid)
@@ -59,25 +59,25 @@ class InsuranceState(object):
         contract = None
         contract_hex = helper.make_contract_address(contract_id)
         state_entries = self._context.get_state(
-            contract_hex,
+            [contract_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             contract = Contract()
             contract.ParseFromString(state_entries[0].data)
         return contract
 
-    def _store_contract(self, contract):
-        contract_address = helper.make_contract_address(contract.id)
-        contract_insurance_relation_address = helper.make_contract_insurance__relation_address(contract.id,
-                                                                                               contract.client_pkey)
-        insurance_contract_relation_address = helper.make_insurance_contract__relation_address(contract.client_pkey,
-                                                                                               contract.id)
+    def _store_contract(self, signer, contract):
+        contract_hex = helper.make_contract_address(contract.id)
+        contract_insurance_relation_hex = helper.make_contract_insurance__relation_address(contract.id,
+                                                                                           signer)
+        insurance_contract_relation_hex = helper.make_insurance_contract__relation_address(signer,
+                                                                                           contract.id)
 
         contract_data = contract.SerializeToString()
         states = {
-            contract_address: contract_data,
-            contract_insurance_relation_address: str.encode(contract.client_pkey),
-            insurance_contract_relation_address: str.encode(contract.id)
+            contract_hex: contract_data,
+            contract_insurance_relation_hex: str.encode(signer),
+            insurance_contract_relation_hex: str.encode(contract.id)
         }
         LOGGER.debug("_store_contract: " + str(states))
         self._context.set_state(

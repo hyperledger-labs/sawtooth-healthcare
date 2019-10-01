@@ -96,8 +96,8 @@ m.route(document.body, "/clinic", {
         }
     },
     "/claim_list": {
-        render: function() {
-            return m(Layout, m(ClaimList))
+        render: function(vnode) {
+            return m(Layout, m(ClaimList, vnode.attrs))
         }
     },
     "/doctor/assign/": {
@@ -131,8 +131,8 @@ m.route(document.body, "/clinic", {
         }
     },
     "/claim/new/": {
-        render: function() {
-            return m(Layout, m(ClaimNewForm))
+        render: function(vnode) {
+            return m(Layout, m(ClaimNewForm, vnode.attrs))
         }
     },
     "/claim/:clinic_pkey/:claim_id": {

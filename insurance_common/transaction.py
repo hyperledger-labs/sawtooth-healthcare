@@ -16,7 +16,8 @@ LOGGER = logging.getLogger(__name__)
 
 def _make_transaction(payload, inputs, outputs, txn_signer, batch_signer):
     txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
-
+    LOGGER.debug('inputs: ' + str(inputs))
+    LOGGER.debug('outputs: ' + str(outputs))
     txn = Transaction(
         header=txn_header_bytes,
         header_signature=signature,
@@ -53,29 +54,29 @@ def make_batch_and_id(transactions, batch_signer):
     return batch, batch.header_signature
 
 
-def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
-    txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
-
-    txn = Transaction(
-        header=txn_header_bytes,
-        header_signature=signature,
-        payload=payload.SerializeToString()
-    )
-
-    transactions = [txn]
-
-    batch_header_bytes, signature = _batch_header(batch_signer, transactions)
-
-    batch = Batch(
-        header=batch_header_bytes,
-        header_signature=signature,
-        transactions=transactions
-    )
-
-    # batch_list = BatchList(batches=[batch])
-    # batch_id = batch_list.batches[0].header_signature
-    # return batch_list, batch_id
-    return batch, batch.header_signature
+# def _make_header_and_batch(payload, inputs, outputs, txn_signer, batch_signer):
+#     txn_header_bytes, signature = _transaction_header(txn_signer, batch_signer, inputs, outputs, payload)
+#
+#     txn = Transaction(
+#         header=txn_header_bytes,
+#         header_signature=signature,
+#         payload=payload.SerializeToString()
+#     )
+#
+#     transactions = [txn]
+#
+#     batch_header_bytes, signature = _batch_header(batch_signer, transactions)
+#
+#     batch = Batch(
+#         header=batch_header_bytes,
+#         header_signature=signature,
+#         transactions=transactions
+#     )
+#
+#     # batch_list = BatchList(batches=[batch])
+#     # batch_id = batch_list.batches[0].header_signature
+#     # return batch_list, batch_id
+#     return batch, batch.header_signature
 
 
 def _transaction_header(txn_signer, batch_signer, inputs, outputs, payload):
@@ -151,7 +152,7 @@ def add_contract(txn_signer, batch_signer, uid, client_pkey):
         payload_type=InsuranceTransactionPayload.ADD_CONTRACT,
         add_contract=contract_payload)
 
-    return _make_header_and_batch(
+    return _make_transaction(
         payload=payload,
         inputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex],
         outputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex],
