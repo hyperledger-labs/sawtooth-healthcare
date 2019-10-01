@@ -1,5 +1,10 @@
+import logging
+
 from payment_processor.payment_common import helper
 # from payment_processor.payment_common.protobuf import payment_payload_pb2
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
 
 
 class PaymentState(object):
@@ -49,11 +54,28 @@ class PaymentState(object):
     #     return None
 
     def _store_payment(self, payment):
-        address = helper.make_payment_address(payer_pkey=payment.public_key, uid=payment.id)
+        payment_hex = helper.make_payment_address(payment.id)
 
-        state_data = payment.SerializeToString()
+        payment_contract_rel_hex = helper.make_payment_contract__relation_address(payment.id, payment.contract_id)
+        contract_payment_rel_hex = helper.make_contract_payment__relation_address(payment.contract_id, payment.id)
+
+        payment_patient_rel_hex = helper.make_payment_patient__relation_address(payment.id, payment.patient_pkey)
+        patient_payment_rel_hex = helper.make_patient_payment__relation_address(payment.patient_pkey, payment.id)
+
+        payment_data = payment.SerializeToString()
+
+        states = {
+            payment_hex: payment_data,
+            payment_contract_rel_hex:  str.encode(payment.contract_id),
+            contract_payment_rel_hex:  str.encode(payment.id),
+
+            payment_patient_rel_hex: str.encode(payment.patient_pkey),
+            patient_payment_rel_hex: str.encode(payment.id)
+        }
+
+        LOGGER.debug("_store_payment: " + str(states))
         self._context.set_state(
-            {address: state_data},
+            states,
             timeout=self.TIMEOUT)
 
     # def _revoke_access(self, doctor_key, patient_pkey):

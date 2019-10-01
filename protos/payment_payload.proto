@@ -12,6 +12,8 @@ message PaymentTransactionPayload {
 }
 
 message Payment {
-    string public_key = 1;
-    string id = 2;
+    string id = 1;
+    string patient_pkey = 2;
+    string contract_id = 3;
+    string claim_id = 4;
 }

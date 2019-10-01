@@ -1,6 +1,6 @@
 import hashlib
 import random
-import time
+# import time
 import logging
 
 from sawtooth_sdk.protobuf.batch_pb2 import BatchHeader, Batch
@@ -164,6 +164,7 @@ def create_insurance_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_CONTRACT),
                    Permission(type=Permission.READ_OWN_CONTRACT),
                    Permission(type=Permission.WRITE_CONTRACT),
+                   Permission(type=Permission.READ_PAYMENT),
                    Permission(type=Permission.READ_OWN_PAYMENT)
                    ]
     return create_client(txn_signer, batch_signer, permissions)

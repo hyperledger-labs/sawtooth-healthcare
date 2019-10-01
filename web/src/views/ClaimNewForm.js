@@ -19,7 +19,7 @@ module.exports = {
             m("input.input[placeholder=Claim id]", {
                 oninput: m.withAttr("value", function(value) {Claim.current.claim_id = value}),
                 value: Claim.current.claim_id
-            }),
+                }),
 //            m("label.label", "Patient public key"),
 //            m("input.input[placeholder=Patient public key]", {
 //                oninput: m.withAttr("value", function(value) {Claim.current.patient_pkey = value}),
@@ -29,6 +29,11 @@ module.exports = {
             m("input.input[placeholder=Description]", {
                 oninput: m.withAttr("value", function(value) {Claim.current.description = value}),
                 value: Claim.current.description
+            }),
+            m("label.label", "Contract ID (optional)"),
+            m("input.input[placeholder=Contract ID]", {
+                oninput: m.withAttr("value", function(value) {Claim.current.contract_id = value}),
+                value: Claim.current.contract_id
             }),
             m("button.button[type=submit]", "Register"),
             m("label.error", Claim.error)

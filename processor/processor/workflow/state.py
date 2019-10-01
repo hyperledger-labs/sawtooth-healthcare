@@ -88,7 +88,7 @@ class HealthCareState(object):
         original_claim = self._load_claim2(claim.id)
         original_claim.provided_service = claim.provided_service
         original_claim.state = Claim.CLOSED
-        self._store_claim(claim=claim)
+        self._update_claim(claim=claim)
 
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
@@ -329,6 +329,24 @@ class HealthCareState(object):
             patient_lab_test_relation_address: str.encode(lab_test.id)
         }
         LOGGER.debug("_store_lab_test: " + str(states))
+        self._context.set_state(
+            states,
+            timeout=self.TIMEOUT)
+
+    def _update_claim(self, claim):
+        claim_address = helper.make_claim_address(claim.id)
+        # claim_patient_relation_address = helper.make_claim_patient__relation_address(claim.id,
+        #                                                                              claim.client_pkey)
+        # patient_claim_relation_address = helper.make_patient_claim__relation_address(claim.client_pkey,
+        #                                                                              claim.id)
+
+        claim_data = claim.SerializeToString()
+        states = {
+            claim_address: claim_data,
+            # claim_patient_relation_address: str.encode(claim.client_pkey),
+            # patient_claim_relation_address: str.encode(claim.id)
+        }
+        LOGGER.debug("_update_claim: " + str(states))
         self._context.set_state(
             states,
             timeout=self.TIMEOUT)

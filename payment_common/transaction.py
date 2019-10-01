@@ -98,14 +98,26 @@ def _batch_header(batch_signer, transactions):
     return batch_header_bytes, signature
 
 
-def create_payment(txn_signer, batch_signer, payer_pkey, payment_id):
+def create_payment(txn_signer, batch_signer, payment_id, patient_pkey, contract_id, claim_id):
     client_pkey = txn_signer.get_public_key().as_hex()
     LOGGER.debug('client_pkey: ' + str(client_pkey))
-    inputs = outputs = helper.make_payment_address(payer_pkey, payment_id)
+
+    payment_hex = helper.make_payment_address(payment_id)
+
+    payment_contract_rel_hex = helper.make_payment_contract__relation_address(payment_id, contract_id)
+    contract_payment_rel_hex = helper.make_contract_payment__relation_address(contract_id, payment_id)
+
+    payment_patient_rel_hex = helper.make_payment_patient__relation_address(payment_id, patient_pkey)
+    patient_payment_rel_hex = helper.make_patient_payment__relation_address(patient_pkey, payment_id)
+
+    inputs = outputs = [payment_hex, payment_contract_rel_hex, contract_payment_rel_hex,
+                        payment_patient_rel_hex, patient_payment_rel_hex]
     LOGGER.debug('inputs: ' + str(inputs))
     payment = Payment(
-        public_key=payer_pkey,
-        id=payment_id)
+        id=payment_id,
+        patient_pkey=patient_pkey,
+        contract_id=contract_id,
+        claim_id=claim_id)
 
     payload = PaymentTransactionPayload(
         payload_type=PaymentTransactionPayload.ADD_PAYMENT,
@@ -115,7 +127,7 @@ def create_payment(txn_signer, batch_signer, payer_pkey, payment_id):
 
     return _make_transaction(
         payload=payload,
-        inputs=[inputs],
-        outputs=[outputs],
+        inputs=inputs,
+        outputs=outputs,
         txn_signer=txn_signer,
         batch_signer=batch_signer)

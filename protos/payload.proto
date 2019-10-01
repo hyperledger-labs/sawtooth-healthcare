@@ -132,6 +132,7 @@ message Claim {
     string description = 3;
     string provided_service = 4;
     State state = 5;
+    string contract_id = 6;
 }
 
 message ActionOnClaim {

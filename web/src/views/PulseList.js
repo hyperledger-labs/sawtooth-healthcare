@@ -8,8 +8,8 @@ module.exports = {
         },
     view: function() {
         return m(".user-list", Pulse.list.map(function(pl) {
-            return m("a.user-list-item", "name: " + pl.name + "; " +
-                                    "surname: " + pl.surname + "; " +
+            return m("a.user-list-item", "NAME: " + pl.name + "; " +
+                                    "SURNAME: " + pl.surname + "; " +
                                     "PULSE: " + pl.pulse + "; " +
                                     "TIMESTAMP: " + pl.timestamp + ";"
 //                                    "PATIENT PUBLIC KEY: " + pl.public_key + ";"

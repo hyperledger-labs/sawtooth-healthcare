@@ -314,7 +314,7 @@ def add_pulse(txn_signer, batch_signer, pulse, uid, timestamp, client_pkey):
         batch_signer=batch_signer)
 
 
-def add_claim(txn_signer, batch_signer, uid, description, client_pkey):
+def add_claim(txn_signer, batch_signer, uid, description, client_pkey, contract_id):
     claim_hex = helper.make_claim_address(uid)
     claim_patient_rel_hex = helper.make_claim_patient__relation_address(uid, client_pkey)
     patient_claim_rel_hex = helper.make_patient_claim__relation_address(client_pkey, uid)
@@ -323,7 +323,8 @@ def add_claim(txn_signer, batch_signer, uid, description, client_pkey):
         id=uid,
         description=description,
         client_pkey=client_pkey,
-        state=Claim.OPENED
+        state=Claim.OPENED,
+        contract_id=contract_id
     )
 
     LOGGER.debug('claim: ' + str(claim))

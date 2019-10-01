@@ -37,7 +37,8 @@ async def get_all_claims(request):
             'id': cl.id,
             'description': cl.description,
             'provided_service': cl.provided_service,
-            'state': cl.state
+            'state': cl.state,
+            'contract_id': cl.contract_id
         })
 
     return response.json(body={'data': claim_list_json},
@@ -54,6 +55,7 @@ async def register_new_claim(request):
 
     claim_id = request.json.get('claim_id')
     description = request.json.get('description')
+    contract_id = request.json.get('contract_id')
 
     client_signer = general.get_signer(request, client_key)
 
@@ -62,7 +64,9 @@ async def register_new_claim(request):
         batch_signer=client_signer,
         uid=claim_id,
         description=description,
-        client_pkey=patient_pkey)
+        client_pkey=patient_pkey,
+        contract_id=contract_id
+    )
 
     batch, batch_id = transaction.make_batch_and_id([claim_txn], client_signer)
 
@@ -94,6 +98,7 @@ async def close_claim(request):
     claim_id = request.json.get('claim_id')
     provided_service = request.json.get('provided_service')
     patient_pkey = request.json.get('client_pkey')
+    contract_id = request.json.get('contract_id')
 
     client_signer = general.get_signer(request, doctor_pkey)
 
@@ -104,11 +109,20 @@ async def close_claim(request):
         patient_pkey=patient_pkey,
         provided_service=provided_service)
 
+    # claim = await security_messaging.get_claim(claim_id, doctor_pkey)
+    # if claim is None:
+    #     raise HealthCareException("Can not find claim e=object having '" + claim_id + "' id")
+    # else:
+    #     payer_pkey = await security_messaging.get_contract(claim_id, patient_pkey, doctor_pkey)
+
     create_payment_txn = payment_transaction.create_payment(
         txn_signer=client_signer,
         batch_signer=client_signer,
-        payer_pkey=patient_pkey,
-        payment_id=str(helper.get_current_timestamp()))
+        payment_id=str(helper.get_current_timestamp()),
+        patient_pkey=patient_pkey,
+        contract_id=contract_id,
+        claim_id=claim_id
+    )
 
     batch, batch_id = transaction.make_batch_and_id([close_claim_txn, create_payment_txn], client_signer)
 

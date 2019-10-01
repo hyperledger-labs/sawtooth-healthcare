@@ -414,6 +414,14 @@ async def close_claim(conn, timeout, batches, dest_pkey, src_pkey):
     raise ApiForbidden("Insufficient permission")
 
 
+async def get_claim(claim_id, doctor_pkey):
+    claim_list = await get_claims(claim_id, doctor_pkey)
+    for claim in claim_list:
+        if claim.id == claim_id:
+            return claim
+    return None
+
+
 async def get_claims(conn, client_key):
     client = await get_client(conn, client_key)
     claim_list = {}
@@ -496,19 +504,36 @@ async def get_contracts(conn, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
-async def get_payment_list(conn, client_key):
+async def get_payments(conn, client_key):
     client = await get_client(conn, client_key)
     payment_list = {}
-    if Permission(type=Permission.READ_PAYMENT) in client.permissions or \
-            Permission(type=Permission.READ_OWN_PAYMENT) in client.permissions:
+    if Permission(type=Permission.READ_PAYMENT) in client.permissions:
         payment_list_address = payment_helper.make_payment_list_address()
-        LOGGER.debug('has READ_PAYMENT or READ_OWN_PAYMENT permission: ' + str(client_key))
-        payment_resources = await messaging.get_state_by_address(conn, payment_list_address)
-        for entity in payment_resources.entries:
+        LOGGER.debug('has READ_PAYMENT permission: ' + str(client_key))
+        payment_resources_ids = await messaging.get_state_by_address(conn, payment_list_address)
+        for entity in payment_resources_ids.entries:
             LOGGER.debug('get payment entity: ' + str(entity.address))
             pay = Payment()
             pay.ParseFromString(entity.data)
             payment_list[entity.address] = pay
+            LOGGER.debug('payment: ' + str(pay))
+        return payment_list
+    elif Permission(type=Permission.READ_OWN_PAYMENT) in client.permissions:
+        # As Patient
+        payment_list_ids_address = payment_helper.make_payment_list_by_patient_address(client_key)
+        LOGGER.debug('has READ_OWN_PAYMENT permission: ' + str(payment_list_ids_address))
+        payment_list_ids = await messaging.get_state_by_address(conn, payment_list_ids_address)
+        for entity in payment_list_ids.entries:
+            payment_id = entity.data.decode()
+            payment_address = payment_helper.make_payment_address(payment_id)
+            LOGGER.debug('get payment entity: ' + str(payment_address))
+            payment_resources = await messaging.get_state_by_address(conn, payment_address)
+            for entity2 in payment_resources.entries:
+                LOGGER.debug('get payment entity2: ' + str(entity2.address))
+                pay = Payment()
+                pay.ParseFromString(entity2.data)
+                payment_list[entity2.address] = pay
+
         return payment_list
     else:
         LOGGER.debug('neither READ_PAYMENT or READ_OWN_PAYMENT permissions')
