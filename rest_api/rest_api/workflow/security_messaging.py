@@ -485,10 +485,25 @@ async def get_contracts(conn, client_key):
             LOGGER.debug('contract: ' + str(con))
         return contract_list
     elif Permission(type=Permission.READ_OWN_CONTRACT) in client.permissions:
+        # As Insurance
         contract_list_ids_address = insurance_helper.make_contract_list_by_insurance_address(client_key)
         LOGGER.debug('has READ_OWN_CONTRACT permission: ' + str(contract_list_ids_address))
         contract_list_ids = await messaging.get_state_by_address(conn, contract_list_ids_address)
         for entity in contract_list_ids.entries:
+            contract_id = entity.data.decode()
+            contract_address = insurance_helper.make_contract_address(contract_id)
+            LOGGER.debug('get contract: ' + str(contract_address))
+            contract_resources = await messaging.get_state_by_address(conn, contract_address)
+            for entity2 in contract_resources.entries:
+                LOGGER.debug('get contract entity2: ' + str(entity2.address))
+                con = ContractWithUser()
+                con.ParseFromString(entity2.data)
+                contract_list[entity2.address] = con
+        # As Patient
+        contract_list_ids2_address = insurance_helper.make_contract_list_by_patient_address(client_key)
+        LOGGER.debug('has READ_OWN_CONTRACT permission (as patient): ' + str(contract_list_ids2_address))
+        contract_list_ids2 = await messaging.get_state_by_address(conn, contract_list_ids2_address)
+        for entity in contract_list_ids2.entries:
             contract_id = entity.data.decode()
             contract_address = insurance_helper.make_contract_address(contract_id)
             LOGGER.debug('get contract: ' + str(contract_address))

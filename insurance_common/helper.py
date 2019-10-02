@@ -18,13 +18,13 @@ TP_VERSION = '1.0'
 # LAB_ENTITY_CODE = '08'
 CONTRACT_ENTITY_CODE = '01'
 INSURANCE_ENTITY_CODE = '02'
-
+PATIENT_ENTITY_CODE = '03'
 
 CONTRACT_INSURANCE__RELATION_CODE = "51"
 INSURANCE_CONTRACT__RELATION_CODE = "52"
 
-# PATIENT_COMPANY__RELATION_CODE = "51"
-# COMPANY_PATIENT__RELATION_CODE = "52"
+CONTRACT_PATIENT__RELATION_CODE = "61"
+PATIENT_CONTRACT__RELATION_CODE = "62"
 
 # PATIENT_CONTRACT__RELATION_CODE = "71"
 # CONTRACT_PATIENT__RELATION_CODE = "72"
@@ -74,6 +74,28 @@ def make_insurance_contract__relation_address(insurance_pkey, contract_id):
 
 def make_contract_list_by_insurance_address(insurance_pkey):
     return TP_PREFFIX_HEX6 + INSURANCE_CONTRACT__RELATION_CODE + INSURANCE_ENTITY_CODE + _hash(insurance_pkey)[:30]
+
+
+# Contract <-> Patient relation
+def make_contract_patient__relation_address(contract_id, patient_pkey):
+    return TP_PREFFIX_HEX6 + CONTRACT_PATIENT__RELATION_CODE + \
+           CONTRACT_ENTITY_CODE + _hash(contract_id)[:30] + \
+           PATIENT_ENTITY_CODE + _hash(patient_pkey)[:28]
+
+
+def make_patient_list_by_contract_address(contract_id):
+    return TP_PREFFIX_HEX6 + CONTRACT_PATIENT__RELATION_CODE + CONTRACT_ENTITY_CODE + _hash(contract_id)[:30]
+
+
+# Patient <-> Contract relation
+def make_patient_contract__relation_address(patient_pkey, contract_id):
+    return TP_PREFFIX_HEX6 + PATIENT_CONTRACT__RELATION_CODE + \
+           PATIENT_ENTITY_CODE + _hash(patient_pkey)[:30] + \
+           CONTRACT_ENTITY_CODE + _hash(contract_id)[:28]
+
+
+def make_contract_list_by_patient_address(patient_pkey):
+    return TP_PREFFIX_HEX6 + PATIENT_CONTRACT__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(patient_pkey)[:30]
 
 
 def get_current_timestamp():

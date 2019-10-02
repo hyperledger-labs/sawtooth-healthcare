@@ -139,9 +139,14 @@ def create_insurance(txn_signer, batch_signer, name):
 
 def add_contract(txn_signer, batch_signer, uid, client_pkey):
     insurance_pkey = txn_signer.get_public_key().as_hex()
+
     contract_hex = helper.make_contract_address(uid)
+
     contract_insurance_rel_hex = helper.make_contract_insurance__relation_address(uid, insurance_pkey)
     insurance_contract_rel_hex = helper.make_insurance_contract__relation_address(insurance_pkey, uid)
+
+    contract_patient_rel_hex = helper.make_contract_patient__relation_address(uid, client_pkey)
+    patient_contract_rel_hex = helper.make_patient_contract__relation_address(client_pkey, uid)
 
     contract_payload = Contract(
         id=uid,
@@ -154,7 +159,9 @@ def add_contract(txn_signer, batch_signer, uid, client_pkey):
 
     return _make_transaction(
         payload=payload,
-        inputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex],
-        outputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex],
+        inputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex,
+                contract_patient_rel_hex, patient_contract_rel_hex],
+        outputs=[contract_hex, contract_insurance_rel_hex, insurance_contract_rel_hex,
+                 contract_patient_rel_hex, patient_contract_rel_hex],
         txn_signer=txn_signer,
         batch_signer=batch_signer)
