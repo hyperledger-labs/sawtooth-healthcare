@@ -6,6 +6,7 @@ from sawtooth_sdk.processor.handler import TransactionHandler
 import processor.common.helper as helper
 from processor.workflow.payload import HealthCarePayload
 from processor.workflow.state import HealthCareState
+from processor.common.protobuf.payload_pb2 import Claim
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -85,8 +86,16 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_close_claim():
 
                 claim = healthcare_payload.close_claim()
-
-                healthcare_state.close_claim(claim)
+                original_claim = healthcare_state.get_claim2(claim.id)
+                if original_claim is None:
+                    raise InvalidTransaction(
+                        'Invalid action: Claim does not exist: ' + claim.id)
+                if original_claim.state == Claim.CLOSED:
+                    raise InvalidTransaction(
+                        'Invalid action: Claim already closed: ' + claim.id)
+                original_claim.provided_service = claim.provided_service
+                original_claim.state = Claim.CLOSED
+                healthcare_state.close_claim(original_claim)
             elif healthcare_payload.is_assign_doctor():
                 assign = healthcare_payload.assign_doctor()
 

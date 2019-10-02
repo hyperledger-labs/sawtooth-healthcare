@@ -85,9 +85,6 @@ class HealthCareState(object):
         self._store_claim(claim=claim)
 
     def close_claim(self, claim):
-        original_claim = self._load_claim2(claim.id)
-        original_claim.provided_service = claim.provided_service
-        original_claim.state = Claim.CLOSED
         self._update_claim(claim=claim)
 
     def get_clinic(self, public_key):
@@ -108,6 +105,10 @@ class HealthCareState(object):
 
     def get_claim(self, claim_id, clinic_pkey):
         od = self._load_claim(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        return od
+
+    def get_claim2(self, claim_id):
+        od = self._load_claim2(claim_id=claim_id)
         return od
 
     # def get_claim_hex(self, claim_hex):
@@ -335,16 +336,9 @@ class HealthCareState(object):
 
     def _update_claim(self, claim):
         claim_address = helper.make_claim_address(claim.id)
-        # claim_patient_relation_address = helper.make_claim_patient__relation_address(claim.id,
-        #                                                                              claim.client_pkey)
-        # patient_claim_relation_address = helper.make_patient_claim__relation_address(claim.client_pkey,
-        #                                                                              claim.id)
-
         claim_data = claim.SerializeToString()
         states = {
-            claim_address: claim_data,
-            # claim_patient_relation_address: str.encode(claim.client_pkey),
-            # patient_claim_relation_address: str.encode(claim.id)
+            claim_address: claim_data
         }
         LOGGER.debug("_update_claim: " + str(states))
         self._context.set_state(

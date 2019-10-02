@@ -109,12 +109,6 @@ async def close_claim(request):
         patient_pkey=patient_pkey,
         provided_service=provided_service)
 
-    # claim = await security_messaging.get_claim(claim_id, doctor_pkey)
-    # if claim is None:
-    #     raise HealthCareException("Can not find claim e=object having '" + claim_id + "' id")
-    # else:
-    #     payer_pkey = await security_messaging.get_contract(claim_id, patient_pkey, doctor_pkey)
-
     create_payment_txn = payment_transaction.create_payment(
         txn_signer=client_signer,
         batch_signer=client_signer,
