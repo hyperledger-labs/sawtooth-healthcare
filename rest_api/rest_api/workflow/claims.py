@@ -14,13 +14,13 @@
 # ------------------------------------------------------------------------------
 from sanic import Blueprint
 from sanic import response
+from rest_api.common.exceptions import HealthCareException
 from rest_api.common import transaction
 from rest_api.payment_common import transaction as payment_transaction
 from rest_api.payment_common import helper
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest
 from rest_api.workflow.errors import ApiInternalError
-
 
 CLAIMS_BP = Blueprint('claims')
 
@@ -56,6 +56,13 @@ async def register_new_claim(request):
     claim_id = request.json.get('claim_id')
     description = request.json.get('description')
     contract_id = request.json.get('contract_id')
+
+    if contract_id is not None:
+        is_valid = await security_messaging.valid_contracts(request.app.config.VAL_CONN, client_key, contract_id)
+        if not is_valid:
+            return response.text(body="Contract having '" + contract_id + "' id is not valid",
+                                 status=ApiBadRequest.status_code,
+                                 headers=general.get_response_headers())
 
     client_signer = general.get_signer(request, client_key)
 

@@ -471,6 +471,14 @@ async def get_claims(conn, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
+async def valid_contracts(conn, client_key, contract_id):
+    contract_list = await get_contracts(conn, client_key)
+    for address, con in contract_list.items():
+        if con.id == contract_id:
+            return True
+    return False
+
+
 async def get_contracts(conn, client_key):
     client = await get_client(conn, client_key)
     contract_list = {}
