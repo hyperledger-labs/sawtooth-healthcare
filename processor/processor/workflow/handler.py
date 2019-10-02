@@ -81,6 +81,10 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()
+                cl = healthcare_state.get_claim2(claim.id)
+                if cl is not None:
+                    raise InvalidTransaction(
+                        'Invalid action: Claim already exist: ' + cl.id)
 
                 healthcare_state.create_claim(claim)
             elif healthcare_payload.is_close_claim():
