@@ -4,8 +4,6 @@ from sawtooth_sdk.processor.exceptions import InvalidTransaction
 from sawtooth_sdk.processor.handler import TransactionHandler
 
 import payment_processor.payment_common.helper as helper
-# from payment_processor.payload import PaymentPayload
-# from payment_processor.state import PaymentState
 from payment_processor.payload import PaymentPayload
 from payment_processor.state import PaymentState
 

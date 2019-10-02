@@ -57,7 +57,7 @@ async def register_new_claim(request):
     description = request.json.get('description')
     contract_id = request.json.get('contract_id')
 
-    if contract_id is not None:
+    if contract_id is not None and contract_id != '':
         is_valid = await security_messaging.valid_contracts(request.app.config.VAL_CONN, client_key, contract_id)
         if not is_valid:
             return response.text(body="Contract having '" + contract_id + "' id is not valid",
