@@ -92,7 +92,7 @@ async def close_claim(request):
     """Updates auth information for the authorized account"""
     # keyfile = common.get_keyfile(request.json.get['signer'])
     doctor_pkey = general.get_request_key_header(request)
-    required_fields = ['claim_id', 'provided_service', 'client_pkey']
+    required_fields = ['claim_id', 'provided_service', 'client_pkey', 'provided_service']
     general.validate_fields(required_fields, request.json)
 
     claim_id = request.json.get('claim_id')
