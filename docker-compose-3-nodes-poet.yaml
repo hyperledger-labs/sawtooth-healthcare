@@ -19,7 +19,7 @@ services:
       - ./:/project/sawtooth_healthcare
       - /project/sawtooth_healthcare/build
     depends_on:
-      - healthcare-cli-hk
+      - consent-processor-0
     command: |
       bash -c "
         sleep 1 &&
@@ -89,6 +89,8 @@ services:
     container_name: consent-processor-0
     volumes:
       - ./:/project/sawtooth_healthcare
+    depends_on:
+      - consent-processor-1
     command: |
       bash -c "
         sleep 1 &&
@@ -110,6 +112,8 @@ services:
     container_name: consent-processor-1
     volumes:
       - ./:/project/sawtooth_healthcare
+    depends_on:
+      - consent-processor-2
     command: |
       bash -c "
         sleep 1 &&
@@ -131,12 +135,152 @@ services:
     container_name: consent-processor-2
     volumes:
       - ./:/project/sawtooth_healthcare
+    depends_on:
+      - payment-processor-0
     command: |
       bash -c "
         sleep 1 &&
         echo '--- Building consent-tp-2 by docker-compose---\n' &&
         init-consent-tp.sh &&
         consent-tp -v -C tcp://validator-2:4004 &&
+        tail -f /dev/null
+               "
+
+  payment-processor-0:
+    build:
+      context: .
+      dockerfile: payment_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: payment-tp
+    container_name: payment-processor-0
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - insurance-processor-0
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building payment-tp-0 by docker-compose---\n' &&
+        init-payment-tp.sh &&
+        payment-tp -v -C tcp://validator-0:4004 &&
+        tail -f /dev/null
+               "
+
+  insurance-processor-0:
+    build:
+      context: .
+      dockerfile: insurance_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: insurance-tp
+    container_name: insurance-processor-0
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - payment-processor-1
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building insurance-tp-0 by docker-compose---\n' &&
+        init-insurance-tp.sh &&
+        insurance-tp -v -C tcp://validator-0:4004 &&
+        tail -f /dev/null
+               "
+
+  payment-processor-1:
+    build:
+      context: .
+      dockerfile: payment_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: payment-tp
+    container_name: payment-processor-1
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - insurance-processor-1
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building payment-tp-1 by docker-compose---\n' &&
+        init-payment-tp.sh &&
+        payment-tp -v -C tcp://validator-1:4004 &&
+        tail -f /dev/null
+               "
+
+  insurance-processor-1:
+    build:
+      context: .
+      dockerfile: insurance_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: insurance-tp
+    container_name: insurance-processor-1
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - payment-processor-2
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building insurance-tp-1 by docker-compose---\n' &&
+        init-insurance-tp.sh &&
+        insurance-tp -v -C tcp://validator-1:4004 &&
+        tail -f /dev/null
+               "
+
+  payment-processor-2:
+    build:
+      context: .
+      dockerfile: payment_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: payment-tp
+    container_name: payment-processor-2
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - insurance-processor-2
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building payment-tp-2 by docker-compose---\n' &&
+        init-payment-tp.sh &&
+        payment-tp -v -C tcp://validator-2:4004 &&
+        tail -f /dev/null
+               "
+
+  insurance-processor-2:
+    build:
+      context: .
+      dockerfile: insurance_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: insurance-tp
+    container_name: insurance-processor-2
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - healthcare-cli-hk
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building insurance-tp-2 by docker-compose---\n' &&
+        init-insurance-tp.sh &&
+        insurance-tp -v -C tcp://validator-2:4004 &&
         tail -f /dev/null
                "
 
