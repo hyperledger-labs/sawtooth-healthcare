@@ -135,6 +135,23 @@ message Claim {
     string contract_id = 6;
 }
 
+message ClaimWithUser {
+
+    enum State {
+        OPENED = 0;
+        CLOSED = 1;
+    }
+
+    string id = 1;
+    string client_pkey = 2;
+    string description = 3;
+    string provided_service = 4;
+    State state = 5;
+    string contract_id = 6;
+    string name = 7;
+    string surname = 8;
+}
+
 message ActionOnClaim {
     enum Event {
         ASSIGN = 0;

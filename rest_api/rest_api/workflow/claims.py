@@ -38,7 +38,9 @@ async def get_all_claims(request):
             'description': cl.description,
             'provided_service': cl.provided_service,
             'state': cl.state,
-            'contract_id': cl.contract_id
+            'contract_id': cl.contract_id,
+            'name': cl.name,
+            'surname': cl.surname
         })
 
     return response.json(body={'data': claim_list_json},

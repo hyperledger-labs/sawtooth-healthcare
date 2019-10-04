@@ -10,6 +10,8 @@ module.exports = {
         return m(".user-list", Claim.list.map(function(claim) {
             return m("a.user-list-item", // {href: "/claim/" + claim.clinic_pkey + "/" + claim.claim_id, oncreate: m.route.link},
                 "DESCRIPTION: " + claim.description +
+                "; NAME: " + claim.name +
+                "; SURNAME: " + claim.surname +
                 "; ID: " + claim.id +
                 "; CLIENT PKEY: " + claim.client_pkey +
                 "; STATE: " + claim.state +

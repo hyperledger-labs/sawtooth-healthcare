@@ -23,7 +23,7 @@ from sawtooth_rest_api.protobuf import validator_pb2
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
 from rest_api.common.protobuf.payload_pb2 import AddPulseWithUser, CreateDoctor, CreatePatient, \
-    AddLabTestWithUser, Claim
+    AddLabTestWithUser, ClaimWithUser
 
 from rest_api.insurance_common import helper as insurance_helper
 from rest_api.insurance_common.protobuf.insurance_payload_pb2 import Insurance, ContractWithUser
@@ -428,28 +428,32 @@ async def get_claims(conn, client_key):
     if Permission(type=Permission.READ_CLAIM) in client.permissions:
         claim_list_address = helper.make_claim_list_address()
         LOGGER.debug('has READ_CLAIM permission: ' + str(client_key))
-        # consent = await get_consent(conn, client_key)
-        # patient_list = {}
-        # for address, pt in consent.items():
-        #     LOGGER.debug('patient consent: ' + str(pt))
-        #     patient = await get_patient(conn, pt.patient_pkey)
-        #     patient_list[pt.patient_pkey] = patient
+        # Get Consent
+        consent = await get_consent(conn, client_key)
+        patient_list = {}
+        for address, pt in consent.items():
+            LOGGER.debug('patient consent: ' + str(pt))
+            patient = await get_patient(conn, pt.patient_pkey)
+            patient_list[pt.patient_pkey] = patient
+        #
         claim_list_resources = await messaging.get_state_by_address(conn, claim_list_address)
         for entity in claim_list_resources.entries:
-            cl = Claim()
+            cl = ClaimWithUser()
             cl.ParseFromString(entity.data)
+
             claim_list[entity.address] = cl
             LOGGER.debug('claim: ' + str(cl))
-        # for patient_address, pt in patient_list.items():
-        #     LOGGER.debug('patient: ' + str(pt))
-        #     for pulse_address, pl in pulse_list.items():
-        #         LOGGER.debug('pulse: ' + str(pl))
-        #         if patient_address == pl.client_pkey:
-        #             LOGGER.debug('match!')
-        #             pt_local = patient_list[patient_address]
-        #             pl.name = pt_local.name
-        #             pl.surname = pt_local.surname
-        #             pulse_list[pulse_address] = pl
+        # Apply Consent
+        for patient_address, pt in patient_list.items():
+            LOGGER.debug('patient: ' + str(pt))
+            for claim_address, cl in claim_list.items():
+                LOGGER.debug('claim: ' + str(cl))
+                if patient_address == cl.client_pkey:
+                    LOGGER.debug('match!')
+                    pt_local = patient_list[patient_address]
+                    cl.name = pt_local.name
+                    cl.surname = pt_local.surname
+                    claim_list[claim_address] = cl
         return claim_list
     elif Permission(type=Permission.READ_OWN_CLAIM) in client.permissions:
         claim_list_ids_address = helper.make_claim_list_by_patient_address(client_key)
@@ -462,7 +466,7 @@ async def get_claims(conn, client_key):
             claim_resources = await messaging.get_state_by_address(conn, claim_address)
             for entity2 in claim_resources.entries:
                 LOGGER.debug('get claim entity2: ' + str(entity2.address))
-                cl = Claim()
+                cl = ClaimWithUser()
                 cl.ParseFromString(entity2.data)
                 claim_list[entity2.address] = cl
         return claim_list
