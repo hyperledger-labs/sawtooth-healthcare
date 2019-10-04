@@ -20,7 +20,7 @@ services:
       - ./:/project/sawtooth_healthcare
       - /project/sawtooth_healthcare/build
     depends_on:
-      - healthcare-cli
+      - healthcare-cli-hk
     command: |
       bash -c "
         sleep 1 &&
@@ -51,28 +51,51 @@ services:
         tail -f /dev/null
                "
 
-  healthcare-cli:
+  payment-processor-0:
     build:
       context: .
-      dockerfile: cli/Dockerfile
+      dockerfile: payment_processor/Dockerfile
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-cli
-    container_name: healthcare-client
+    image: payment-tp
+    container_name: payment-processor-0
     volumes:
       - ./:/project/sawtooth_healthcare
-      - /project/sawtooth_healthcare/build
     depends_on:
-      - healthcare-cli-hk
+      - insurance-processor-0
     command: |
       bash -c "
         sleep 1 &&
-        echo '--- Building healthcare-cli by docker-compose---\n' &&
-        init-healthcare-cli.sh &&
+        echo '--- Building payment-tp-0 by docker-compose---\n' &&
+        init-payment-tp.sh &&
+        payment-tp -v -C tcp://validator-0:4004 &&
         tail -f /dev/null
-      "
+               "
+
+  insurance-processor-0:
+    build:
+      context: .
+      dockerfile: insurance_processor/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: insurance-tp
+    container_name: insurance-processor-0
+    volumes:
+      - ./:/project/sawtooth_healthcare
+    depends_on:
+      - consent-processor-0
+    command: |
+      bash -c "
+        sleep 1 &&
+        echo '--- Building insurance-tp-0 by docker-compose---\n' &&
+        init-insurance-tp.sh &&
+        insurance-tp -v -C tcp://validator-0:4004 &&
+        tail -f /dev/null
+               "
 
   healthcare-cli-hk:
     build:

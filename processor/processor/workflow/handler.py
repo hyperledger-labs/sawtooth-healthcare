@@ -6,6 +6,7 @@ from sawtooth_sdk.processor.handler import TransactionHandler
 import processor.common.helper as helper
 from processor.workflow.payload import HealthCarePayload
 from processor.workflow.state import HealthCareState
+from processor.common.protobuf.payload_pb2 import Claim
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -80,24 +81,25 @@ class HealthCareTransactionHandler(TransactionHandler):
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()
-
-                clinic = healthcare_state.get_clinic(signer)
-                if clinic is None:
-                    raise InvalidTransaction(
-                        'Invalid action: Clinic does not exist: ' + signer)
-
-                cl = healthcare_state.get_claim(claim.claim_id, claim.clinic_pkey)
+                cl = healthcare_state.get_claim2(claim.id)
                 if cl is not None:
                     raise InvalidTransaction(
-                        'Invalid action: Claim ' + claim.claim_id + ' already exists in clinic having ' +
-                        claim.clinic_pkey + ' public key')
+                        'Invalid action: Claim already exist: ' + cl.id)
 
-                pat = healthcare_state.get_patient(claim.patient_pkey)
-                if pat is None:
+                healthcare_state.create_claim(claim)
+            elif healthcare_payload.is_close_claim():
+
+                claim = healthcare_payload.close_claim()
+                original_claim = healthcare_state.get_claim2(claim.id)
+                if original_claim is None:
                     raise InvalidTransaction(
-                        'Invalid action: Patient having ' + claim.patient_pkey + ' public key does not exist')
-
-                healthcare_state.create_claim(claim.claim_id, claim.clinic_pkey, claim.patient_pkey)
+                        'Invalid action: Claim does not exist: ' + claim.id)
+                if original_claim.state == Claim.CLOSED:
+                    raise InvalidTransaction(
+                        'Invalid action: Claim already closed: ' + claim.id)
+                original_claim.provided_service = claim.provided_service
+                original_claim.state = Claim.CLOSED
+                healthcare_state.close_claim(original_claim)
             elif healthcare_payload.is_assign_doctor():
                 assign = healthcare_payload.assign_doctor()
 

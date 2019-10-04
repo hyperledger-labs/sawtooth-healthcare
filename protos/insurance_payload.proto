@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+message InsuranceTransactionPayload {
+
+    enum PayloadType {
+        TYPE_UNSET = 0;
+        CREATE_INSURANCE = 1;
+        ADD_CONTRACT = 2;
+    }
+
+    PayloadType payload_type = 1;
+
+    Insurance create_insurance = 2;
+    Contract add_contract = 3;
+}
+
+message Insurance {
+    string public_key = 1;
+    string name = 2;
+}
+
+message Contract {
+    string client_pkey = 1;
+    string id = 2;
+}
+
+message ContractWithUser {
+    string client_pkey = 1;
+    string id = 2;
+    string name = 3;
+    string surname = 4;
+}

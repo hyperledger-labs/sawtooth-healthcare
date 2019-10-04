@@ -2,6 +2,8 @@ from processor.common import helper
 from processor.common.protobuf import payload_pb2
 import logging
 
+from processor.common.protobuf.payload_pb2 import Claim
+
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
@@ -42,12 +44,12 @@ class HealthCareState(object):
         if op is None:
             self._store_lab(public_key, lab)
 
-    def create_claim(self, claim_id, clinic_pkey, patient_pkey):
-        od = self._load_claim(clinic_pkey=clinic_pkey, claim_id=claim_id)
-
-        if od is None:
-            self._store_claim(clinic_pkey=clinic_pkey, claim_id=claim_id,
-                              patient_pkey=patient_pkey)
+    # def create_claim(self, claim_id, clinic_pkey, patient_pkey):
+    #     od = self._load_claim(clinic_pkey=clinic_pkey, claim_id=claim_id)
+    #
+    #     if od is None:
+    #         self._store_claim(clinic_pkey=clinic_pkey, claim_id=claim_id,
+    #                           patient_pkey=patient_pkey)
 
     def assign_doctor(self, claim_id, clinic_pkey, description, event_time):
         self._store_event(claim_id=claim_id, clinic_pkey=clinic_pkey, description=description,
@@ -79,6 +81,12 @@ class HealthCareState(object):
     def add_pulse(self, pulse):
         self._store_pulse(pulse=pulse)
 
+    def create_claim(self, claim):
+        self._store_claim(claim=claim)
+
+    def close_claim(self, claim):
+        self._update_claim(claim=claim)
+
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
         return clinic
@@ -97,6 +105,10 @@ class HealthCareState(object):
 
     def get_claim(self, claim_id, clinic_pkey):
         od = self._load_claim(claim_id=claim_id, clinic_pkey=clinic_pkey)
+        return od
+
+    def get_claim2(self, claim_id):
+        od = self._load_claim2(claim_id=claim_id)
         return od
 
     # def get_claim_hex(self, claim_hex):
@@ -185,6 +197,17 @@ class HealthCareState(object):
     #         claim.ParseFromString(state_entries[0].data)
     #     return claim
 
+    def _load_claim2(self, claim_id):
+        claim = None
+        claim_hex = helper.make_claim_address(claim_id)
+        state_entries = self._context.get_state(
+            [claim_hex],
+            timeout=self.TIMEOUT)
+        if state_entries:
+            claim = payload_pb2.Claim()
+            claim.ParseFromString(state_entries[0].data)
+        return claim
+
     def _load_claim(self, claim_id, clinic_pkey):
         claim = None
         claim_hex = [] if clinic_pkey is None and claim_id is None \
@@ -267,17 +290,17 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_claim(self, claim_id, clinic_pkey, patient_pkey):
-        claim_hex = helper.make_claim_address(claim_id, clinic_pkey)
-        claim = payload_pb2.CreateClaim()
-        claim.claim_id = claim_id
-        claim.clinic_pkey = clinic_pkey
-        claim.patient_pkey = patient_pkey
-
-        state_data = claim.SerializeToString()
-        self._context.set_state(
-            {claim_hex: state_data},
-            timeout=self.TIMEOUT)
+    # def _store_claim(self, claim_id, clinic_pkey, patient_pkey):
+    #     claim_hex = helper.make_claim_address(claim_id, clinic_pkey)
+    #     claim = payload_pb2.CreateClaim()
+    #     claim.claim_id = claim_id
+    #     claim.clinic_pkey = clinic_pkey
+    #     claim.patient_pkey = patient_pkey
+    #
+    #     state_data = claim.SerializeToString()
+    #     self._context.set_state(
+    #         {claim_hex: state_data},
+    #         timeout=self.TIMEOUT)
 
     def _store_event(self, claim_id, clinic_pkey, description, event_time, event):
         address = helper.make_event_address(claim_id, clinic_pkey, event_time)
@@ -311,6 +334,35 @@ class HealthCareState(object):
             states,
             timeout=self.TIMEOUT)
 
+    def _update_claim(self, claim):
+        claim_address = helper.make_claim_address(claim.id)
+        claim_data = claim.SerializeToString()
+        states = {
+            claim_address: claim_data
+        }
+        LOGGER.debug("_update_claim: " + str(states))
+        self._context.set_state(
+            states,
+            timeout=self.TIMEOUT)
+
+    def _store_claim(self, claim):
+        claim_address = helper.make_claim_address(claim.id)
+        claim_patient_relation_address = helper.make_claim_patient__relation_address(claim.id,
+                                                                                     claim.client_pkey)
+        patient_claim_relation_address = helper.make_patient_claim__relation_address(claim.client_pkey,
+                                                                                     claim.id)
+
+        claim_data = claim.SerializeToString()
+        states = {
+            claim_address: claim_data,
+            claim_patient_relation_address: str.encode(claim.client_pkey),
+            patient_claim_relation_address: str.encode(claim.id)
+        }
+        LOGGER.debug("_store_claim: " + str(states))
+        self._context.set_state(
+            states,
+            timeout=self.TIMEOUT)
+
     def _store_pulse(self, pulse):
         pulse_address = helper.make_pulse_address(pulse.id)
         pulse_patient_relation_address = helper.make_pulse_patient__relation_address(pulse.id,
@@ -319,10 +371,6 @@ class HealthCareState(object):
                                                                                      pulse.id)
 
         pulse_data = pulse.SerializeToString()
-        # p = payload_pb2.AddPulse()
-        # p.public_key = public_key
-        # p.pulse = pulse
-        # p.timestamp = timestamp
         states = {
             pulse_address: pulse_data,
             pulse_patient_relation_address: str.encode(pulse.client_pkey),

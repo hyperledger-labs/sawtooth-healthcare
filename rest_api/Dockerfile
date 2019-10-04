@@ -49,8 +49,9 @@ RUN pip3 install \
 #    pycrypto \
 #    rethinkdb \
     sanic==19.03.1 \
-    sanic_cors \
-    itsdangerous
+    sanic_cors
+#    \
+#    itsdangerous
 
 WORKDIR /project/sawtooth_healthcare
 

@@ -22,6 +22,9 @@ class HealthCarePayload(object):
     def create_claim(self):
         return self._transaction.create_claim
 
+    def close_claim(self):
+        return self._transaction.close_claim
+
     def assign_doctor(self):
         return self._transaction.assign_doctor
 
@@ -60,6 +63,9 @@ class HealthCarePayload(object):
 
     def is_create_claim(self):
         return self._transaction.payload_type == payload_pb2.TransactionPayload.CREATE_CLAIM
+
+    def is_close_claim(self):
+        return self._transaction.payload_type == payload_pb2.TransactionPayload.CLOSE_CLAIM
 
     def is_assign_doctor(self):
         return self._transaction.payload_type == payload_pb2.TransactionPayload.ASSIGN_DOCTOR
