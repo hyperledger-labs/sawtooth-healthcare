@@ -53,9 +53,21 @@ message Permission {
       READ_CLAIM = 400;
       READ_OWN_CLAIM = 401;
       WRITE_CLAIM = 402;
+      UPDATE_CLAIM = 403;
 
       REVOKE_ACCESS = 500;
       GRANT_ACCESS = 501;
+
+      READ_INSURANCE_COMPANY = 900;
+      READ_OWN_INSURANCE_COMPANY = 901;
+
+      READ_CONTRACT = 1000;
+      READ_OWN_CONTRACT = 1001;
+      WRITE_CONTRACT = 1002;
+
+      READ_PAYMENT = 1100;
+      READ_OWN_PAYMENT = 1101;
+      WRITE_PAYMENT = 1102;
     }
 
     PermissionType type = 1;

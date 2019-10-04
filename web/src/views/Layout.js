@@ -17,7 +17,8 @@ module.exports = {
                 m("a", {href: "/clinic", oncreate: m.route.link}, "As Clinic|"),
                 m("a", {href: "/doctor", oncreate: m.route.link}, "As Doctor|"),
                 m("a", {href: "/patient", oncreate: m.route.link}, "As Patient|"),
-                m("a", {href: "/lab", oncreate: m.route.link}, "As Lab"),
+                m("a", {href: "/lab", oncreate: m.route.link}, "As Lab|"),
+                m("a", {href: "/insurance", oncreate: m.route.link}, "As Insurance"),
             ]),
             m("section", vnode.children),
         ])

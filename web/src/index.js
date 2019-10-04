@@ -14,6 +14,9 @@ var PatientDetailsForm = require("./views/PatientDetailsForm")
 var ClinicList = require("./views/ClinicList")
 var ClinicForm = require("./views/ClinicForm")
 
+var InsuranceList = require("./views/InsuranceList")
+var InsuranceForm = require("./views/InsuranceForm")
+
 var ClaimList = require("./views/ClaimList")
 var ClaimNewForm = require("./views/ClaimNewForm")
 var ClaimDetailsForm = require("./views/ClaimDetailsForm")
@@ -27,6 +30,11 @@ var LabForm = require("./views/LabForm")
 var PulseList = require("./views/PulseList")
 var PulseForm = require("./views/PulseForm")
 
+var ContractList = require("./views/ContractList")
+var ContractForm = require("./views/ContractForm")
+
+var PaymentList = require("./views/PaymentList")
+
 var DoctorAssignForm = require("./views/DoctorAssignForm")
 var FirstVisitForm = require("./views/FirstVisitForm")
 var EatPillsForm = require("./views/EatPillsForm")
@@ -38,6 +46,7 @@ var DoctorActionsList = require("./views/DoctorActionsList")
 var ClinicActionsList = require("./views/ClinicActionsList")
 var PatientActionsList = require("./views/PatientActionsList")
 var LabActionsList = require("./views/LabActionsList")
+var InsuranceActionsList = require("./views/InsuranceActionsList")
 var Layout = require("./views/Layout")
 
 m.route(document.body, "/clinic", {
@@ -78,9 +87,19 @@ m.route(document.body, "/clinic", {
             return m(Layout, m(ClinicForm))
         }
     },
-    "/claim_list": {
+    "/insurance_list/": {
+        render: function(vnode) {
+            return m(Layout, m(InsuranceList, vnode.attrs))
+        }
+    },
+    "/insurance/new/": {
         render: function() {
-            return m(Layout, m(ClaimList))
+            return m(Layout, m(InsuranceForm))
+        }
+    },
+    "/claim_list": {
+        render: function(vnode) {
+            return m(Layout, m(ClaimList, vnode.attrs))
         }
     },
     "/doctor/assign/": {
@@ -114,8 +133,8 @@ m.route(document.body, "/clinic", {
         }
     },
     "/claim/new/": {
-        render: function() {
-            return m(Layout, m(ClaimNewForm))
+        render: function(vnode) {
+            return m(Layout, m(ClaimNewForm, vnode.attrs))
         }
     },
     "/claim/:clinic_pkey/:claim_id": {
@@ -143,6 +162,21 @@ m.route(document.body, "/clinic", {
             return m(Layout, m(PulseForm, vnode.attrs))
         }
     },
+    "/payment_list": {
+        render: function(vnode) {
+            return m(Layout, m(PaymentList, vnode.attrs))
+        }
+    },
+    "/contract_list": {
+        render: function(vnode) {
+            return m(Layout, m(ContractList, vnode.attrs))
+        }
+    },
+    "/contract_list/new/": {
+        render: function(vnode) {
+            return m(Layout, m(ContractForm, vnode.attrs))
+        }
+    },
     "/patient/:patient_pkey": {
         render: function(vnode) {
             return m(Layout, m(PatientDetailsForm, vnode.attrs))
@@ -166,6 +200,11 @@ m.route(document.body, "/clinic", {
     "/lab": {
         render: function() {
             return m(Layout, m(LabActionsList))
+        }
+    },
+    "/insurance": {
+        render: function() {
+            return m(Layout, m(InsuranceActionsList))
         }
     },
     "/lab_list/": {

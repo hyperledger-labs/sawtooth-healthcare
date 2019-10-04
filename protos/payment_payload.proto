@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message PaymentTransactionPayload {
+
+    enum PayloadType {
+        TYPE_UNSET = 0;
+        ADD_PAYMENT = 1;
+    }
+
+    PayloadType payload_type = 1;
+    Payment create_payment = 2;
+}
+
+message Payment {
+    string id = 1;
+    string patient_pkey = 2;
+    string contract_id = 3;
+    string claim_id = 4;
+}

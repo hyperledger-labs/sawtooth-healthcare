@@ -55,7 +55,7 @@ async def get_all_pulse_items(request):
         })
 
     return response.json(body={'data': pulse_list_json},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())
 
 
 # @PULSE_BP.get('own_pulse/<patient_pkey>')
@@ -126,10 +126,10 @@ async def add_new_pulse(request):
     # private_key = common.get_signer_from_file(keyfile)
     # signer = CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
     # patient_signer = request.app.config.SIGNER  # .get_public_key().as_hex()
-    client_signer = helper.get_signer(request, client_key)
+    client_signer = general.get_signer(request, client_key)
     current_times_str = str(helper.get_current_timestamp())
 
-    batch, batch_id = transaction.add_pulse(
+    pulse_txn = transaction.add_pulse(
         txn_signer=client_signer,
         batch_signer=client_signer,
         pulse=pulse,
@@ -137,6 +137,8 @@ async def add_new_pulse(request):
         timestamp=timestamp,
         client_pkey=client_key
     )
+
+    batch, batch_id = transaction.make_batch_and_id([pulse_txn], client_signer)
 
     await security_messaging.add_pulse(
         request.app.config.VAL_CONN,
@@ -152,4 +154,4 @@ async def add_new_pulse(request):
         raise err
 
     return response.json(body={'status': general.DONE},
-                         headers=general.get_response_headers(general.get_request_origin(request)))
+                         headers=general.get_response_headers())

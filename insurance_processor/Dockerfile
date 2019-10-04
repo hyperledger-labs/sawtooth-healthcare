@@ -4,17 +4,14 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8AA7AF1F10
     echo 'deb [arch=amd64] http://repo.sawtooth.me/ubuntu/bumper/stable xenial universe' >> /etc/apt/sources.list && \
     apt-get update
 
-RUN apt-get install -y -q \
+RUN apt-get install -y -f -q \
     python3-grpcio-tools \
-    python3-requests \
     python3-setuptools \
     python3-sawtooth-sdk \
-    python3-sawtooth-signing \
-    python3-sawtooth-cli \
+#    python3-sawtooth-cli \
     iputils-ping \
     curl \
     telnet
-
 #\
 #    && /project/sawtooth_healthcare/bin/healthcare-protogen \
 #    && cd /project/sawtooth_healthcare/processor/ \
@@ -28,7 +25,6 @@ WORKDIR /project/sawtooth_healthcare
 ENV PATH $PATH:/project/sawtooth_healthcare/bin
 
 #CMD ["echo", "$PATH"]
-CMD echo "\033[0;32m--- 2Building healthcare-tp ---\n\033[0m" \
-    && init-healthcare-cli.sh
-#    \
-#    && healthcare-cli-python
+CMD echo "\033[0;32m--- 2Building insurance-tp ---\n\033[0m" \
+    && init-insurance-tp.sh \
+    && insurance-tp -v -C tcp://validator:4004

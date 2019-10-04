@@ -17,7 +17,7 @@ import os
 
 # from Crypto.Cipher import AES
 
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from sawtooth_signing import ParseError
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
@@ -27,20 +27,20 @@ from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 # from protobuf import payload_pb2 as rule_pb2
 from rest_api.workflow.errors import ApiBadRequest, ApiForbidden
 from rest_api.common.exceptions import HealthCareException
-from rest_api.common.protobuf import payload_pb2 as rule_pb2
+# from rest_api.common.protobuf import payload_pb2 as rule_pb2
 
 DONE = 'DONE'
 
 
-def get_response_headers(origin):
+def get_response_headers():
     return {
         # 'Access-Control-Allow-Credentials': True,
         # 'Access-Control-Allow-Origin': origin,
         'Connection': 'keep-alive'}
 
 
-def get_request_origin(request):
-    return request.headers['Origin'] if ('Origin' in request.headers) else None
+# def get_request_origin(request):
+#     return request.headers['Origin'] if ('Origin' in request.headers) else None
 
 
 def get_request_key_header(request):
@@ -84,47 +84,47 @@ def validate_fields(required_fields, request_json):
 #     return CryptoFactory(request.app.config.CONTEXT).new_signer(private_key)
 
 
-def decrypt_private_key(aes_key, public_key, encrypted_private_key):
-    init_vector = bytes.fromhex(public_key[:32])
-    cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
-    return cipher.decrypt(encrypted_private_key)
+# def decrypt_private_key(aes_key, public_key, encrypted_private_key):
+#     init_vector = bytes.fromhex(public_key[:32])
+#     cipher = AES.new(bytes.fromhex(aes_key), AES.MODE_CBC, init_vector)
+#     return cipher.decrypt(encrypted_private_key)
 
 
-def generate_auth_token(secret_key, email, public_key):
-    serializer = Serializer(secret_key)
-    token = serializer.dumps({'email': email, 'public_key': public_key})
-    return token.decode('ascii')
+# def generate_auth_token(secret_key, email, public_key):
+#     serializer = Serializer(secret_key)
+#     token = serializer.dumps({'email': email, 'public_key': public_key})
+#     return token.decode('ascii')
 
 
-def deserialize_auth_token(secret_key, token):
-    serializer = Serializer(secret_key)
-    return serializer.loads(token)
+# def deserialize_auth_token(secret_key, token):
+#     serializer = Serializer(secret_key)
+#     return serializer.loads(token)
 
 
-def proto_wrap_rules(rules):
-    rule_protos = []
-    if rules is not None:
-        for rule in rules:
-            try:
-                rule_proto = rule_pb2.Rule(type=rule['type'])
-            except IndexError:
-                raise ApiBadRequest("Improper rule format")
-            except ValueError:
-                raise ApiBadRequest("Invalid rule type")
-            except KeyError:
-                raise ApiBadRequest("Rule type is required")
-            if rule.get('value') is not None:
-                rule_proto.value = value_to_csv(rule['value'])
-            rule_protos.append(rule_proto)
-    return rule_protos
+# def proto_wrap_rules(rules):
+#     rule_protos = []
+#     if rules is not None:
+#         for rule in rules:
+#             try:
+#                 rule_proto = rule_pb2.Rule(type=rule['type'])
+#             except IndexError:
+#                 raise ApiBadRequest("Improper rule format")
+#             except ValueError:
+#                 raise ApiBadRequest("Invalid rule type")
+#             except KeyError:
+#                 raise ApiBadRequest("Rule type is required")
+#             if rule.get('value') is not None:
+#                 rule_proto.value = value_to_csv(rule['value'])
+#             rule_protos.append(rule_proto)
+#     return rule_protos
 
 
-def value_to_csv(value):
-    if isinstance(value, (list, tuple)):
-        csv = ",".join(map(str, value))
-        return bytes(csv, 'utf-8')
-    else:
-        raise ApiBadRequest("Rule value must be a JSON array")
+# def value_to_csv(value):
+#     if isinstance(value, (list, tuple)):
+#         csv = ",".join(map(str, value))
+#         return bytes(csv, 'utf-8')
+#     else:
+#         raise ApiBadRequest("Rule value must be a JSON array")
 
 
 def get_keyfile(user):
@@ -153,3 +153,20 @@ def get_signer_from_file(keyfile):
     return private_key
     # self._signer = CryptoFactory(create_context('secp256k1')) \
     #     .new_signer(private_key)
+
+
+def get_signer(request, client_key):
+    if request.app.config.SIGNER_CLINIC.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_CLINIC
+    elif request.app.config.SIGNER_PATIENT.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_PATIENT
+    elif request.app.config.SIGNER_DOCTOR.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_DOCTOR
+    elif request.app.config.SIGNER_LAB.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_LAB
+    elif request.app.config.SIGNER_INSURANCE.get_public_key().as_hex() == client_key:
+        client_signer = request.app.config.SIGNER_INSURANCE
+    else:
+        raise HealthCareException(
+            'Unable to load private key for client_key: {}'.format(str(client_key)))
+    return client_signer

@@ -1,0 +1,2 @@
+class PaymentException(Exception):
+    pass
