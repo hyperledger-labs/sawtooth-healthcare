@@ -16,4 +16,5 @@ message Payment {
     string patient_pkey = 2;
     string contract_id = 3;
     string claim_id = 4;
+    string timestamp = 5;
 }

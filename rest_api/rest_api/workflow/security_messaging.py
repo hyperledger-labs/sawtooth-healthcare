@@ -559,6 +559,10 @@ async def get_payments(conn, client_key):
                 LOGGER.debug('get payment entity2: ' + str(entity2.address))
                 pay = Payment()
                 pay.ParseFromString(entity2.data)
+                if pay.contract_id is not None and pay.contract_id != '':
+                    timestamp = pay.timestamp
+                    pay = Payment()
+                    pay.timestamp = timestamp
                 payment_list[entity2.address] = pay
 
         return payment_list
