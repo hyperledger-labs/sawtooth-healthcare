@@ -18,11 +18,6 @@ module.exports = {
                 "; PROVIDED SERVICE: " + claim.provided_service +
                 "; CONTRACT ID: " + claim.contract_id +
                 ";",
-                m("label.label", "Provided Service"),
-                    m("input.input[placeholder=Provided Service]", {
-                        oninput: m.withAttr("value", function(value) {Claim.current.provided_service = value}),
-                        value: Claim.current.provided_service
-                }),
                 m("div"),
                 m("button", {
                     onclick: function() {
@@ -34,6 +29,11 @@ module.exports = {
                     }
                 }, 'Close claim')
             )
+        }),
+        m("label.label", "Provided Service"),
+        m("input.input[placeholder=Provided Service]", {
+            oninput: m.withAttr("value", function(value) {Claim.current.provided_service = value}),
+            value: Claim.current.provided_service
         }),
         m("label.error", Claim.error))
     }
