@@ -35,7 +35,7 @@ conf_dir = "/etc/sawtooth"
 #                        ['packaging/systemd/sawtooth-healthcare-client-python.service']))
 
 setup(
-    name='healthcare-client-hk',
+    name='healthcare-client',
     version='0.1',
     description='Sawtooth HealthCare Client Example',
     author='Hyperledger Sawtooth',
@@ -55,7 +55,7 @@ setup(
     # data_files=data_files,
     entry_points={
         'console_scripts': [
-            'cli-hk = cli.workflow.dehr_hk_cli:main_wrapper',
+            'cli = cli.workflow.dehr_cli:main_wrapper',
             # 'healthcare-tp-python = processor.workflow.main:main',
         ]
 })

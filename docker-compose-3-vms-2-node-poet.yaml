@@ -20,7 +20,7 @@ services:
       - ./:/project/sawtooth_healthcare
       - /project/sawtooth_healthcare/build
     depends_on:
-      - healthcare-cli-hk
+      - healthcare-cli
     command: |
       bash -c "
         sleep 1 &&
@@ -105,16 +105,16 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: healthcare-cli-hk
-    container_name: healthcare-client-hk
+    image: healthcare-cli
+    container_name: healthcare-client
     volumes:
       - ./:/project/sawtooth_healthcare
       - /project/sawtooth_healthcare/build
     command: |
       bash -c "
         sleep 1 &&
-        echo '--- Building healthcare-cli-hk by docker-compose---\n' &&
-        init-healthcare-cli-hk.sh &&
+        echo '--- Building healthcare-cli by docker-compose---\n' &&
+        init-healthcare-cli.sh &&
         tail -f /dev/null
       "
 
