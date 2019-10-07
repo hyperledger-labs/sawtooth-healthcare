@@ -88,10 +88,10 @@ services:
         tail -f /dev/null
                "
 
-  healthcare-cli-hk:
+  healthcare-cli:
     build:
       context: .
-      dockerfile: cli_hk/Dockerfile
+      dockerfile: cli/Dockerfile
       args:
         - http_proxy
         - https_proxy
