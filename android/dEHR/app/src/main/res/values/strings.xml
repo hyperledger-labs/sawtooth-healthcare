@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">dEHR</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="barcode_reader">QrCode Reader</string>
+    <string name="app_needs_your_camera_permission_in_order_to_scan_qr_code">App needs your camera permission in order to scan qr code.</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+    <string name="click_get_items_button">Click Get Items Button</string>
+    <string name="get_items">Get items</string>
+    <string name="add_pulse">Add Pulse</string>
+    <string name="set_url">Set URL</string>
+    <string name="http_localhost_8040">http://localhost:8040</string>
+    <string name="register_patient">Register patient</string>
+    <string name="grant_access">Grant Access</string>
+    <string name="revoke_access">Revoke Access</string>
+    <string name="doctor_pkey">doctor_pkey</string>
+</resources>
