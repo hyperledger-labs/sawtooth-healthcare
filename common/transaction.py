@@ -146,7 +146,7 @@ def create_patient(txn_signer, batch_signer, name, surname):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_PATIENT),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_PATIENT)]
     patient = CreatePatient(
-        # public_key=txn_signer.get_public_key().as_hex(),
+        public_key=patient_pkey,
         name=name,
         surname=surname)
 
@@ -172,7 +172,7 @@ def create_clinic(txn_signer, batch_signer, name):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     clinic = CreateClinic(
-        # public_key=clinic_pkey,
+        public_key=clinic_pkey,
         name=name)
 
     payload = TransactionPayload(
@@ -202,7 +202,7 @@ def create_lab(txn_signer, batch_signer, name):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     lab = CreateLab(
-        # public_key=clinic_pkey,
+        public_key=lab_pkey,
         name=name)
 
     payload = TransactionPayload(

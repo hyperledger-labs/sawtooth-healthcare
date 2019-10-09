@@ -50,7 +50,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Clinic already exists: ' + clinic.name)
 
-                healthcare_state.create_clinic(signer, clinic)
+                healthcare_state.create_clinic(clinic)
             elif healthcare_payload.is_create_doctor():
                 doctor = healthcare_payload.create_doctor()
 
@@ -68,7 +68,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Patient already exists: ' + patient.name)
 
-                healthcare_state.create_patient(signer, patient)
+                healthcare_state.create_patient(patient)
             elif healthcare_payload.is_create_lab():
                 lab = healthcare_payload.create_lab()
 
@@ -77,7 +77,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Lab already exists: ' + lb.name)
 
-                healthcare_state.create_lab(signer, lab)
+                healthcare_state.create_lab(lab)
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()

@@ -2,7 +2,7 @@ from processor.common import helper
 from processor.common.protobuf import payload_pb2
 import logging
 
-from processor.common.protobuf.payload_pb2 import Claim
+# from processor.common.protobuf.payload_pb2 import Claim
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -20,11 +20,11 @@ class HealthCareState(object):
 
         self._context = context
 
-    def create_clinic(self, public_key, clinic):
-        op = self._load_clinic(public_key=public_key)
+    def create_clinic(self, clinic):
+        op = self._load_clinic(public_key=clinic.public_key)
 
         if op is None:
-            self._store_clinic(public_key, clinic)
+            self._store_clinic(clinic)
 
     def create_doctor(self, doctor):
         op = self._load_doctor(public_key=doctor.public_key)
@@ -32,17 +32,17 @@ class HealthCareState(object):
         if op is None:
             self._store_doctor(doctor)
 
-    def create_patient(self, public_key, patient):
-        op = self._load_patient(public_key=public_key)
+    def create_patient(self, patient):
+        op = self._load_patient(public_key=patient.public_key)
 
         if op is None:
-            self._store_patient(public_key, patient)
+            self._store_patient(patient)
 
-    def create_lab(self, public_key, lab):
-        op = self._load_lab(public_key=public_key)
+    def create_lab(self, lab):
+        op = self._load_lab(public_key=lab.public_key)
 
         if op is None:
-            self._store_lab(public_key, lab)
+            self._store_lab(lab)
 
     # def create_claim(self, claim_id, clinic_pkey, patient_pkey):
     #     od = self._load_claim(clinic_pkey=clinic_pkey, claim_id=claim_id)
@@ -143,44 +143,44 @@ class HealthCareState(object):
     #     pulse_list = self._load_pulse(patient_pkey=patient_pkey)
     #     return pulse_list
 
-    def _load_clinic(self, public_key=None):
+    def _load_clinic(self, public_key):
         clinic = None
-        clinic_hex = [] if public_key is None else [helper.make_clinic_address(public_key)]
+        clinic_hex = helper.make_clinic_address(public_key)
         state_entries = self._context.get_state(
-            clinic_hex,
+            [clinic_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             clinic = payload_pb2.CreateClinic()
             clinic.ParseFromString(state_entries[0].data)
         return clinic
 
-    def _load_doctor(self, public_key=None):
+    def _load_doctor(self, public_key):
         doctor = None
-        doctor_hex = [] if public_key is None else [helper.make_doctor_address(public_key)]
+        doctor_hex = helper.make_doctor_address(public_key)
         state_entries = self._context.get_state(
-            doctor_hex,
+            [doctor_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             doctor = payload_pb2.CreateDoctor()
             doctor.ParseFromString(state_entries[0].data)
         return doctor
 
-    def _load_lab(self, public_key=None):
+    def _load_lab(self, public_key):
         lab = None
-        lab_hex = [] if public_key is None else [helper.make_lab_address(public_key)]
+        lab_hex = helper.make_lab_address(public_key)
         state_entries = self._context.get_state(
-            lab_hex,
+            [lab_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             lab = payload_pb2.CreateLab()
             lab.ParseFromString(state_entries[0].data)
         return lab
 
-    def _load_patient(self, public_key=None):
+    def _load_patient(self, public_key):
         patient = None
-        patient_hex = [] if public_key is None else [helper.make_patient_address(public_key)]
+        patient_hex = helper.make_patient_address(public_key)
         state_entries = self._context.get_state(
-            patient_hex,
+            [patient_hex],
             timeout=self.TIMEOUT)
         if state_entries:
             patient = payload_pb2.CreatePatient()
@@ -245,8 +245,8 @@ class HealthCareState(object):
     #         pulse.ParseFromString(state_entries[0].data)
     #     return pulse
 
-    def _store_clinic(self, public_key, clinic):
-        address = helper.make_clinic_address(public_key)
+    def _store_clinic(self, clinic):
+        address = helper.make_clinic_address(clinic.public_key)
 
         # clinic = payload_pb2.CreateClinic()
         # clinic.public_key = public_key
@@ -270,8 +270,8 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_patient(self, public_key, patient):
-        address = helper.make_patient_address(public_key)
+    def _store_patient(self, patient):
+        address = helper.make_patient_address(patient.public_key)
 
         # patient = payload_pb2.CreatePatient()
         # patient.public_key = public_key
@@ -283,8 +283,8 @@ class HealthCareState(object):
             {address: state_data},
             timeout=self.TIMEOUT)
 
-    def _store_lab(self, public_key, lab):
-        address = helper.make_lab_address(public_key)
+    def _store_lab(self, lab):
+        address = helper.make_lab_address(lab.public_key)
         state_data = lab.SerializeToString()
         self._context.set_state(
             {address: state_data},
