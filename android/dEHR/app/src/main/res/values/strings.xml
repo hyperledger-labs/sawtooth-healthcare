@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">dEHR</string>
+    <string name="app_name">MedicalInsurance</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
