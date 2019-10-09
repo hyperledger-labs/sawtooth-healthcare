@@ -11,8 +11,8 @@ module.exports = {
             return m("a.user-list-item", "PATIENT PKEY: " + pay.patient_pkey +
                                     "; CONTRACT ID: " + pay.contract_id +
                                     "; ID: " + pay.id +
-                                    "; CLAIM ID: " + pay.claim_id
-//                                    "PATIENT PUBLIC KEY: " + pl.public_key + ";"
+                                    "; CLAIM ID: " + pay.claim_id +
+                                    "; TIMESTAMP: " + pay.timestamp + ";"
                                     ) // + user.publicKey
         }),
         m("label.error", Payment.error))

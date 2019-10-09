@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 bin/healthcare-protogen
-cp -R common cli_hk/cli
-cd cli_hk || exit
-#python3 setup.py clean --bdist-base ./cli_hk/bdist.linux-x86_64 --build-lib ./cli_hk/lib --all
-#python3 setup.py build -b ./cli_hk install
+cp -R common cli/cli
+cd cli || exit
+#python3 setup.py clean --bdist-base ./cli/bdist.linux-x86_64 --build-lib ./cli/lib --all
+#python3 setup.py build -b ./cli install
 python3 setup.py clean --all
 python3 setup.py build
 python3 setup.py install

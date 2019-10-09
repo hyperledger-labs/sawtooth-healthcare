@@ -17,7 +17,8 @@ message TransactionPayload {
         ADD_LAB_TEST = 11;
         ADD_PULSE = 12;
         CREATE_LAB = 13;
-        CLOSE_CLAIM = 14;
+        UPDATE_CLAIM = 14;
+        CLOSE_CLAIM = 15;
     }
 
     PayloadType payload_type = 1;
@@ -36,11 +37,12 @@ message TransactionPayload {
     AddPulse pulse = 13;
     CreateLab create_lab = 14;
     Claim close_claim = 15;
+    Claim update_claim = 16;
 }
 
 message CreateClinic {
-//    string public_key = 1;
-    string name = 1;
+    string public_key = 1;
+    string name = 2;
 //    repeated Permission permissions = 2;
 }
 
@@ -52,13 +54,15 @@ message CreateDoctor {
 }
 
 message CreatePatient {
-    string name = 1;
-    string surname = 2;
+    string public_key = 1;
+    string name = 2;
+    string surname = 3;
 //    repeated Permission permissions = 3;
 }
 
 message CreateLab {
-    string name = 1;
+    string public_key = 1;
+    string name = 2;
 //    repeated Permission permissions = 2;
 }
 

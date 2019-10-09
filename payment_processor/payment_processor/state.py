@@ -64,22 +64,32 @@ class PaymentState(object):
         payment_patient_rel_hex = helper.make_payment_patient__relation_address(payment.id, payment.patient_pkey)
         patient_payment_rel_hex = helper.make_patient_payment__relation_address(payment.patient_pkey, payment.id)
 
-        if payment.contract_id is not None and payment.contract_id != '':
-            LOGGER.debug("payment contract relation: '" + str(payment.contract_id) + "'")
-            states = {
-                payment_hex: payment_data,
+        # if payment.contract_id is not None and payment.contract_id != '':
+        #     LOGGER.debug("payment contract relation: '" + str(payment.contract_id) + "'")
+        #     states = {
+        #         payment_hex: payment_data,
+        #
+        #         payment_contract_rel_hex: str.encode(payment.contract_id),
+        #         contract_payment_rel_hex: str.encode(payment.id),
+        #     }
+        # else:
+        #     LOGGER.debug("payment patient relation: '" + str(payment.contract_id) + "'")
+        #     states = {
+        #         payment_hex: payment_data,
+        #
+        #         payment_patient_rel_hex: str.encode(payment.patient_pkey),
+        #         patient_payment_rel_hex: str.encode(payment.id)
+        #     }
 
-                payment_contract_rel_hex: str.encode(payment.contract_id),
-                contract_payment_rel_hex: str.encode(payment.id),
-            }
-        else:
-            LOGGER.debug("payment patient relation: '" + str(payment.contract_id) + "'")
-            states = {
-                payment_hex: payment_data,
+        states = {
+            payment_hex: payment_data,
 
-                payment_patient_rel_hex: str.encode(payment.patient_pkey),
-                patient_payment_rel_hex: str.encode(payment.id)
-            }
+            payment_patient_rel_hex: str.encode(payment.patient_pkey),
+            patient_payment_rel_hex: str.encode(payment.id),
+
+            payment_contract_rel_hex: str.encode(payment.contract_id),
+            contract_payment_rel_hex: str.encode(payment.id)
+        }
 
         LOGGER.debug("_store_payment: " + str(states))
         self._context.set_state(

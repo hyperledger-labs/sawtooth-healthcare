@@ -11,7 +11,7 @@ from sawtooth_signing import create_context #, CryptoFactory
 
 from cli.common.helper import DISTRIBUTION_NAME, DEFAULT_URL
 from cli.common.exceptions import HealthCareException
-from cli.workflow.dehr_hk_client import HealthCareClient
+from cli.workflow.dehr_client import HealthCareClient
 
 
 def create_console_handler(verbose_level):

@@ -28,7 +28,7 @@ WORKDIR /project/sawtooth_healthcare
 ENV PATH $PATH:/project/sawtooth_healthcare/bin
 
 #CMD ["echo", "$PATH"]
-CMD echo "\033[0;32m--- Building cli_hk ---\n\033[0m" \
-    && init-healthcare-cli-hk.sh
+CMD echo "\033[0;32m--- Building cli ---\n\033[0m" \
+    && init-healthcare-cli.sh
 #    \
 #    && healthcare-cli-python

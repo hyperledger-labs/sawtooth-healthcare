@@ -146,7 +146,7 @@ def create_patient(txn_signer, batch_signer, name, surname):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_PATIENT),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_PATIENT)]
     patient = CreatePatient(
-        # public_key=txn_signer.get_public_key().as_hex(),
+        public_key=patient_pkey,
         name=name,
         surname=surname)
 
@@ -172,7 +172,7 @@ def create_clinic(txn_signer, batch_signer, name):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     clinic = CreateClinic(
-        # public_key=clinic_pkey,
+        public_key=clinic_pkey,
         name=name)
 
     payload = TransactionPayload(
@@ -202,7 +202,7 @@ def create_lab(txn_signer, batch_signer, name):
     # permissions = [payload_pb2.Permission(type=payload_pb2.Permission.READ_CLINIC),
     #                payload_pb2.Permission(type=payload_pb2.Permission.READ_OWN_CLINIC)]
     lab = CreateLab(
-        # public_key=clinic_pkey,
+        public_key=lab_pkey,
         name=name)
 
     payload = TransactionPayload(
@@ -357,6 +357,29 @@ def close_claim(txn_signer, batch_signer, uid, patient_pkey, provided_service):
     payload = TransactionPayload(
         payload_type=TransactionPayload.CLOSE_CLAIM,
         close_claim=claim)
+
+    return _make_transaction(
+        payload=payload,
+        inputs=[claim_hex],
+        outputs=[claim_hex],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
+
+def update_claim(txn_signer, batch_signer, uid, patient_pkey, provided_service):
+    claim_hex = helper.make_claim_address(uid)
+
+    claim = Claim(
+        id=uid,
+        client_pkey=patient_pkey,
+        provided_service=provided_service
+    )
+
+    LOGGER.debug('claim: ' + str(claim))
+
+    payload = TransactionPayload(
+        payload_type=TransactionPayload.UPDATE_CLAIM,
+        update_claim=claim)
 
     return _make_transaction(
         payload=payload,

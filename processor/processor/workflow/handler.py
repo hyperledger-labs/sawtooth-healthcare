@@ -50,7 +50,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Clinic already exists: ' + clinic.name)
 
-                healthcare_state.create_clinic(signer, clinic)
+                healthcare_state.create_clinic(clinic)
             elif healthcare_payload.is_create_doctor():
                 doctor = healthcare_payload.create_doctor()
 
@@ -68,7 +68,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Patient already exists: ' + patient.name)
 
-                healthcare_state.create_patient(signer, patient)
+                healthcare_state.create_patient(patient)
             elif healthcare_payload.is_create_lab():
                 lab = healthcare_payload.create_lab()
 
@@ -77,7 +77,7 @@ class HealthCareTransactionHandler(TransactionHandler):
                     raise InvalidTransaction(
                         'Invalid action: Lab already exists: ' + lb.name)
 
-                healthcare_state.create_lab(signer, lab)
+                healthcare_state.create_lab(lab)
             elif healthcare_payload.is_create_claim():
 
                 claim = healthcare_payload.create_claim()
@@ -100,6 +100,19 @@ class HealthCareTransactionHandler(TransactionHandler):
                 original_claim.provided_service = claim.provided_service
                 original_claim.state = Claim.CLOSED
                 healthcare_state.close_claim(original_claim)
+            elif healthcare_payload.is_update_claim():
+
+                claim = healthcare_payload.update_claim()
+                original_claim = healthcare_state.get_claim2(claim.id)
+                if original_claim is None:
+                    raise InvalidTransaction(
+                        'Invalid action: Claim does not exist: ' + claim.id)
+                if original_claim.state == Claim.CLOSED:
+                    raise InvalidTransaction(
+                        'Invalid action: Can not update closed claim: ' + claim.id)
+                original_claim.provided_service = claim.provided_service
+                # original_claim.state = Claim.CLOSED
+                healthcare_state.update_claim(original_claim)
             elif healthcare_payload.is_assign_doctor():
                 assign = healthcare_payload.assign_doctor()
 

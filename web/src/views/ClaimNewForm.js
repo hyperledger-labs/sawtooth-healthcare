@@ -10,11 +10,11 @@ module.exports = {
                     Claim.register(vnode.attrs.client_key)
                 }
             }, [
-//            m("label.label", "Clinic account"),
-//            m("input.input[type=text][placeholder=Clinic account]", {
-//                oninput: m.withAttr("value", function(value) {Claim.current.signer = value}),
-//                value: Claim.current.signer
-//            }),
+            m("label.label", "Patient pkey"),
+            m("input.input[type=text][placeholder=Patient pkey]", {
+                oninput: m.withAttr("value", function(value) {Claim.current.patient_pkey = value}),
+                value: Claim.current.patient_pkey
+            }),
             m("label.label", "Claim id"),
             m("input.input[placeholder=Claim id]", {
                 oninput: m.withAttr("value", function(value) {Claim.current.claim_id = value}),

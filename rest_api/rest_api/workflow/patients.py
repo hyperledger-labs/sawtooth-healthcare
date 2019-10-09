@@ -1,43 +1,11 @@
-# Copyright 2017 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
-# import base64
-#
-# import bcrypt
-#
-# from itsdangerous import BadSignature
 from sanic import Blueprint
 from sanic import response
 
-# from sawtooth_signing import CryptoFactory
-
-# from rest_api.workflow.authorization import authorized
-from rest_api.common.protobuf import payload_pb2
+# from rest_api.common.protobuf import payload_pb2
 from rest_api.common import transaction
 from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiInternalError, ApiBadRequest
-
-# from workflow.errors import ApiBadRequest
-# from workflow.errors import ApiInternalError
-# from db import accounts_query
-# from db import auth_query
-# import pandas as pd
-# from google.protobuf.json_format import MessageToJson
-# from google.protobuf.json_format import MessageToDict
-
-# from marketplace_transaction import transaction_creation
 
 
 PATIENTS_BP = Blueprint('patients')
@@ -90,29 +58,39 @@ PATIENTS_BP = Blueprint('patients')
 #         })
 
 
+# @PATIENTS_BP.get('patients')
+# async def get_all_patients(request):
+#     """Fetches complete details of all Accounts in state"""
+#     client_key = general.get_request_key_header(request)
+#     patient_resources = await security_messaging.get_patients(request.app.config.VAL_CONN, client_key)
+#     patients = []
+#     for entity in patient_resources.entries:
+#         pat = payload_pb2.CreatePatient()
+#         pat.ParseFromString(entity.data)
+#         # permissions = []
+#         # for perm in pat.permissions:
+#         #     permissions.append(perm)
+#         # patients.append({'name': pat.name, 'surname': pat.surname, 'permissions': str(permissions)})
+#         patients.append({'name': pat.name, 'surname': pat.surname})
+#
+#     return response.json(body={'data': patients},
+#                          headers=general.get_response_headers())
+
+
 @PATIENTS_BP.get('patients')
 async def get_all_patients(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
-    # list_patient_address = helper.make_patient_list_address()
-    patient_resources = await security_messaging.get_patients(request.app.config.VAL_CONN, client_key)
-    # account_resources2 = MessageToJson(account_resources)
-    # account_resources3 = MessageToDict(account_resources)
-    patients = []
-    for entity in patient_resources.entries:
-        # dec_cl = base64.b64decode(entity.data)
-        pat = payload_pb2.CreatePatient()
-        pat.ParseFromString(entity.data)
-        # permissions = []
-        # for perm in pat.permissions:
-        #     permissions.append(perm)
-        # patients.append({'name': pat.name, 'surname': pat.surname, 'permissions': str(permissions)})
-        patients.append({'name': pat.name, 'surname': pat.surname})
+    patient_list = await security_messaging.get_patients(request.app.config.VAL_CONN, client_key)
+    patient_list_json = []
+    for address, pat in patient_list.items():
+        patient_list_json.append({
+            'public_key': pat.public_key,
+            'name': pat.name,
+            'surname': pat.surname
+        })
 
-    # import json
-    # result = json.dumps(clinics)
-    # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': patients},
+    return response.json(body={'data': patient_list_json},
                          headers=general.get_response_headers())
 
 

@@ -23,7 +23,7 @@ from sawtooth_rest_api.protobuf import validator_pb2
 # from rest_api.common.protobuf import payload_pb2
 from rest_api.common import helper
 from rest_api.common.protobuf.payload_pb2 import AddPulseWithUser, CreateDoctor, CreatePatient, \
-    AddLabTestWithUser, ClaimWithUser
+    AddLabTestWithUser, ClaimWithUser, CreateClinic
 
 from rest_api.insurance_common import helper as insurance_helper
 from rest_api.insurance_common.protobuf.insurance_payload_pb2 import Insurance, ContractWithUser
@@ -33,13 +33,8 @@ from rest_api.payment_common.protobuf.payment_payload_pb2 import Payment
 
 from rest_api.consent_common import helper as consent_helper
 from rest_api.consent_common.protobuf.consent_payload_pb2 import Client, Permission, ActionOnAccess
-# from rest_api.consent_common.protobuf import consent_payload_pb2
-# from rest_api.common.protobuf import payload_pb2
 from rest_api.workflow import messaging
 from rest_api.workflow.errors import ApiForbidden, ApiUnauthorized, ApiBadRequest
-
-# from rest_api.workflow.errors import ApiBadRequest
-# from rest_api.workflow.errors import ApiInternalError
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
@@ -81,19 +76,16 @@ async def add_clinic(conn, timeout, batches):
 
 async def get_clinics(conn, client_key):
     client = await get_client(conn, client_key)
+    clinic_list = {}
     if Permission(type=Permission.READ_CLINIC) in client.permissions:
         list_clinic_address = helper.make_clinic_list_address()
-        return await messaging.get_state_by_address(conn, list_clinic_address)
-    # client_address = consent_helper.make_client_address(client_key)
-    # LOGGER.debug('client_address: ' + str(client_address))
-    # client_resources = await messaging.get_state_by_address(conn, client_address)
-    # LOGGER.debug('client_resources: ' + str(client_resources))
-    # for entity in client_resources.entries:
-    #     cl = Client()
-    #     cl.ParseFromString(entity.data)
-    #     LOGGER.debug('client: ' + str(cl))
-    #     if Permission(type=Permission.READ_CLINIC) in cl.permissions:
-    #         return await messaging.get_state_by_address(conn, address_suffix)
+        list_clinic_resources = await messaging.get_state_by_address(conn, list_clinic_address)
+        for entity in list_clinic_resources.entries:
+            cl = CreateClinic()
+            cl.ParseFromString(entity.data)
+            LOGGER.debug('clinic: ' + str(cl))
+            clinic_list[entity.address] = cl
+        return clinic_list
     raise ApiForbidden("Insufficient permission")
 
 
@@ -123,11 +115,43 @@ async def add_patient(conn, timeout, batches):
     await _send(conn, timeout, batches)
 
 
+# async def get_patients(conn, client_key):
+#     client = await get_client(conn, client_key)
+#     if Permission(type=Permission.READ_PATIENT) in client.permissions:
+#         list_patient_address = helper.make_patient_list_address()
+#         return await messaging.get_state_by_address(conn, list_patient_address)
+#     raise ApiForbidden("Insufficient permission")
+
 async def get_patients(conn, client_key):
     client = await get_client(conn, client_key)
+    patient_list = {}
     if Permission(type=Permission.READ_PATIENT) in client.permissions:
         list_patient_address = helper.make_patient_list_address()
-        return await messaging.get_state_by_address(conn, list_patient_address)
+        LOGGER.debug('has READ_PATIENT permission: ' + str(client_key))
+        # Get Consent
+        consent = await get_consent(conn, client_key)
+        consent_list = {}
+        for address, pt in consent.items():
+            LOGGER.debug('consent: ' + str(pt))
+            patient = await get_patient(conn, pt.patient_pkey)
+            consent_list[pt.patient_pkey] = patient
+        #
+        patient_list_resources = await messaging.get_state_by_address(conn, list_patient_address)
+        for entity in patient_list_resources.entries:
+            pat = CreatePatient()
+            pat.ParseFromString(entity.data)
+
+            patient_list[entity.address] = pat
+            LOGGER.debug('patient: ' + str(pat))
+        # Apply Consent
+        for patient_address, pt in patient_list.items():
+            LOGGER.debug('patient: ' + str(pt))
+            if Permission(type=Permission.READ_OWN_PATIENT) in client.permissions and pt.public_key == client_key:
+                pass
+            elif pt.public_key not in consent_list:
+                pat2 = CreatePatient()
+                patient_list[patient_address] = pat2
+        return patient_list
     raise ApiForbidden("Insufficient permission")
 
 
@@ -192,12 +216,21 @@ async def add_pulse(conn, timeout, batches, client_key):
     raise ApiForbidden("Insufficient permission")
 
 
-async def add_claim(conn, timeout, batches, client_key):
-    client = await get_client(conn, client_key)
+async def add_claim(conn, timeout, batches, dest_pkey, src_pkey):
+    client = await get_client(conn, dest_pkey)
     if Permission(type=Permission.WRITE_CLAIM) in client.permissions:
-        LOGGER.debug('has permission: True')
+        LOGGER.debug('has READ_CLAIM and UPDATE_CLAIM permission: True')
+        # Has consent from patient
+        consent = await has_consent(conn, dest_pkey, src_pkey)
+        if not consent:
+            LOGGER.debug('no consent from patient')
+            raise ApiForbidden("Insufficient permission")
+        #
         await _send(conn, timeout, batches)
         return
+        # LOGGER.debug('has permission: True')
+        # await _send(conn, timeout, batches)
+        # return
     else:
         LOGGER.debug('has permission: False')
     raise ApiForbidden("Insufficient permission")
@@ -399,6 +432,24 @@ async def get_pulse_list(conn, client_key):
 async def close_claim(conn, timeout, batches, dest_pkey, src_pkey):
     client = await get_client(conn, dest_pkey)
     if Permission(type=Permission.READ_CLAIM) in client.permissions \
+            and Permission(type=Permission.CLOSE_CLAIM) in client.permissions:
+        LOGGER.debug('has READ_CLAIM and CLOSE_CLAIM permission: True')
+        # Has consent from patient
+        consent = await has_consent(conn, dest_pkey, src_pkey)
+        if not consent:
+            LOGGER.debug('no consent from patient')
+            raise ApiForbidden("Insufficient permission")
+        #
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def update_claim(conn, timeout, batches, dest_pkey, src_pkey):
+    client = await get_client(conn, dest_pkey)
+    if Permission(type=Permission.READ_CLAIM) in client.permissions \
             and Permission(type=Permission.UPDATE_CLAIM) in client.permissions:
         LOGGER.debug('has READ_CLAIM and UPDATE_CLAIM permission: True')
         # Has consent from patient
@@ -559,6 +610,10 @@ async def get_payments(conn, client_key):
                 LOGGER.debug('get payment entity2: ' + str(entity2.address))
                 pay = Payment()
                 pay.ParseFromString(entity2.data)
+                if pay.contract_id is not None and pay.contract_id != '':
+                    timestamp = pay.timestamp
+                    pay = Payment()
+                    pay.timestamp = timestamp
                 payment_list[entity2.address] = pay
 
         return payment_list
