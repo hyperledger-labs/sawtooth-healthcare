@@ -25,6 +25,16 @@ module.exports = {
                         Claim.current.client_pkey = claim.client_pkey
 //                        Claim.current.provided_service = "pills, lab tests"
                         Claim.current.contract_id = claim.contract_id
+                        Claim.update(vnode.attrs.client_key)
+                    }
+                }, 'Update claim'),
+                m("div"),
+                m("button", {
+                    onclick: function() {
+                        Claim.current.claim_id = claim.id
+                        Claim.current.client_pkey = claim.client_pkey
+//                        Claim.current.provided_service = "pills, lab tests"
+                        Claim.current.contract_id = claim.contract_id
                         Claim.close(vnode.attrs.client_key)
                     }
                 }, 'Close claim')

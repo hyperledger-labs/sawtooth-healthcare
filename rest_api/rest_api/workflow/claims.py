@@ -144,3 +144,53 @@ async def close_claim(request):
 
     return response.json(body={'status': general.DONE},
                          headers=general.get_response_headers())
+
+
+@CLAIMS_BP.post('claims/update')
+async def update_claim(request):
+    """Updates auth information for the authorized account"""
+    # keyfile = common.get_keyfile(request.json.get['signer'])
+    clinic_pkey = general.get_request_key_header(request)
+    required_fields = ['claim_id', 'provided_service', 'client_pkey', 'provided_service']
+    general.validate_fields(required_fields, request.json)
+
+    claim_id = request.json.get('claim_id')
+    provided_service = request.json.get('provided_service')
+    patient_pkey = request.json.get('client_pkey')
+    contract_id = request.json.get('contract_id')
+
+    client_signer = general.get_signer(request, clinic_pkey)
+
+    close_claim_txn = transaction.update_claim(
+        txn_signer=client_signer,
+        batch_signer=client_signer,
+        uid=claim_id,
+        patient_pkey=patient_pkey,
+        provided_service=provided_service)
+
+    # create_payment_txn = payment_transaction.create_payment(
+    #     txn_signer=client_signer,
+    #     batch_signer=client_signer,
+    #     payment_id=str(helper.get_current_timestamp()),
+    #     patient_pkey=patient_pkey,
+    #     contract_id=contract_id,
+    #     claim_id=claim_id
+    # )
+
+    batch, batch_id = transaction.make_batch_and_id([close_claim_txn], client_signer)
+
+    await security_messaging.update_claim(
+        request.app.config.VAL_CONN,
+        request.app.config.TIMEOUT,
+        [batch], clinic_pkey, patient_pkey)
+
+    try:
+        await security_messaging.check_batch_status(
+            request.app.config.VAL_CONN, [batch_id])
+    except (ApiBadRequest, ApiInternalError) as err:
+        # await auth_query.remove_auth_entry(
+        #     request.app.config.DB_CONN, request.json.get('email'))
+        raise err
+
+    return response.json(body={'status': general.DONE},
+                         headers=general.get_response_headers())

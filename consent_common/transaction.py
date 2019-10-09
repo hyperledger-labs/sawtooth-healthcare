@@ -117,7 +117,7 @@ def create_clinic_client(txn_signer, batch_signer):
     permissions = [Permission(type=Permission.READ_CLINIC),
                    Permission(type=Permission.WRITE_CLAIM),
                    Permission(type=Permission.READ_CLAIM),
-                   Permission(type=Permission.UPDATE_CLAIM),
+                   Permission(type=Permission.CLOSE_CLAIM),
                    Permission(type=Permission.WRITE_PAYMENT),
                    Permission(type=Permission.READ_OWN_CLINIC),
                    Permission(type=Permission.READ_PATIENT)

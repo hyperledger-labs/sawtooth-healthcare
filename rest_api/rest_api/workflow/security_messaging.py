@@ -432,6 +432,24 @@ async def get_pulse_list(conn, client_key):
 async def close_claim(conn, timeout, batches, dest_pkey, src_pkey):
     client = await get_client(conn, dest_pkey)
     if Permission(type=Permission.READ_CLAIM) in client.permissions \
+            and Permission(type=Permission.CLOSE_CLAIM) in client.permissions:
+        LOGGER.debug('has READ_CLAIM and CLOSE_CLAIM permission: True')
+        # Has consent from patient
+        consent = await has_consent(conn, dest_pkey, src_pkey)
+        if not consent:
+            LOGGER.debug('no consent from patient')
+            raise ApiForbidden("Insufficient permission")
+        #
+        await _send(conn, timeout, batches)
+        return
+    else:
+        LOGGER.debug('has permission: False')
+    raise ApiForbidden("Insufficient permission")
+
+
+async def update_claim(conn, timeout, batches, dest_pkey, src_pkey):
+    client = await get_client(conn, dest_pkey)
+    if Permission(type=Permission.READ_CLAIM) in client.permissions \
             and Permission(type=Permission.UPDATE_CLAIM) in client.permissions:
         LOGGER.debug('has READ_CLAIM and UPDATE_CLAIM permission: True')
         # Has consent from patient

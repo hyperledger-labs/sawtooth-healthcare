@@ -58,6 +58,25 @@ var Claim = {
         })
     },
 
+    update: function(clientKey) {
+        return m.request({
+            method: "POST",
+            url: "/api/claims/update",
+            data: Claim.current,
+            headers: {
+                'ClientKey': clientKey
+            },
+            useBody: true,
+        })
+        .then(function(items) {
+            Claim.error = ""
+        })
+        .catch(function(e) {
+            console.log(e)
+            Claim.error = e.message
+        })
+    },
+
     register: function(clientKey) {
         return m.request({
             method: "POST",

@@ -84,8 +84,11 @@ class HealthCareState(object):
     def create_claim(self, claim):
         self._store_claim(claim=claim)
 
-    def close_claim(self, claim):
+    def update_claim(self, claim):
         self._update_claim(claim=claim)
+
+    def close_claim(self, claim):
+        self._close_claim(claim=claim)
 
     def get_clinic(self, public_key):
         clinic = self._load_clinic(public_key=public_key)
@@ -341,6 +344,17 @@ class HealthCareState(object):
             claim_address: claim_data
         }
         LOGGER.debug("_update_claim: " + str(states))
+        self._context.set_state(
+            states,
+            timeout=self.TIMEOUT)
+
+    def _close_claim(self, claim):
+        claim_address = helper.make_claim_address(claim.id)
+        claim_data = claim.SerializeToString()
+        states = {
+            claim_address: claim_data
+        }
+        LOGGER.debug("_close_claim: " + str(states))
         self._context.set_state(
             states,
             timeout=self.TIMEOUT)

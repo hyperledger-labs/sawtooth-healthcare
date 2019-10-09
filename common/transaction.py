@@ -365,6 +365,29 @@ def close_claim(txn_signer, batch_signer, uid, patient_pkey, provided_service):
         txn_signer=txn_signer,
         batch_signer=batch_signer)
 
+
+def update_claim(txn_signer, batch_signer, uid, patient_pkey, provided_service):
+    claim_hex = helper.make_claim_address(uid)
+
+    claim = Claim(
+        id=uid,
+        client_pkey=patient_pkey,
+        provided_service=provided_service
+    )
+
+    LOGGER.debug('claim: ' + str(claim))
+
+    payload = TransactionPayload(
+        payload_type=TransactionPayload.UPDATE_CLAIM,
+        update_claim=claim)
+
+    return _make_transaction(
+        payload=payload,
+        inputs=[claim_hex],
+        outputs=[claim_hex],
+        txn_signer=txn_signer,
+        batch_signer=batch_signer)
+
 # def register_claim(txn_signer, batch_signer, claim_id, patient_pkey):
 #     # batch_key = txn_key = self._signer.get_public_key().as_hex()
 #     clinic_pkey = txn_signer.get_public_key().as_hex()
