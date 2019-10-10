@@ -1,4 +1,4 @@
-package com.dehr;
+package com.medicalinsurance;
 
 import android.Manifest;
 import android.content.Intent;
@@ -29,8 +29,8 @@ import java.util.List;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import me.dm7.barcodescanner.zxing.ZXingScannerView.ResultHandler;
 
-import static com.dehr.MainActivity.MY_CAMERA_REQUEST_CODE;
-import static com.dehr.MainActivity.QR_CODE_ENTERED_VALUE;
+import static com.medicalinsurance.MainActivity.MY_CAMERA_REQUEST_CODE;
+import static com.medicalinsurance.MainActivity.QR_CODE_ENTERED_VALUE;
 
 public class ScanQrCodeActivity extends AppCompatActivity implements ResultHandler{
 

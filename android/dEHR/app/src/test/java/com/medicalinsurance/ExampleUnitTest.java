@@ -1,4 +1,4 @@
-package com.dehr;
+package com.medicalinsurance;
 
 import org.junit.Test;
 

@@ -1,11 +1,11 @@
-package com.dehr;
+package com.medicalinsurance;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.dehr.protobuf.Payload;
+import com.medicalinsurance.protobuf.Payload;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

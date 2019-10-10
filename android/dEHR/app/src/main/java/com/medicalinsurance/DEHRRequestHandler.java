@@ -1,7 +1,7 @@
-package com.dehr;
+package com.medicalinsurance;
 
-import com.dehr.protobuf.ConsentPayload;
-import com.dehr.protobuf.Payload;
+import com.medicalinsurance.protobuf.ConsentPayload;
+import com.medicalinsurance.protobuf.Payload;
 //import com.google.protobuf.ByteString;
 //
 //import java.io.ByteArrayOutputStream;

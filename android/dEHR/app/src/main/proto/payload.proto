@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.dehr.protobuf";
+option java_package = "com.medicalinsurance.protobuf";
 option java_outer_classname = "Payload";
 
 message TransactionPayload {
