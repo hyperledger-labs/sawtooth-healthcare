@@ -39,7 +39,8 @@ async def get_all_payments(request):
             'patient_pkey': pay.patient_pkey,
             'contract_id': pay.contract_id,
             'claim_id': pay.claim_id,
-            'id': pay.id
+            'id': pay.id,
+            'timestamp': pay.timestamp
         })
 
     return response.json(body={'data': payment_list_json},

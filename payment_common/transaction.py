@@ -113,11 +113,13 @@ def create_payment(txn_signer, batch_signer, payment_id, patient_pkey, contract_
     inputs = outputs = [payment_hex, payment_contract_rel_hex, contract_payment_rel_hex,
                         payment_patient_rel_hex, patient_payment_rel_hex]
     LOGGER.debug('inputs: ' + str(inputs))
+    timestamp = str(helper.get_current_timestamp())
     payment = Payment(
         id=payment_id,
         patient_pkey=patient_pkey,
         contract_id=contract_id,
-        claim_id=claim_id)
+        claim_id=claim_id,
+        timestamp=timestamp)
 
     payload = PaymentTransactionPayload(
         payload_type=PaymentTransactionPayload.ADD_PAYMENT,

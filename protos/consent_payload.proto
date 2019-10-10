@@ -54,6 +54,7 @@ message Permission {
       READ_OWN_CLAIM = 401;
       WRITE_CLAIM = 402;
       UPDATE_CLAIM = 403;
+      CLOSE_CLAIM = 404;
 
       REVOKE_ACCESS = 500;
       GRANT_ACCESS = 501;

@@ -115,7 +115,7 @@ consent_common/protobuf/
 insurance_common/protobuf/
 payment_common/protobuf/
 
-cli_hk/cli/common
+cli/cli/common
 processor/processor/common
 consent_processor/consent_processor/consent_common
 insurance_processor/processor/insurance_common

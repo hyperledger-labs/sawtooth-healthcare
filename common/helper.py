@@ -36,6 +36,8 @@ PULSE_PATIENT__RELATION_CODE = "62"
 PATIENT_CLAIM__RELATION_CODE = "71"
 CLAIM_PATIENT__RELATION_CODE = "72"
 
+CLINIC_CLAIM__RELATION_CODE = "81"
+CLAIM_CLINIC__RELATION_CODE = "82"
 # permissions = {
 #     'read_clinic': '100',
 #     'read_own_clinic': '101',
@@ -167,6 +169,28 @@ def make_patient_claim__relation_address(client_pkey, claim_id):
 
 def make_claim_list_by_patient_address(client_pkey):
     return TP_PREFFIX_HEX6 + PATIENT_CLAIM__RELATION_CODE + PATIENT_ENTITY_CODE + _hash(client_pkey)[:30]
+
+
+# Claim <-> Clinic relation
+def make_claim_clinic__relation_address(claim_id, client_pkey):
+    return TP_PREFFIX_HEX6 + CLAIM_CLINIC__RELATION_CODE + \
+        CLAIM_ENTITY_CODE + _hash(claim_id)[:30] + \
+        CLINIC_ENTITY_CODE + _hash(client_pkey)[:28]
+
+
+def make_clinic_list_by_claim_address(claim_id):
+    return TP_PREFFIX_HEX6 + CLAIM_CLINIC__RELATION_CODE + CLAIM_ENTITY_CODE + _hash(claim_id)[:30]
+
+
+# Clinic <-> Claim relation
+def make_clinic_claim__relation_address(client_pkey, claim_id):
+    return TP_PREFFIX_HEX6 + CLINIC_CLAIM__RELATION_CODE + \
+        CLINIC_ENTITY_CODE + _hash(client_pkey)[:30] + \
+        CLAIM_ENTITY_CODE + _hash(claim_id)[:28]
+
+
+def make_claim_list_by_clinic_address(client_pkey):
+    return TP_PREFFIX_HEX6 + CLINIC_CLAIM__RELATION_CODE + CLINIC_ENTITY_CODE + _hash(client_pkey)[:30]
 
 
 def make_event_address(claim_id, clinic_pkey, event_time):

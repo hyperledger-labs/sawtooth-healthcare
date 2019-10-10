@@ -15,10 +15,7 @@
 from sanic import Blueprint
 from sanic import response
 
-# from rest_api.common.protobuf import payload_pb2
 from rest_api.common import transaction
-# from rest_api.consent_common import helper as consent_helper
-from rest_api.common.protobuf.payload_pb2 import CreateClinic
 from rest_api.consent_common import transaction as consent_transaction
 from rest_api.workflow import general, security_messaging
 from rest_api.workflow.errors import ApiBadRequest, ApiInternalError
@@ -30,26 +27,16 @@ CLINICS_BP = Blueprint('clinics')
 async def get_all_clinics(request):
     """Fetches complete details of all Accounts in state"""
     client_key = general.get_request_key_header(request)
-    # list_clinic_address = helper.make_clinic_list_address()
-    account_resources = await security_messaging.get_clinics(request.app.config.VAL_CONN, client_key)
-    # account_resources2 = MessageToJson(account_resources)
-    # account_resources3 = MessageToDict(account_resources)
-    clinics = []
-    for entity in account_resources.entries:
-        # dec_cl = base64.b64decode(entity.data)
-        cl = CreateClinic()
-        cl.ParseFromString(entity.data)
-        # permissions = []
-        # for perm in cl.permissions:
-        #     permissions.append(perm)
-        clinics.append({'name': cl.name})
+    clinic_list = await security_messaging.get_clinics(request.app.config.VAL_CONN, client_key)
 
-    # import json
-    # result = json.dumps(clinics)
-    # clinics_json = MessageToJson(account_resources)
-    return response.json(body={'data': clinics},
+    clinic_list_json = []
+    for address, cl in clinic_list.items():
+        clinic_list_json.append({
+            'public_key': cl.public_key,
+            'name': cl.name
+        })
+    return response.json(body={'data': clinic_list_json},
                          headers=general.get_response_headers())
-    # return response.text(body={'data': clinics})  # , dumps=pd.json.dumps)
 
 
 @CLINICS_BP.post('clinics')

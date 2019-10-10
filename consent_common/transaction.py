@@ -115,7 +115,13 @@ def _batch_header(batch_signer, transactions):
 
 def create_clinic_client(txn_signer, batch_signer):
     permissions = [Permission(type=Permission.READ_CLINIC),
-                   Permission(type=Permission.READ_OWN_CLINIC)]
+                   Permission(type=Permission.WRITE_CLAIM),
+                   Permission(type=Permission.READ_CLAIM),
+                   Permission(type=Permission.CLOSE_CLAIM),
+                   Permission(type=Permission.WRITE_PAYMENT),
+                   Permission(type=Permission.READ_OWN_CLINIC),
+                   Permission(type=Permission.READ_PATIENT)
+                   ]
     return create_client(txn_signer, batch_signer, permissions)
 
 
@@ -126,14 +132,15 @@ def create_doctor_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_LAB_TEST),
                    Permission(type=Permission.READ_PULSE),
                    Permission(type=Permission.READ_CLAIM),
-                   Permission(type=Permission.UPDATE_CLAIM),
-                   Permission(type=Permission.WRITE_PAYMENT)
+                   Permission(type=Permission.UPDATE_CLAIM)
+                   # Permission(type=Permission.WRITE_PAYMENT)
                    ]
     return create_client(txn_signer, batch_signer, permissions)
 
 
 def create_patient_client(txn_signer, batch_signer):
-    permissions = [Permission(type=Permission.READ_PATIENT),
+    permissions = [Permission(type=Permission.READ_CLINIC),
+                   Permission(type=Permission.READ_PATIENT),
                    Permission(type=Permission.READ_DOCTOR),
                    Permission(type=Permission.READ_OWN_PATIENT),
                    Permission(type=Permission.READ_OWN_LAB_TEST),
@@ -141,7 +148,7 @@ def create_patient_client(txn_signer, batch_signer):
                    Permission(type=Permission.READ_OWN_CLAIM),
                    Permission(type=Permission.WRITE_LAB_TEST),
                    Permission(type=Permission.WRITE_PULSE),
-                   Permission(type=Permission.WRITE_CLAIM),
+                   # Permission(type=Permission.WRITE_CLAIM),
                    Permission(type=Permission.READ_OWN_CONTRACT),
                    # Permission(type=Permission.WRITE_CONTRACT),
                    Permission(type=Permission.REVOKE_ACCESS),

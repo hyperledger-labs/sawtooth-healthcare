@@ -18,11 +18,16 @@ module.exports = {
                 "; PROVIDED SERVICE: " + claim.provided_service +
                 "; CONTRACT ID: " + claim.contract_id +
                 ";",
-                m("label.label", "Provided Service"),
-                    m("input.input[placeholder=Provided Service]", {
-                        oninput: m.withAttr("value", function(value) {Claim.current.provided_service = value}),
-                        value: Claim.current.provided_service
-                }),
+                m("div"),
+                m("button", {
+                    onclick: function() {
+                        Claim.current.claim_id = claim.id
+                        Claim.current.client_pkey = claim.client_pkey
+//                        Claim.current.provided_service = "pills, lab tests"
+                        Claim.current.contract_id = claim.contract_id
+                        Claim.update(vnode.attrs.client_key)
+                    }
+                }, 'Update claim'),
                 m("div"),
                 m("button", {
                     onclick: function() {
@@ -34,6 +39,11 @@ module.exports = {
                     }
                 }, 'Close claim')
             )
+        }),
+        m("label.label", "Provided Service"),
+        m("input.input[placeholder=Provided Service]", {
+            oninput: m.withAttr("value", function(value) {Claim.current.provided_service = value}),
+            value: Claim.current.provided_service
         }),
         m("label.error", Claim.error))
     }
