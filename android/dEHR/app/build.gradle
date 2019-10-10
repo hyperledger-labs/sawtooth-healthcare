@@ -9,7 +9,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.1"
     defaultConfig {
-        applicationId "com.dehr"
+        applicationId "com.medicalinsurance"
         minSdkVersion 26
         targetSdkVersion 29
         versionCode 3
@@ -24,7 +24,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             applicationVariants.all { variant ->
                 variant.outputs.all {
-                    def appName = "dEHR"
+                    def appName = "MedInsurance"
                     outputFileName = appName + "-${variant.versionName}.apk"
                 }
             }

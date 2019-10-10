@@ -1,4 +1,4 @@
-package com.dehr;
+package com.medicalinsurance;
 
 public class Pulse {
 
