@@ -42,7 +42,7 @@ client’s role.
 
 # Architecture
 
-![Infrastructure](https://github.com/hyperledger-labs/sawtooth-healthcare/MedicalInsurance.png)
+![Infrastructure](https://github.com/hyperledger-labs/sawtooth-healthcare/blob/master/MedicalInsurance.png)
 
 # Technology stack
 
